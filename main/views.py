@@ -70,15 +70,30 @@ class UserLoginView(APIView):
 
 class BusCreateView(APIView):
     def post(self, request):
-        serializer = BusSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+        try:
+            # Access the user associated with the request
+            user = request.user
+            
+            # Create a new instance of Bus with the associated user
+            serializer = BusSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(user=user)  # Associate the request's user with the Bus
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            # Return an error response with details of the exception
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
 class TripScheduleCreateView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
+
+            user = request.user
+
             # Extract bus details from the request data
             bus_type = request.data.get('bus_type')
             number_plate = request.data.get('number_plate')
@@ -97,6 +112,7 @@ class TripScheduleCreateView(APIView):
             
             # Create the new trip schedule instance
             trip_schedule = TripSchedule.objects.create(
+                user=user,
                 bus=bus,
                 origin=request.data.get('origin', ''),
                 departure=request.data.get('departure', ''),
