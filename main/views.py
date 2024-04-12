@@ -16,6 +16,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import AuthenticationFailed, APIException
 #from django.core.exceptions import MultipleObjectsReturned
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class RegistrationAPIView(APIView):
@@ -84,7 +85,7 @@ class BusCreateView(APIView):
         except Exception as e:
             # Return an error response with details of the exception
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            
+
 class TripScheduleCreateView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -133,3 +134,28 @@ class TripScheduleCreateView(APIView):
         except Exception as e:
             # Return an error response with details of the exception
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class TripSearchView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Extract search parameters from the request
+        origin = request.query_params.get('origin')
+        departure = request.query_params.get('departure')
+        date = request.query_params.get('date')  # Assuming the date format is 'YYYY-MM-DD'
+
+        # Filter trip details based on search criteria
+        trips = TripSchedule.objects.filter(
+            origin=origin,
+            departure=departure,
+            departure_date=date
+        )
+
+        # Serialize the filtered trip details
+        serializer = TripScheduleSerializer(trips, many=True)
+        data_response = serializer.data
+        print('Response:', data_response)
+        # Return the serialized trip details in the response
+        return Response(data_response)

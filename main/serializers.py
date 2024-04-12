@@ -103,16 +103,23 @@ class TripScheduleSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        
+    
         # Convert departure_date string to datetime object
         if instance.departure_date:
-            representation['departure_date'] = datetime.datetime.strptime(instance.departure_date, '%Y-%m-%d').strftime('%Y-%m-%d')
+            if isinstance(instance.departure_date, str):
+                representation['departure_date'] = datetime.datetime.strptime(instance.departure_date, '%Y-%m-%d').strftime('%Y-%m-%d')
+            else:
+                representation['departure_date'] = instance.departure_date.strftime('%Y-%m-%d')
         
         # Convert departure_time string to datetime object
         if instance.departure_time:
-            representation['departure_time'] = datetime.datetime.strptime(instance.departure_time, '%H:%M:%S').strftime('%H:%M:%S')
+            if isinstance(instance.departure_time, str):
+                representation['departure_time'] = datetime.datetime.strptime(instance.departure_time, '%H:%M:%S').strftime('%H:%M:%S')
+            else:
+                representation['departure_time'] = instance.departure_time.strftime('%H:%M:%S')
         
         return representation
+
 
 
                     
