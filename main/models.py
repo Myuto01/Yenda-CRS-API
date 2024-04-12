@@ -109,3 +109,16 @@ class TripSchedule(models.Model):
 
     def __str__(self):
         return f"User: {self.user}, Bus: {self.bus}, Origin: {self.origin}, Departure: {self.departure}, Departure Date: {self.departure_date}, Departure Time: {self.departure_time}"
+
+
+
+
+class Ticket(models.Model):
+    buyer_booking = models.ForeignKey(User, on_delete=models.CASCADE)
+    trip = models.ForeignKey(TripSchedule, on_delete=models.CASCADE)
+    passenger_name = models.CharField(max_length=15, default="", null=True)
+    passenger_phonenumber = models.CharField(max_length=15)
+    confirmed = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)

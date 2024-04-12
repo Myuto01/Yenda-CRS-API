@@ -159,3 +159,21 @@ class TripSearchView(APIView):
         print('Response:', data_response)
         # Return the serialized trip details in the response
         return Response(data_response)
+
+class BusDetailsView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, bus_id):
+        try:
+            bus = Bus.objects.get(id=bus_id)
+            booked_seats = TripSchedule.objects.filter(bus=bus).count()
+            available_seats = bus.total_seats - booked_seats
+            bus_data = {
+                'bus': BusSerializer(bus).data,
+                'available_seats': available_seats
+            }
+            return Response(bus_data, status=status.HTTP_200_OK)
+        except Bus.DoesNotExist:
+            return Response({'error': 'Bus not found'}, status=status.HTTP_404_NOT_FOUND)

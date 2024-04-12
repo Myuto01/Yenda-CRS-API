@@ -8,5 +8,6 @@ urlpatterns = [
     path('api/v1/buses/',  views.BusCreateView.as_view(), name='bus-create'),
     path('api/v1/trip-schedules/',  views.TripScheduleCreateView.as_view(), name='trip-schedule-create'),
     path('api/v1/trip-search/', views.TripSearchView.as_view(), name='trip_search'),
+    path('api/v1/bus-details/<int:bus_id>/', views.BusDetailsView.as_view(), name='bus-details'),
 
 ]
