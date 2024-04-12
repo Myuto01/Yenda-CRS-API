@@ -70,6 +70,9 @@ class UserLoginView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class BusCreateView(APIView):
+    
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             # Access the user associated with the request
