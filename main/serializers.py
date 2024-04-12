@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from main.models import User
+from main.models import User, Bus, TripSchedule
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
@@ -11,6 +11,7 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from django.contrib.auth.hashers import make_password
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
+import datetime
 
 #chamge extra keyword arguments and log in serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -70,5 +71,48 @@ class UserLoginSerializer(serializers.Serializer):
         }
 
         return validated_data
+
+class BusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bus
+        fields = [ 
+            'bus_type',
+            'total_seats',
+            'number_plate',
+            'features', 
+            'status', 
+            'seat_picture'
+        ]
+
+    def create(self, validated_data):
+        """
+        Create and return a new Bus instance, given the validated data.
+        """
+        return Bus.objects.create(**validated_data)
+
+class TripScheduleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TripSchedule
+        fields = [
+            'bus', 
+            'origin', 
+            'departure',
+            'departure_date',
+            'departure_time'
+        ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
         
+        # Convert departure_date string to datetime object
+        if instance.departure_date:
+            representation['departure_date'] = datetime.datetime.strptime(instance.departure_date, '%Y-%m-%d').strftime('%Y-%m-%d')
+        
+        # Convert departure_time string to datetime object
+        if instance.departure_time:
+            representation['departure_time'] = datetime.datetime.strptime(instance.departure_time, '%H:%M:%S').strftime('%H:%M:%S')
+        
+        return representation
+
+
                     
