@@ -3,11 +3,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
 from json import JSONDecodeError
-from rest_framework import views, status, renderers
-from .models import User, TripSchedule, Bus
+from rest_framework import views, status, renderers, generics
+from .models import User, TripSchedule, Bus, Feature
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, FeatureSerializer
 from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number
 from .permissions import AllowAnyPermission
 from twilio.rest import Client
@@ -183,3 +183,7 @@ class BusDetailsView(APIView):
             return Response(bus_data, status=status.HTTP_200_OK)
         except Bus.DoesNotExist:
             return Response({'error': 'Bus not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class FeatureListView(generics.ListAPIView):
+    queryset = Feature.objects.all()
+    serializer_class = FeatureSerializer

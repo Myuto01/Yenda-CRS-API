@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from main.models import User, Bus, TripSchedule
+from main.models import User, Bus, TripSchedule, Feature
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
@@ -120,6 +120,9 @@ class TripScheduleSerializer(serializers.ModelSerializer):
         
         return representation
 
-
+class FeatureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feature
+        fields = ['name'] 
 
                     
