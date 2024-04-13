@@ -100,6 +100,8 @@ class Bus(models.Model):
 
 
 class Feature(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
+
     FEATURE_CHOICES = [
         ('Wifi', 'WiFi'),
         ('Tv', 'TV'),

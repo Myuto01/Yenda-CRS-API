@@ -185,5 +185,15 @@ class BusDetailsView(APIView):
             return Response({'error': 'Bus not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class FeatureListView(generics.ListAPIView):
-    queryset = Feature.objects.all()
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = FeatureSerializer
+
+    def get_queryset(self):
+        # Get the currently authenticated user
+        user = self.request.user
+
+        # Filter the queryset to retrieve features belonging to the user
+        queryset = Feature.objects.filter(user=user)
+        print("queryset", queryset)
+        return queryset
