@@ -65,12 +65,14 @@ class UserLoginView(APIView):
         serializer = UserLoginSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             validated_data = serializer.validated_data
+            print("Validated Data:", validated_data)
             return Response(validated_data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class BusCreateView(APIView):
-    
+
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
