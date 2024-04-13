@@ -54,12 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Bus(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
 
-    FEATURE_CHOICES = [
-        ('wifi', 'WiFi'),
-        ('tv', 'TV'),
-        ('snacks', 'Snacks'),
-        # Add more choices here
-    ]
+   
     
     STATUS_CHOICES = [
         ('active', 'Active'),
@@ -76,8 +71,8 @@ class Bus(models.Model):
 
     bus_type = models.CharField(max_length=30, blank=True, default="", choices=BUS_CHOICES)
     total_seats = models.IntegerField(blank=True, default=0)
-    number_plate = models.CharField(max_length=7, blank=True, default="", choices=NUMBER_PLATE_CHOICES)
-    features = models.CharField(max_length=20, blank=True, choices=FEATURE_CHOICES)
+    number_plate = models.CharField(max_length=10, blank=True, default="", choices=NUMBER_PLATE_CHOICES)
+    features = models.ManyToManyField('Feature', blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     seat_picture = models.ImageField(upload_to='media/buses/', null=True, blank=True)
     
@@ -90,14 +85,31 @@ class Bus(models.Model):
                 self.save()
 
     def save(self, *args, **kwargs):
-            # Update BUS_CHOICES and NUMBER_PLATE_CHOICES with new values
+        # Update BUS_CHOICES and NUMBER_PLATE_CHOICES with new values
         if self.bus_type and (self.bus_type, self.bus_type) not in self.BUS_CHOICES:
             self.BUS_CHOICES.append((self.bus_type, self.bus_type))
         if self.number_plate and (self.number_plate, self.number_plate) not in self.NUMBER_PLATE_CHOICES:
             self.NUMBER_PLATE_CHOICES.append((self.number_plate, self.number_plate))
 
+        # Validate input data before saving
+        if self.total_seats < 0:
+            raise ValueError("Total seats must be a non-negative integer.")
+
         # Call the original save method
         super().save(*args, **kwargs)
+
+
+class Feature(models.Model):
+    FEATURE_CHOICES = [
+        ('Wifi', 'WiFi'),
+        ('Tv', 'TV'),
+        ('Snacks', 'Snacks'),
+        # Add more choices here
+    ]
+    name = models.CharField(max_length=20, choices=FEATURE_CHOICES)
+
+    def __str__(self):
+        return self.name
 
 class TripSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
@@ -106,7 +118,7 @@ class TripSchedule(models.Model):
     departure = models.CharField(max_length=30, blank=True, default="")
     departure_date =  models.DateTimeField(default=datetime.datetime.now)
     departure_time =  models.TimeField(default=time(12, 0, 0))
-
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     def __str__(self):
         return f"User: {self.user}, Bus: {self.bus}, Origin: {self.origin}, Departure: {self.departure}, Departure Date: {self.departure_date}, Departure Time: {self.departure_time}"
 
