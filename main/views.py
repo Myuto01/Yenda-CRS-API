@@ -93,6 +93,7 @@ class BusCreateView(APIView):
 
 class TripScheduleCreateView(APIView):
 
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
