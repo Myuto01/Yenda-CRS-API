@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create bus | Yenda</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
 </head>
 <style>
     body {
@@ -48,6 +51,11 @@
     input[type="submit"]:hover {
         background-color: #45a049;
     }
+
+    select {
+        width: 100%; /* Set the width to 100% */
+    }
+
 </style>
 </head>
 <body>
@@ -61,20 +69,31 @@
             </select>
             <input type="text" id="customFeatureInput" placeholder="Enter custom feature">
             <button type="button" id="addFeatureBtn">Add</button>
-            <input type="text" name="status" placeholder="active/inactive" required>
+            <select name="status" id="status">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
             <input type="file" name="seat_picture" id="seat_picture" accept="image/*">
-            <input type="submit" value="Submit">
+            <input type="submit" id="submitButton" value="Submit">
         </form>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
     <script>
         $(document).ready(function() {
     const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0ODkyODMxLCJpYXQiOjE3MTMxNjQ4MzEsImp0aSI6Ijk5YjIzMjAzZDljNDRkNGZhNWFjMTQ2YTZhZTBmZDBmIiwidXNlcl9pZCI6OX0.8dDNaXopAyrWrdTqut4-7sNLOnN2nyXhYLPMpchnLxo";
 
     // Fetch features from the backend API after page load
+    $('#features').select2({
+        placeholder: "Select a Feature >",
+        
+
+
+    });
 
     $.ajax({
-        url: "https://yenda-crs-api-2.onrender.com/api/v1/features/",
+        url: "http://127.0.0.1:8000/api/v1/features/",
         type: "GET",
         beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
@@ -101,6 +120,7 @@
 
     // Event listener for the add feature button
     $('#addFeatureBtn').click(function() {
+        $(this).text('Adding...'); 
         const customFeature = $('#customFeatureInput').val().trim();
         if (customFeature) {
             addCustomFeature(customFeature);
@@ -124,23 +144,41 @@
             xhr.setRequestHeader("Authorization", "JWT " + accessToken);
         },
         success: function(response) {
-            console.log("Custom Feature created:", response);
-            
-            // Extract the ID and attributes from the data object
-            var featureId = response.data.id;
-            var featureAttributes = response.data.attributes;
-            
-            // Append the new option to the select element
-            $('#features').append($('<option>', {
-                value: featureId, // Use ID as the value
-                text: featureAttributes.name
-            }));
+        console.log("Custom Feature created:", response);
+        $('#addFeatureBtn').text('Add');
 
-            // Optionally, select the newly added option
-            // $('#features').val(featureId);
-        },
+
+        // Extract the ID and attributes from the data object
+        var featureId = response.data.id;
+        var featureAttributes = response.data.attributes;
+        
+        // Create the new option element
+        var newOption = $('<option>', {
+            value: featureId, // Use ID as the value
+            text: featureAttributes.name
+        });
+
+        // Create a delete button with an icon
+        var deleteBtn = $('<button>', {
+            type: 'button',
+            class: 'deleteFeatureBtn',
+            'data-feature-id': featureId,
+            html: '<i class="fas fa-trash-alt"></i>' // Assuming you're using Font Awesome for icons
+        });
+
+        // Append the delete button to the new option
+        newOption.append(deleteBtn);
+
+        // Append the new option to the select element
+        $('#features').append(newOption);
+
+        // Optionally, select the newly added option
+        // $('#features').val(featureId);
+    },
+
         error: function(xhr, status, error) {
             console.error('Error creating custom feature:', error);
+            $('#addFeatureBtn').text('Add');
         }
     });
 }
@@ -149,12 +187,14 @@
 $("#create_bus_form").submit(function(e) {
     e.preventDefault(); // Prevent default form submission
 
+    $('#submitButton').val('Submitting');
+
     // Construct the payload object
     var payload = {
             bus_type: $("input[name='bus_type']").val(),
             total_seats: $("input[name='total_seats']").val(),
             number_plate: $("input[name='number_plate']").val(),
-            status: $("input[name='status']").val(),
+            status: $("#status").val(),
             features: $("#features").val() || [], // Get selected features
     };
 
@@ -162,12 +202,20 @@ $("#create_bus_form").submit(function(e) {
     var payloadString = JSON.stringify(payload);
 
     // Access file data from the file input element
-    var fileData = document.getElementById('seat_picture').files[0];
+    var fileInput = document.getElementById('seat_picture');
+    var fileData = fileInput.files[0]; 
+
+    // Check if a file has been selected
+    if (fileData) { // Check if fileData exists
+        // File is selected, include seat_picture field in the request data
+        formDataToSend.append('seat_picture', fileData);
+    }
 
     // Create a FormData object to send both file data and JSON data
     var formDataToSend = new FormData();
     formDataToSend.append('fileData', fileData);
     formDataToSend.set('jsonData', payloadString);
+
 
     // Iterate through FormData and print out each data individually
     for (var pair of formDataToSend.entries()) {
@@ -186,9 +234,11 @@ $("#create_bus_form").submit(function(e) {
         },
         success: function(response) {
             console.log('Success:', response);
+            $('#submitButton').val('Submit');
         },
         error: function(xhr, status, error) {
             console.error('Error:', error);
+            $('#submitButton').val('Submit');
         }
     });
 

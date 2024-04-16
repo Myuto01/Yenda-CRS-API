@@ -135,17 +135,16 @@ class FeatureSerializer(serializers.ModelSerializer):
 
 
 
-class BusFeatureSerializer(serializers.ModelSerializer):
+class BusCreateSerializer(serializers.ModelSerializer):
     features = serializers.PrimaryKeyRelatedField(
         queryset=Feature.objects.all(),  # Assuming Feature is the related model
         many=True,
         required=False
     )
     
-    seat_picture = serializers.ImageField(required=False)  # Add ImageField for seat_picture
+    seat_picture = serializers.ImageField(required=False)   
 
     class Meta:
         model = Bus
         fields = ['bus_type', 'total_seats', 'number_plate', 'status', 'features', 'seat_picture']
-
 

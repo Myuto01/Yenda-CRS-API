@@ -7,7 +7,7 @@ from rest_framework import views, status, renderers, generics
 from .models import User, TripSchedule, Bus, Feature
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusFeatureSerializer, FeatureSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer
 from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number
 from .permissions import AllowAnyPermission
 from twilio.rest import Client
@@ -100,14 +100,23 @@ class BusCreateView(APIView):
         except json.JSONDecodeError as e:
             return Response({'error': 'Failed to decode JSON data'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Include uploaded file data in the deserialized data dictionary
-        deserialized_data['seat_picture'] = request.FILES.get('fileData')
+       # Include uploaded file data in the deserialized data dictionary if available
+        if 'fileData' in request.FILES:
+            deserialized_data['seat_picture'] = request.FILES['fileData']
+
+        print("PASS")
 
         # Pass the combined data to the serializer
-        serializer = BusFeatureSerializer(data=deserialized_data)
+        serializer = BusCreateSerializer(data=deserialized_data)
         print('serializer:', serializer)
 
         if serializer.is_valid():
+
+            number_plate = serializer.validated_data['number_plate']
+            
+            if Bus.objects.filter(number_plate=number_plate).exists():
+                return Response({'error': 'Number plate already registered'}, status=400)
+
             user = request.user
             bus_type = serializer.validated_data['bus_type']
             print("Bus Type:", bus_type)
@@ -117,26 +126,33 @@ class BusCreateView(APIView):
             feature_names = serializer.validated_data.get('features', [])
             print('feature_names:', feature_names)
             
-            seat_picture = serializer.validated_data['seat_picture'] 
+            seat_picture = None
 
-            bus, bus_created = Bus.objects.get_or_create(
-                bus_type=bus_type,
-                total_seats=total_seats, 
-                number_plate=number_plate, 
-                status=status, 
-                seat_picture=seat_picture,     
-                user=user
-            )
+            # Check if seat_picture is provided and not empty
+            if 'seat_picture' in serializer.validated_data and serializer.validated_data['seat_picture']:
+                    seat_picture = serializer.validated_data['seat_picture']
+                # Process seat_picture if it's not empty
+                # Your code for handling non-empty seat_picture goes here
+            else:
 
-            print("Bus:", bus )
+                bus, bus_created = Bus.objects.get_or_create(
+                    bus_type=bus_type,
+                    total_seats=total_seats, 
+                    number_plate=number_plate, 
+                    status=status, 
+                    seat_picture=seat_picture,     
+                    user=user
+                )
 
-            print('feature_names:', feature_names)
-            # Set the features for the bus
-            bus.features.set(feature_names)
-            print("pass")
-            # Serialize the bus instance with the updated features
-            serialized_bus = BusFeatureSerializer(bus)
-            
+                print("Bus:", bus )
+
+                print('feature_names:', feature_names)
+                # Set the features for the bus
+                bus.features.set(feature_names)
+                print("pass")
+                # Serialize the bus instance with the updated features
+                serialized_bus = BusCreateSerializer(bus)
+                
             return Response(serialized_bus.data, status=201)
         else:
             return Response(serializer.errors, status=400)
@@ -238,19 +254,10 @@ class BusDetailsView(APIView):
             return Response({'error': 'Bus not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class FeatureCreateAPIView(APIView):
-    def post(self, request):
-        serializer = BusFeatureSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-
 class FeatureListView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = BusFeatureSerializer
+    serializer_class = FeatureSerializer
 
     def get_queryset(self):
         # Get the currently authenticated user
