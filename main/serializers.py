@@ -121,8 +121,31 @@ class TripScheduleSerializer(serializers.ModelSerializer):
         return representation
 
 class FeatureSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Feature
-        fields = ['name'] 
+        fields = ['name']
 
-                    
+    def create(self, validated_data):
+        # Get the user who made the request from the serializer context
+        user = self.context['request'].user
+        # Add the user to the validated data before saving
+        validated_data['user'] = user
+        return super().create(validated_data)
+
+
+
+class BusFeatureSerializer(serializers.ModelSerializer):
+    features = serializers.PrimaryKeyRelatedField(
+        queryset=Feature.objects.all(),  # Assuming Feature is the related model
+        many=True,
+        required=False
+    )
+    
+    seat_picture = serializers.ImageField(required=False)  # Add ImageField for seat_picture
+
+    class Meta:
+        model = Bus
+        fields = ['bus_type', 'total_seats', 'number_plate', 'status', 'features', 'seat_picture']
+
+

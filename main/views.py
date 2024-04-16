@@ -7,7 +7,7 @@ from rest_framework import views, status, renderers, generics
 from .models import User, TripSchedule, Bus, Feature
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, FeatureSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusFeatureSerializer, FeatureSerializer
 from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number
 from .permissions import AllowAnyPermission
 from twilio.rest import Client
@@ -17,7 +17,17 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import AuthenticationFailed, APIException
 #from django.core.exceptions import MultipleObjectsReturned
 from rest_framework_simplejwt.authentication import JWTAuthentication
+import json
+from rest_framework.parsers import MultiPartParser
 
+#Remove
+def test_view(request):
+    try:
+        feature = Feature.objects.get(pk=35)
+        print("Feature with PK 35 exists:", feature)
+    except Feature.DoesNotExist:
+        print("Feature with PK 35 does not exist")
+    return render(request, 'test.html')
 
 class RegistrationAPIView(APIView):
     
@@ -74,22 +84,65 @@ class BusCreateView(APIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]
 
     def post(self, request):
-        try:
-            # Access the user associated with the request
-            user = request.user
-            
-            # Create a new instance of Bus with the associated user
-            serializer = BusSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(user=user)  # Associate the request's user with the Bus
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        json_data = request.POST.get('jsonData')
         
-        except Exception as e:
-            # Return an error response with details of the exception
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        # Remove square brackets using strip()
+        json_data_stripped = json_data.strip('[]')
+        print("pass:", json_data_stripped)
+       
+        # Deserialize the JSON string into a Python dictionary
+        try:
+            deserialized_data = json.loads(json_data_stripped)
+            print("deserialized_data:", deserialized_data)
+        except json.JSONDecodeError as e:
+            return Response({'error': 'Failed to decode JSON data'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Include uploaded file data in the deserialized data dictionary
+        deserialized_data['seat_picture'] = request.FILES.get('fileData')
+
+        # Pass the combined data to the serializer
+        serializer = BusFeatureSerializer(data=deserialized_data)
+        print('serializer:', serializer)
+
+        if serializer.is_valid():
+            user = request.user
+            bus_type = serializer.validated_data['bus_type']
+            print("Bus Type:", bus_type)
+            total_seats = serializer.validated_data['total_seats']
+            number_plate = serializer.validated_data['number_plate']
+            status = serializer.validated_data['status']
+            feature_names = serializer.validated_data.get('features', [])
+            print('feature_names:', feature_names)
+            
+            seat_picture = serializer.validated_data['seat_picture'] 
+
+            bus, bus_created = Bus.objects.get_or_create(
+                bus_type=bus_type,
+                total_seats=total_seats, 
+                number_plate=number_plate, 
+                status=status, 
+                seat_picture=seat_picture,     
+                user=user
+            )
+
+            print("Bus:", bus )
+
+            print('feature_names:', feature_names)
+            # Set the features for the bus
+            bus.features.set(feature_names)
+            print("pass")
+            # Serialize the bus instance with the updated features
+            serialized_bus = BusFeatureSerializer(bus)
+            
+            return Response(serialized_bus.data, status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
+
+
 
 class TripScheduleCreateView(APIView):
 
@@ -184,10 +237,20 @@ class BusDetailsView(APIView):
         except Bus.DoesNotExist:
             return Response({'error': 'Bus not found'}, status=status.HTTP_404_NOT_FOUND)
 
+
+class FeatureCreateAPIView(APIView):
+    def post(self, request):
+        serializer = BusFeatureSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
 class FeatureListView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = FeatureSerializer
+    serializer_class = BusFeatureSerializer
 
     def get_queryset(self):
         # Get the currently authenticated user
@@ -195,5 +258,19 @@ class FeatureListView(generics.ListAPIView):
 
         # Filter the queryset to retrieve features belonging to the user
         queryset = Feature.objects.filter(user=user)
-        print("queryset", queryset)
+
         return queryset
+
+class FeatureCreateAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Include the user information in the data before saving
+        data = request.data
+        # Pass the request context to the serializer
+        serializer = FeatureSerializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

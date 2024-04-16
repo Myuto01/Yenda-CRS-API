@@ -53,65 +53,32 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Bus(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
-
-   
-    
-    STATUS_CHOICES = [
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
-    ]
-
-    NUMBER_PLATE_CHOICES = [
-
-    ]
-
-    BUS_CHOICES = [
-
-    ]
-
-    bus_type = models.CharField(max_length=30, blank=True, default="", choices=BUS_CHOICES)
-    total_seats = models.IntegerField(blank=True, default=0)
-    number_plate = models.CharField(max_length=10, blank=True, default="", choices=NUMBER_PLATE_CHOICES)
-    features = models.ManyToManyField('Feature', blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    bus_type = models.CharField(max_length=30, blank=True, null=True, default="")
+    total_seats = models.IntegerField(blank=True, null=True, default=0)
+    number_plate = models.CharField(max_length=10, blank=True, null=True, default="")
+    features = models.ManyToManyField('Feature',  blank=True)  # Change to ManyToManyField
+    status = models.CharField(max_length=10, blank=True, null=True)
     seat_picture = models.ImageField(upload_to='media/buses/', null=True, blank=True)
     
     def __str__(self):
-            return str(self.bus_type)
-    # Method to add custom choices dynamically
-    def add_custom_feature(self, custom_feature):
-            if custom_feature not in [choice[0] for choice in self.FEATURE_CHOICES]:
-                self.FEATURE_CHOICES.append((custom_feature, custom_feature))
-                self.save()
+        return f"User: {self.user}, Bus: {self.bus_type}, Number Plate: {self.number_plate}"
 
-    def save(self, *args, **kwargs):
-        # Update BUS_CHOICES and NUMBER_PLATE_CHOICES with new values
-        if self.bus_type and (self.bus_type, self.bus_type) not in self.BUS_CHOICES:
-            self.BUS_CHOICES.append((self.bus_type, self.bus_type))
-        if self.number_plate and (self.number_plate, self.number_plate) not in self.NUMBER_PLATE_CHOICES:
-            self.NUMBER_PLATE_CHOICES.append((self.number_plate, self.number_plate))
 
-        # Validate input data before saving
-        if self.total_seats < 0:
-            raise ValueError("Total seats must be a non-negative integer.")
-
-        # Call the original save method
-        super().save(*args, **kwargs)
 
 
 class Feature(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
 
-    FEATURE_CHOICES = [
-        ('Wifi', 'WiFi'),
-        ('Tv', 'TV'),
-        ('Snacks', 'Snacks'),
-        # Add more choices here
-    ]
-    name = models.CharField(max_length=20, choices=FEATURE_CHOICES)
+    features = models.ManyToManyField('self', blank=True)
+
+    name = models.CharField(max_length=20, default="")
 
     def __str__(self):
-        return self.name
+       return self.name
+
+    
+
+
 
 class TripSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
