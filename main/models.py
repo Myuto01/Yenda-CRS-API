@@ -84,7 +84,7 @@ class TripSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)  
     origin = models.CharField(max_length=30, blank=True, default="")
-    departure = models.CharField(max_length=30, blank=True, default="")
+    destination = models.CharField(max_length=30, blank=True, default="")
     departure_date =  models.DateTimeField(default=datetime.datetime.now)
     departure_time =  models.TimeField(default=time(12, 0, 0))
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)

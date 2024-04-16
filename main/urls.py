@@ -13,8 +13,11 @@ urlpatterns = [
     path('api/v1/bus-details/<int:bus_id>/', views.BusDetailsView.as_view(), name='bus-details'),
     path('api/v1/features/', views.FeatureListView.as_view(), name='feature-list'),
     path('api/v1/create-features/', views.FeatureCreateAPIView.as_view(), name='feature-create'),
+    path('api/v1/bus-list/', views.BusListView.as_view(), name='bus-list'),
 
 
     #Remove
-    path('test/', views.test_view, name="test")
+    path('test/', views.test_view, name="test"),
+    path('trip-create/', views.trip_create_view, name="trip-create-view")
+
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

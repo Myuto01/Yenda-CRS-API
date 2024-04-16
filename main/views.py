@@ -22,12 +22,10 @@ from rest_framework.parsers import MultiPartParser
 
 #Remove
 def test_view(request):
-    try:
-        feature = Feature.objects.get(pk=35)
-        print("Feature with PK 35 exists:", feature)
-    except Feature.DoesNotExist:
-        print("Feature with PK 35 does not exist")
     return render(request, 'test.html')
+
+def trip_create_view(request):
+    return render(request, 'create_trip.html')
 
 class RegistrationAPIView(APIView):
     
@@ -125,7 +123,7 @@ class BusCreateView(APIView):
             status = serializer.validated_data['status']
             feature_names = serializer.validated_data.get('features', [])
             print('feature_names:', feature_names)
-            
+
             seat_picture = None
 
             # Check if seat_picture is provided and not empty
@@ -170,31 +168,41 @@ class TripScheduleCreateView(APIView):
 
             user = request.user
 
-            # Extract bus details from the request data
+           # Extract bus details from the request data
             bus_type = request.data.get('bus_type')
             number_plate = request.data.get('number_plate')
             total_seats = request.data.get('total_seats')
-            features = request.data.get('features')
-            
+            features_data = request.data.get('features', [])  # Assuming features is a list of feature names or identifiers
+
             # Find or create the corresponding bus instance
             bus, created = Bus.objects.get_or_create(
                 bus_type=bus_type,
                 number_plate=number_plate,
-                defaults={
-                    'total_seats': total_seats,
-                    'features': features
-                }
+                total_seats=total_seats,
             )
-            
+
+            # Create or update features associated with the bus
+            features_objects = []
+            for feature_name in features_data:
+                feature_obj, _ = Feature.objects.get_or_create(name=feature_name)
+                features_objects.append(feature_obj)
+
+            # Update the features associated with the bus instance
+            bus.features.set(features_objects)
+
+            # Save the bus instance
+            bus.save()
+
             # Create the new trip schedule instance
             trip_schedule = TripSchedule.objects.create(
                 user=user,
                 bus=bus,
                 origin=request.data.get('origin', ''),
-                departure=request.data.get('departure', ''),
+                destination=request.data.get('destination', ''),
                 departure_date=request.data.get('departure_date', None),
                 departure_time=request.data.get('departure_time', None)
             )
+
             
             # Return the serialized data of the created trip schedule
             serializer = TripScheduleSerializer(trip_schedule)
@@ -281,3 +289,15 @@ class FeatureCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BusListView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Assuming YourModel has a ForeignKey to the User model
+        queryset = Bus.objects.filter(user=request.user)  # Filter objects for the current user
+        serializer = BusSerializer(queryset, many=True)
+        return Response(serializer.data)

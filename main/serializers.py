@@ -73,6 +73,11 @@ class UserLoginSerializer(serializers.Serializer):
         return validated_data
 
 class BusSerializer(serializers.ModelSerializer):
+    features = serializers.PrimaryKeyRelatedField(
+        queryset=Feature.objects.all(),  # Assuming Feature is the related model
+        many=True,
+        required=False
+    )
     class Meta:
         model = Bus
         fields = [ 
@@ -96,11 +101,11 @@ class TripScheduleSerializer(serializers.ModelSerializer):
         fields = [
             'bus', 
             'origin', 
-            'departure',
+            'destination',
             'departure_date',
             'departure_time'
         ]
-
+    """
     def to_representation(self, instance):
         representation = super().to_representation(instance)
     
@@ -119,7 +124,7 @@ class TripScheduleSerializer(serializers.ModelSerializer):
                 representation['departure_time'] = instance.departure_time.strftime('%H:%M:%S')
         
         return representation
-
+"""
 class FeatureSerializer(serializers.ModelSerializer):
 
     class Meta:
