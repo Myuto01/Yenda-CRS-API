@@ -14,10 +14,12 @@ urlpatterns = [
     path('api/v1/features/', views.FeatureListView.as_view(), name='feature-list'),
     path('api/v1/create-features/', views.FeatureCreateAPIView.as_view(), name='feature-create'),
     path('api/v1/bus-list/', views.BusListView.as_view(), name='bus-list'),
-
+    path('api/v1/create-driver-details/', views.CreateDriverDetailsAPIView.as_view(), name='create-driver-details'),
 
     #Remove
     path('test/', views.test_view, name="test"),
-    path('trip-create/', views.trip_create_view, name="trip-create-view")
+    path('trip-create/', views.trip_create_view, name="trip-create-view"),
+    path('create-driver/', views.create_driver_details, name="create-driver")
+
 
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -91,6 +91,18 @@ class TripSchedule(models.Model):
     def __str__(self):
         return f"User: {self.user}, Bus: {self.bus}, Origin: {self.origin}, Departure: {self.departure}, Departure Date: {self.departure_date}, Departure Time: {self.departure_time}"
 
+class DriverDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
+    driver_name = models.CharField(max_length=30, blank=True, null=True, default="")
+    license_number = models.CharField(max_length=30, blank=True, null=True, default="")
+    nrc_number = models.CharField(max_length=30, blank=True, null=True, default="")
+    phone_number = models.CharField(max_length=10, blank=True, null=True, default="")
+    passport_number = models.CharField(max_length=30, blank=True, null=True, default="")
+    license_image = models.ImageField(upload_to='media/license_image/', null=True, blank=True)
+    nrc_image = models.ImageField(upload_to='media/nrc_image/', null=True, blank=True)
+    passport_image = models.ImageField(upload_to='media/passport_image/', null=True, blank=True)
+
+
 
 
 

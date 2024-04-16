@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from json import JSONDecodeError
 from rest_framework import views, status, renderers, generics
-from .models import User, TripSchedule, Bus, Feature
+from .models import User, TripSchedule, Bus, Feature, DriverDetails
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer, CreateDriverDetailsSerializer
 from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number
 from .permissions import AllowAnyPermission
 from twilio.rest import Client
@@ -26,6 +26,16 @@ def test_view(request):
 
 def trip_create_view(request):
     return render(request, 'create_trip.html')
+
+def create_driver_details(request):
+    return render(request, 'create_driver_details.html')
+
+
+
+
+
+
+##############################################################################
 
 class RegistrationAPIView(APIView):
     
@@ -301,3 +311,20 @@ class BusListView(APIView):
         queryset = Bus.objects.filter(user=request.user)  # Filter objects for the current user
         serializer = BusSerializer(queryset, many=True)
         return Response(serializer.data)
+
+class CreateDriverDetailsAPIView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Include the user information in the data before saving
+        data = request.data
+        # Pass the request context to the serializer
+        serializer = CreateDriverDetailsSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+

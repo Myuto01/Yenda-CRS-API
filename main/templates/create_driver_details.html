@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create driver details | Yenda</title>
+</head>
+<body>
+    <form id="driver_create_form">
+        <input  type="text" id="driver_name" name="driver_name" placeholder="John Doe" required>
+
+        <input type="text" id="license_number" name="license_number" placeholder="1234-5678-90" required>
+
+        <input type="text" id="nrc_number" name="nrc_number" placeholder="805154/10/1" required>
+
+        <input type="tel" id="phone_number" name="phone_number" placeholder="0966142238" required>
+
+        <input type="text" id="passport_number" name="passport_number" placeholder="134567" >
+
+        <input type="submit" id="drivercreatesubmitButton" value="Submit">
+
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+        const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0ODkyODMxLCJpYXQiOjE3MTMxNjQ4MzEsImp0aSI6Ijk5YjIzMjAzZDljNDRkNGZhNWFjMTQ2YTZhZTBmZDBmIiwidXNlcl9pZCI6OX0.8dDNaXopAyrWrdTqut4-7sNLOnN2nyXhYLPMpchnLxo";
+
+        $("#driver_create_form").submit(function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            //$('#tripcreatesubmitButton').val('Submitting');
+
+            // Construct the payload object
+            var payload = {
+                "data": {
+                    "type": "CreateDriverDetailsAPIView",
+                    "attributes": {
+                        "driver_name": $("#driver_name").val(),
+                        "license_number": $("#license_number").val(),
+                        "nrc_number": $("#nrc_number").val(),
+                        "phone_number": $("#phone_number").val(), // Get selected features
+                        "passport_number": $("#passport_number").val(),
+                       
+                    }
+                }
+            }
+
+
+            // Convert the payload object to a JSON string
+            var payloadString = JSON.stringify(payload);
+
+            // Iterate through FormData and print out each data individually
+        console.log("payload", payloadString)
+
+            // Send AJAX request
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/v1/create-driver-details/',
+                type: 'POST',
+                data: payloadString ,
+                contentType: 'application/vnd.api+json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+                },
+                success: function(response) {
+                    console.log('Success:', response);
+                    //$('#tripcreatesubmitButton').val('Submit');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    //$('#tripcreatesubmitButton').val('Submit');
+                }
+            });
+        });
+        })
+    </script>
+
+</body>
+</html>

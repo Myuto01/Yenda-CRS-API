@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from main.models import User, Bus, TripSchedule, Feature
+from main.models import User, Bus, TripSchedule, Feature,  DriverDetails
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
@@ -153,3 +153,11 @@ class BusCreateSerializer(serializers.ModelSerializer):
         model = Bus
         fields = ['bus_type', 'total_seats', 'number_plate', 'status', 'features', 'seat_picture']
 
+
+class CreateDriverDetailsSerializer(serializers.ModelSerializer):
+    license_image = serializers.ImageField(required=False)
+    nrc_image = serializers.ImageField(required=False)
+    passport_image = serializers.ImageField(required=False)
+    class Meta:
+        model = DriverDetails
+        fields = '__all__'
