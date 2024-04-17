@@ -236,13 +236,13 @@ class TripSearchView(APIView):
     def get(self, request):
         # Extract search parameters from the request
         origin = request.query_params.get('origin')
-        departure = request.query_params.get('departure')
+        destination = request.query_params.get('destination')
         date = request.query_params.get('date')  # Assuming the date format is 'YYYY-MM-DD'
 
         # Filter trip details based on search criteria
         trips = TripSchedule.objects.filter(
             origin=origin,
-            departure=departure,
+            destination=destination,
             departure_date=date
         )
 
@@ -323,7 +323,7 @@ class CreateDriverDetailsAPIView(APIView):
         # Pass the request context to the serializer
         serializer = CreateDriverDetailsSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

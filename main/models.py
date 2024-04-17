@@ -89,7 +89,7 @@ class TripSchedule(models.Model):
     departure_time =  models.TimeField(default=time(12, 0, 0))
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     def __str__(self):
-        return f"User: {self.user}, Bus: {self.bus}, Origin: {self.origin}, Departure: {self.departure}, Departure Date: {self.departure_date}, Departure Time: {self.departure_time}"
+        return f"User: {self.user}, Bus: {self.bus}, Origin: {self.origin}, Destination: {self.destination}, Departure Date: {self.departure_date}, Departure Time: {self.departure_time}"
 
 class DriverDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
