@@ -21,7 +21,7 @@ import json
 from rest_framework.parsers import MultiPartParser
 
 #Remove
-def test_view(request):
+def test_view(request): #Bus Creation  View
     return render(request, 'test.html')
 
 def trip_create_view(request):
@@ -30,7 +30,8 @@ def trip_create_view(request):
 def create_driver_details(request):
     return render(request, 'create_driver_details.html')
 
-
+def trip_search(request):
+    return render(request, 'trip_search.html')
 
 
 
@@ -236,8 +237,13 @@ class TripSearchView(APIView):
     def get(self, request):
         # Extract search parameters from the request
         origin = request.query_params.get('origin')
+        print('Origin :', origin)
+
         destination = request.query_params.get('destination')
+        print('destination :', destination)
+
         date = request.query_params.get('date')  # Assuming the date format is 'YYYY-MM-DD'
+        print('date :', date)
 
         # Filter trip details based on search criteria
         trips = TripSchedule.objects.filter(
@@ -248,6 +254,8 @@ class TripSearchView(APIView):
 
         # Serialize the filtered trip details
         serializer = TripScheduleSerializer(trips, many=True)
+        print('serializer :', serializer)
+
         data_response = serializer.data
         print('Response:', data_response)
         # Return the serialized trip details in the response
@@ -313,18 +321,89 @@ class BusListView(APIView):
         return Response(serializer.data)
 
 class CreateDriverDetailsAPIView(APIView):
-
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser]
 
     def post(self, request):
-        # Include the user information in the data before saving
-        data = request.data
-        # Pass the request context to the serializer
-        serializer = CreateDriverDetailsSerializer(data=data)
+        json_data = request.POST.get('jsonData')
+        
+        # Remove square brackets using strip()
+        json_data_stripped = json_data.strip('[]')
+        print("pass:", json_data_stripped)
+       
+        # Deserialize the JSON string into a Python dictionary
+        try:
+            deserialized_data = json.loads(json_data_stripped)
+            print("deserialized_data:", deserialized_data)
+        except json.JSONDecodeError as e:
+            return Response({'error': 'Failed to decode JSON data'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Include uploaded file data in the deserialized data dictionary if available
+        if 'license_image' in request.FILES:
+            license_image_file = request.FILES['license_image']
+            deserialized_data['license_image'] = license_image_file
+            print("License Image File:", license_image_file)
+
+        if 'nrc_image' in request.FILES:
+            nrc_image_file = request.FILES['nrc_image']
+            deserialized_data['nrc_image'] = nrc_image_file
+            print("NRC Image File:", nrc_image_file)
+
+        if 'passport_image' in request.FILES:
+            passport_image_file = request.FILES['passport_image']
+            deserialized_data['passport_image'] = passport_image_file
+            print("Passport Image File:", passport_image_file)
+
+        print("PASS")
+
+        # Pass the combined data to the serializer
+        serializer = CreateDriverDetailsSerializer(data=deserialized_data)
+        print('serializer:', serializer)
+
         if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user = request.user
+            driver_name = serializer.validated_data['driver_name']
+            print("driver_name:", driver_name)
+            license_number = serializer.validated_data['license_number']
+            nrc_number = serializer.validated_data['nrc_number']
+            phone_number = serializer.validated_data['phone_number']
+            passport_number = serializer.validated_data.get('passport_number')
+            print('passport_number:', passport_number)
 
+            license_image = None
+            nrc_image = None  
+            passport_image = None
 
+            # Check if any image is provided and not empty
+            if 'license_image' in serializer.validated_data and serializer.validated_data['license_image']:
+                license_image = serializer.validated_data['license_image']
+                print("license_image", license_image)
+
+            if 'nrc_image' in serializer.validated_data and serializer.validated_data['nrc_image']:
+                nrc_image = serializer.validated_data['nrc_image']
+                print("nrc_image", nrc_image)
+
+            if 'passport_image' in serializer.validated_data and serializer.validated_data['passport_image']:
+                passport_image = serializer.validated_data['passport_image']
+                print("passport_image", passport_image)
+
+            # Create or get the DriverDetails object
+            driver, driver_created = DriverDetails.objects.get_or_create(
+                driver_name=driver_name,
+                license_number=license_number, 
+                nrc_number=nrc_number, 
+                phone_number=phone_number, 
+                passport_number=passport_number,
+                license_image=license_image,
+                nrc_image=nrc_image,
+                passport_image=passport_image,     
+                user=user
+            )
+
+            # Serialize the driver instance with the updated features
+            serialized_driver_details = CreateDriverDetailsSerializer(driver)
+            
+            return Response(serialized_driver_details.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

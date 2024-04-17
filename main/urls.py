@@ -17,9 +17,11 @@ urlpatterns = [
     path('api/v1/create-driver-details/', views.CreateDriverDetailsAPIView.as_view(), name='create-driver-details'),
 
     #Remove
+    
     path('test/', views.test_view, name="test"),
     path('trip-create/', views.trip_create_view, name="trip-create-view"),
-    path('create-driver/', views.create_driver_details, name="create-driver")
+    path('create-driver/', views.create_driver_details, name="create-driver"),
+    path('trip-search/', views.trip_search, name="trip-search")
 
 
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

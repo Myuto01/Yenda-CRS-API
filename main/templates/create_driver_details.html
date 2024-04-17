@@ -18,6 +18,12 @@
         <input type="text" id="passport_number" name="passport_number" placeholder="134567" >
 
         <!--Include File inputs as well-->
+        <input type="file" id="license_image" name="license_image">
+
+        <input type="file" id="nrc_image" name="nrc_image">
+
+        <input type="file" id="passport_image" name="passport_image">
+
 
         
         <input type="submit" id="drivercreatesubmitButton" value="Submit">
@@ -26,56 +32,69 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-        const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0ODkyODMxLCJpYXQiOjE3MTMxNjQ4MzEsImp0aSI6Ijk5YjIzMjAzZDljNDRkNGZhNWFjMTQ2YTZhZTBmZDBmIiwidXNlcl9pZCI6OX0.8dDNaXopAyrWrdTqut4-7sNLOnN2nyXhYLPMpchnLxo";
+        $(document).ready(function() {
+    const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0ODkyODMxLCJpYXQiOjE3MTMxNjQ4MzEsImp0aSI6Ijk5YjIzMjAzZDljNDRkNGZhNWFjMTQ2YTZhZTBmZDBmIiwidXNlcl9pZCI6OX0.8dDNaXopAyrWrdTqut4-7sNLOnN2nyXhYLPMpchnLxo";
 
-        $("#driver_create_form").submit(function(e) {
-            e.preventDefault(); // Prevent default form submission
+    $("#driver_create_form").submit(function(e) {
+        e.preventDefault(); // Prevent default form submission
 
-            //$('#tripcreatesubmitButton').val('Submitting');
-
-            // Construct the payload object
-            var payload = {
-                "data": {
-                    "type": "CreateDriverDetailsAPIView",
-                    "attributes": {
-                        "driver_name": $("#driver_name").val(),
-                        "license_number": $("#license_number").val(),
-                        "nrc_number": $("#nrc_number").val(),
-                        "phone_number": $("#phone_number").val(), // Get selected features
-                        "passport_number": $("#passport_number").val(),
-                       
-                    }
+        // Construct the payload object
+        var payload = {
+                    "driver_name": $("#driver_name").val(),
+                    "license_number": $("#license_number").val(),
+                    "nrc_number": $("#nrc_number").val(),
+                    "phone_number": $("#phone_number").val(),
+                    "passport_number": $("#passport_number").val(),
                 }
+           
+
+        // Convert the payload object to a JSON string
+        var payloadString = JSON.stringify(payload);
+
+        // Create a FormData object to send both file data and JSON data
+        var formDataToSend = new FormData();
+        formDataToSend.append('jsonData', payloadString);
+
+        // Append file data for license image
+        var licenseImageFile = document.getElementById('license_image').files[0];
+        if (licenseImageFile) {
+            formDataToSend.append('license_image', licenseImageFile);
+        }
+
+        // Append file data for NRC image
+        var nrcImageFile = document.getElementById('nrc_image').files[0];
+        if (nrcImageFile) {
+            formDataToSend.append('nrc_image', nrcImageFile);
+        }
+
+        // Append file data for passport image
+        var passportImageFile = document.getElementById('passport_image').files[0];
+        if (passportImageFile) {
+            formDataToSend.append('passport_image', passportImageFile);
+        }
+
+        // Send AJAX request
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/v1/create-driver-details/',
+            type: 'POST',
+            data: formDataToSend,
+            contentType: false,
+            processData: false,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+            },
+            success: function(response) {
+                console.log('Success:', response);
+                // Handle success response
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                // Handle error response
             }
-
-
-            // Convert the payload object to a JSON string
-            var payloadString = JSON.stringify(payload);
-
-            // Iterate through FormData and print out each data individually
-        console.log("payload", payloadString)
-
-            // Send AJAX request
-            $.ajax({
-                url: 'http://127.0.0.1:8000/api/v1/create-driver-details/',
-                type: 'POST',
-                data: payloadString ,
-                contentType: 'application/vnd.api+json',
-                beforeSend: function(xhr) {
-                    xhr.setRequestHeader("Authorization", "JWT " + accessToken);
-                },
-                success: function(response) {
-                    console.log('Success:', response);
-                    //$('#tripcreatesubmitButton').val('Submit');
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    //$('#tripcreatesubmitButton').val('Submit');
-                }
-            });
         });
-        })
+    });
+});
+
     </script>
 
 </body>
