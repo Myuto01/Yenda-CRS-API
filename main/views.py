@@ -19,6 +19,7 @@ from rest_framework.exceptions import AuthenticationFailed, APIException
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import json
 from rest_framework.parsers import MultiPartParser
+from rest_framework.decorators import  permission_classes
 
 #Remove
 def test_view(request): #Bus Creation  View
@@ -231,6 +232,8 @@ class TripScheduleCreateView(APIView):
 
 class TripSearchView(APIView):
 
+    authentication_classes = []  
+    permission_classes = []
 
     def get(self, request):
         # Extract search parameters from the request
