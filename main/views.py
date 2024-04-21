@@ -231,9 +231,6 @@ class TripScheduleCreateView(APIView):
 
 class TripSearchView(APIView):
 
-    #authentication_classes = [JWTAuthentication]
-    #permission_classes = [IsAuthenticated]
-    permission_classes = [AllowAnyPermission]
 
     def get(self, request):
         # Extract search parameters from the request
