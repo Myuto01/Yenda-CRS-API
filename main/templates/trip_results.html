@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Results</title>
+    <style>
+        /* styles.css */
+
+/* Style for the list items containing trip information */
+#tripResults li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+/* Style for the links within the list items */
+#tripResults li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Hover effect for the links */
+#tripResults li a:hover {
+    color: #007bff; /* Change to your desired hover color */
+}
+
+    </style>
+</head>
+<body>
+    <ul id="tripResults"></ul>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Retrieve trip data
+            var tripsData = JSON.parse(localStorage.getItem('tripResults'));
+
+            // Check if tripsData contains the 'data' key
+            if ('data' in tripsData && Array.isArray(tripsData.data)) {
+                var tripResultsList = $("#tripResults");
+                tripsData.data.forEach(function(trip) {
+                    var listItem = $("<li></li>");
+                    var link = $("<a></a>")
+                        .text(trip.attributes.origin + " to " + trip.attributes.destination + " - " + trip.attributes.departure_date + " " + trip.attributes.departure_time)
+                        .attr("href", "/bus_details.html?id=" + trip.id);
+                    listItem.append(link);
+                    tripResultsList.append(listItem);
+                });
+            } else {
+                // Handle case where tripsData does not have 'data' key or it is not an array
+                console.error("The 'data' key is missing or not an array in tripsData:", tripsData);
+            }
+        });
+    </script>
+</body>
+</html>

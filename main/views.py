@@ -34,8 +34,17 @@ def create_driver_details(request):
 def trip_search(request):
     return render(request, 'trip_search.html')
 
+def trip_results_view(request):
+    return render(request, 'trip_results.html')
 
+def bus_details_view(request):
+    return render(request, 'bus_details.html')
 
+def enter_passenger_details_view(request):
+    return render(request, 'enter_passenger_details.html')
+
+def confirm_passenger_details_view(request):
+    return render(request, 'details_confirmation_page.html')
 
 ##############################################################################
 
@@ -264,8 +273,8 @@ class TripSearchView(APIView):
 
 class BusDetailsView(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    authentication_classes = []
+    permission_classes = []
     
     def get(self, request, bus_id):
         try:

@@ -5,22 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trip Search | Yenda</title>
 </head>
-<body>
-    <form id="trip_search_form">
-        <input type="text" name="origin" id="origin" placeholder="Enter origin" required>
+    <body>
+        <form id="trip_search_form">
+            <input type="text" name="origin" id="origin" placeholder="Enter origin" required>
 
-        <input type="text" name="destination" id="destination" placeholder="Enter destination" required>
+            <input type="text" name="destination" id="destination" placeholder="Enter destination" required>
 
-        <input type="date" name="date" id="date" placeholder="Enter date" required>
+            <input type="date" name="date" id="date" placeholder="Enter date" required>
 
-        <input type="submit" value="submit" id="tripsearchsubmitButton">
-        
-    </form>
-
+            <input type="submit" value="submit" id="tripsearchsubmitButton">
+            
+        </form>
+    </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
-            const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0ODkyODMxLCJpYXQiOjE3MTMxNjQ4MzEsImp0aSI6Ijk5YjIzMjAzZDljNDRkNGZhNWFjMTQ2YTZhZTBmZDBmIiwidXNlcl9pZCI6OX0.8dDNaXopAyrWrdTqut4-7sNLOnN2nyXhYLPMpchnLxo";
 
             $("#trip_search_form").submit(function(e) {
                 e.preventDefault(); // Prevent default form submission
@@ -37,11 +36,14 @@
                     url: url,
                     type: 'GET',
                     contentType: 'application/json',
-                    beforeSend: function(xhr) {
-                        xhr.setRequestHeader("Authorization", "JWT " + accessToken);
-                    },
+                  
                     success: function(response) {
                         console.log('Success:', response);
+                        
+                        localStorage.setItem('tripResults', JSON.stringify(response));
+
+                        window.location.href = "{% url 'trip-results' %}";
+
                         // Handle the response
                     },
                     error: function(xhr, status, error) {
@@ -50,9 +52,6 @@
                     }
                 });
             });
-
-        });
-           
-    </script>   
-</body>
+});
+</script>
 </html>

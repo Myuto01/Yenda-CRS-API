@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Details</title>
+</head>
+<body>
+    <div id="passengerForms"></div>
+    <button id="submitAllButton">Submit All</button>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Retrieve selected seats from localStorage
+            const selectedSeats = JSON.parse(localStorage.getItem('selectedSeats'));
+
+            if (!selectedSeats || selectedSeats.length === 0) {
+                // No selected seats found
+                $('#passengerForms').html('<p>No seats selected.</p>');
+            } else {
+                // Generate forms for selected seats
+                const passengerForms = $('#passengerForms');
+
+                selectedSeats.forEach(function(seat) {
+                    const form = $('<form></form>').addClass('passengerForm');
+                    form.append($('<h2></h2>').text('Passenger Details for Seat ' + seat));
+                    form.append($('<input>').attr('type', 'text').attr('name', 'name').attr('placeholder', 'Name'));
+                    form.append($('<input>').attr('type', 'text').attr('name', 'email').attr('placeholder', 'Email'));
+                    form.append($('<input>').attr('type', 'text').attr('name', 'phone').attr('placeholder', 'Phone'));
+                    passengerForms.append(form);
+                });
+
+                // Attach event handler for submit all button
+                $('#submitAllButton').click(function() {
+                    // Loop through each form
+                    $('.passengerForm').each(function(index) {
+                        // Gather form data
+                        const formData = $(this).serialize();
+
+                        // Save form data to local storage
+                        const seat = selectedSeats[index];
+                        const formDataKey = 'passengerDetails_' + seat;
+                        localStorage.setItem(formDataKey, JSON.stringify(formData));
+
+                        console.log('Form data saved for seat ' + seat + ':', formData);
+                        
+                        window.location.href = '{% url 'confirm-details' %}';
+
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

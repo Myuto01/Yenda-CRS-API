@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passenger Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        .passenger-info {
+            margin-bottom: 10px;
+        }
+
+        .seat-number {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .passenger-name {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div id="passengerDetails"></div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Retrieve selected seats from localStorage
+            const selectedSeats = JSON.parse(localStorage.getItem('selectedSeats'));
+
+            if (!selectedSeats || selectedSeats.length === 0) {
+                // No selected seats found
+                $('#passengerDetails').html('<p>No seats selected.</p>');
+            } else {
+                // Display form data
+                const passengerDetailsDiv = $('#passengerDetails');
+
+                selectedSeats.forEach(function(seat) {
+                    const formDataKey = 'passengerDetails_' + seat;
+                    const formData = JSON.parse(localStorage.getItem(formDataKey));
+                    if (formData) {
+                        const parsedFormData = decodeURIComponent(formData.replace(/\+/g, ' ')); // Decode form data
+                        const name = parsedFormData.match(/name=([^&]*)/)[1]; // Extract name from form data
+                        passengerDetailsDiv.append('<p class="passenger-info"><span class="seat-number">Seat ' + seat + ':</span> <span class="passenger-name">' + name + '</span></p>');
+                    } else {
+                        passengerDetailsDiv.append('<p class="passenger-info">No details found for Seat ' + seat + '.</p>');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
