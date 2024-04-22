@@ -56,12 +56,21 @@ class Bus(models.Model):
     bus_type = models.CharField(max_length=30, blank=True, null=True, default="")
     total_seats = models.IntegerField(blank=True, null=True, default=0)
     number_plate = models.CharField(max_length=10, blank=True, null=True, default="")
-    features = models.ManyToManyField('Feature',  blank=True)  # Change to ManyToManyField
+    features = models.ManyToManyField('Feature', blank=True)
     status = models.CharField(max_length=10, blank=True, null=True)
     seat_picture = models.ImageField(upload_to='media/buses/', null=True, blank=True)
-    
+
     def __str__(self):
         return f"User: {self.user}, Bus: {self.bus_type}, Number Plate: {self.number_plate}"
+
+class Seat(models.Model):
+    bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
+    seat_number = models.IntegerField()
+    is_booked = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Seat {self.seat_number} of Bus {self.bus.number_plate}"
+
 
 
 
@@ -103,15 +112,15 @@ class DriverDetails(models.Model):
     passport_image = models.ImageField(upload_to='media/passport_image/', null=True, blank=True)
 
 
-
-
-
 class Ticket(models.Model):
-    buyer_booking = models.ForeignKey(User, on_delete=models.CASCADE)
     trip = models.ForeignKey(TripSchedule, on_delete=models.CASCADE)
-    passenger_name = models.CharField(max_length=15, default="", null=True)
-    passenger_phonenumber = models.CharField(max_length=15)
+    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default="")
+    passenger_name = models.CharField(max_length=255, default="", null=True)
+    passenger_phonenumber = models.CharField(max_length=255)
+    passenger_email = models.CharField(max_length=255, default="")
+    seat_number = models.CharField(max_length=255, default="")
     confirmed = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False)
+    buyer_user_id = models.IntegerField(default=0)

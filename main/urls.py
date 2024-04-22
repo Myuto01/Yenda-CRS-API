@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/v1/bus-list/', views.BusListView.as_view(), name='bus-list'),
     path('api/v1/create-driver-details/', views.CreateDriverDetailsAPIView.as_view(), name='create-driver-details'),
     path('bus_details.html', views.bus_details_view, name='bus_details'),
+    path('api/v1/trip-submission/', views.TripSubmissionAPIView.as_view(), name='trip-submission'),
 
     #Remove
     

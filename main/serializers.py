@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from main.models import User, Bus, TripSchedule, Feature,  DriverDetails
+from main.models import User, Bus, TripSchedule, Feature,  DriverDetails, Ticket, Seat
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
@@ -72,15 +72,18 @@ class UserLoginSerializer(serializers.Serializer):
 
         return validated_data
 
+class FeatureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feature
+        fields = ['name']
+
 class BusSerializer(serializers.ModelSerializer):
-    features = serializers.PrimaryKeyRelatedField(
-        queryset=Feature.objects.all(),  # Assuming Feature is the related model
-        many=True,
-        required=False
-    )
+    features = FeatureSerializer(many=True, read_only=True)
+
     class Meta:
         model = Bus
         fields = [ 
+            'id',
             'bus_type',
             'total_seats',
             'number_plate',
@@ -89,21 +92,37 @@ class BusSerializer(serializers.ModelSerializer):
             'seat_picture'
         ]
 
+    def get_features(self, obj):
+        return [feature.name for feature in obj.features.all()]
+
     def create(self, validated_data):
         """
         Create and return a new Bus instance, given the validated data.
         """
         return Bus.objects.create(**validated_data)
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['company_name']  
+
+
+
 class TripScheduleSerializer(serializers.ModelSerializer):
+
+    user = UserSerializer()
+    bus = BusSerializer()
+
     class Meta:
         model = TripSchedule
         fields = [
+            'user',
             'bus', 
             'origin', 
             'destination',
             'departure_date',
-            'departure_time'
+            'departure_time',
+            'price'
         ]
 """
     def to_representation(self, instance):
@@ -160,3 +179,40 @@ class CreateDriverDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DriverDetails
         fields = '__all__'
+
+class TripSubmissionSerializer(serializers.ModelSerializer):
+    passenger_name = serializers.ListField(child=serializers.CharField())
+    passenger_phonenumber = serializers.ListField(child=serializers.CharField())
+    passenger_email = serializers.ListField(child=serializers.EmailField())
+    seat_number = serializers.ListField(child=serializers.IntegerField())
+
+    # Add custom fields for trip and bus IDs
+    trip_id = serializers.PrimaryKeyRelatedField(queryset=TripSchedule.objects.all(), source='trip', write_only=True)
+    bus_id = serializers.PrimaryKeyRelatedField(queryset=Bus.objects.all(), source='bus', write_only=True)
+
+    class Meta:
+        model = Ticket
+        fields = [
+            'trip_id',
+            'bus_id',
+            'passenger_name',
+            'passenger_phonenumber',
+            'passenger_email',
+            'seat_number',
+        ]
+
+    def create(self, validated_data):
+        # Extract the bus instance from validated data
+        bus = validated_data.get('bus')
+
+        # Extract seat numbers from validated data
+        seat_numbers = validated_data.get('seat_number')
+
+        # Mark each seat as booked
+        for seat_number in seat_numbers:
+            seat, created = Seat.objects.get_or_create(bus=bus, seat_number=seat_number)
+            seat.is_booked = True
+            seat.save()
+
+        # Call the superclass's create method to create the Ticket instance
+        return super().create(validated_data)

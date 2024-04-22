@@ -46,14 +46,25 @@
                     var listItem = $("<li></li>");
                     var link = $("<a></a>")
                         .text(trip.attributes.origin + " to " + trip.attributes.destination + " - " + trip.attributes.departure_date + " " + trip.attributes.departure_time)
-                        .attr("href", "/bus_details.html?id=" + trip.id);
+                        .attr("href", "/bus_details.html?id=" +  trip.attributes.bus.id);
+                    var details = $("<p></p>")
+                        .text("Company: " + trip.attributes.user.company_name + ", Price: " + trip.attributes.price + ", Seats: " + trip.attributes.bus.total_seats + ", Date: " + trip.attributes.departure_date + ", Time: " + trip.attributes.departure_time);
+
+                    var featuresList = $("<ul></ul>");
+                    trip.attributes.bus.features.forEach(function(feature) {
+                        featuresList.append($("<li></li>").text(feature.name));
+                    });
+
                     listItem.append(link);
+                    listItem.append(details);
+                    listItem.append(featuresList);
                     tripResultsList.append(listItem);
                 });
             } else {
                 // Handle case where tripsData does not have 'data' key or it is not an array
                 console.error("The 'data' key is missing or not an array in tripsData:", tripsData);
             }
+
         });
     </script>
 </body>

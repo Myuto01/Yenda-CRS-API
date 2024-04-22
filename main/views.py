@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from json import JSONDecodeError
 from rest_framework import views, status, renderers, generics
-from .models import User, TripSchedule, Bus, Feature, DriverDetails
+from .models import User, TripSchedule, Bus, Feature, DriverDetails, Seat
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer, CreateDriverDetailsSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer, CreateDriverDetailsSerializer, TripSubmissionSerializer
 from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number
 from .permissions import AllowAnyPermission
 from twilio.rest import Client
@@ -272,18 +272,21 @@ class TripSearchView(APIView):
         return Response(data_response)
 
 class BusDetailsView(APIView):
-
+    
     authentication_classes = []
     permission_classes = []
     
     def get(self, request, bus_id):
         try:
             bus = Bus.objects.get(id=bus_id)
-            booked_seats = TripSchedule.objects.filter(bus=bus).count()
+            booked_seats = Seat.objects.filter(bus=bus, is_booked=True).count()
+            booked_seat_numbers = list(Seat.objects.filter(bus=bus, is_booked=True).values_list('seat_number', flat=True))
             available_seats = bus.total_seats - booked_seats
+
             bus_data = {
                 'bus': BusSerializer(bus).data,
-                'available_seats': available_seats
+                'available_seats': available_seats,
+                'booked_seats': booked_seat_numbers
             }
             return Response(bus_data, status=status.HTTP_200_OK)
         except Bus.DoesNotExist:
@@ -417,3 +420,21 @@ class CreateDriverDetailsAPIView(APIView):
             return Response(serialized_driver_details.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class TripSubmissionAPIView(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+    
+    def post(self, request):
+        data = request.data
+        print("Data:", data)
+        serializer = TripSubmissionSerializer(data=data)
+        print("Serializer:", serializer)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

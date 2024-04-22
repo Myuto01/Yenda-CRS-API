@@ -32,161 +32,156 @@
 
         <!-- Trip form-->
         <input type="text" name="origin" id="origin" placeholder="Enter Origin" required>
-
         <input type="text" name="destination" id="destination" placeholder="Enter Destination" required>
-
         <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required>
-
         <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required>
-
-
         <input type="submit" id="tripcreatesubmitButton" value="Submit">
     </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script>
+        const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
+
+        // Fetch data from the backend API
+        fetch('http://127.0.0.1:8000/api/v1/bus-list/', {
+            headers: {
+                'Authorization': "JWT " + accessToken 
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Response data:", data); // Log the response data to inspect its structure
+            const buses = data.data; // Access the array of bus objects
+            
+            const busDropdown = document.getElementById('bus-dropdown');
+            const numberPlateDropdown = document.getElementById('number-plate-dropdown');
+            const totalSeatsInput = document.getElementById('total-seats');
+            const featureDropdown = document.getElementById('features-dropdown');
+
+            buses.forEach(bus => {
+                // Populate bus dropdown
+                const option = document.createElement('option');
+                option.value = bus.id; // Assuming bus id is available
+                option.textContent = `${bus.attributes.bus_type} (${bus.attributes.total_seats} seats)`;
+                busDropdown.appendChild(option);
+                
+                // Populate number plate dropdown
+                const plateOption = document.createElement('option');
+                plateOption.value = bus.attributes.number_plate;
+                plateOption.textContent = bus.attributes.number_plate;
+                numberPlateDropdown.appendChild(plateOption);
+            });
+
+            // Event listener for bus selection
+            busDropdown.addEventListener('change', function() {
+                const selectedBusId = this.value;
+                const selectedBus = buses.find(bus => bus.id === selectedBusId);
+                
+                if (selectedBus) {
+                    // Update number plate field
+                    numberPlateDropdown.value = selectedBus.attributes.number_plate;
+                    
+                    // Update total seats field
+                    totalSeatsInput.value = selectedBus.attributes.total_seats;
+
+                    // Clear previous options in featureDropdown
+                    featureDropdown.innerHTML = '';
+
+                    // Populate featureDropdown with the features of the selected bus
+                    if (selectedBus.attributes.features && Array.isArray(selectedBus.attributes.features)) {
+                        selectedBus.attributes.features.forEach(feature => {
+                            const option = document.createElement('option');
+                            option.value = feature.id;
+                            option.textContent = feature.name;
+                            featureDropdown.appendChild(option);
+                        });
+                    } else {
+                        console.error('Error: Features data not available for the selected bus');
+                    }
+                } else {
+                    console.error('Error: Selected bus not found');
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+
+        $('#features-dropdown').select2({
+            placeholder: "Select a Feature",
+        });
+
+        // Ajax Request to get features
+        $.ajax({
+            url: "http://127.0.0.1:8000/api/v1/features/",
+            type: "GET",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
+            },
+            success: function(response) {
+                console.log("Response:", response);
+                // Check if response contains the data array
+                if (response.data && Array.isArray(response.data)) {
+                    // Populate the dropdown with the retrieved features
+                    response.data.forEach(function(feature) {
+                        // Access the ID and attributes object of each feature
+                        var featureId = feature.id;
+                        var attributes = feature.attributes;
+                        // Append the feature name and ID to the dropdown
+                        $('#features-dropdown').append('<option value="' + featureId + '">' + attributes.name + '</option>');
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching features:", error);
+            }
+        });
+
+        $("#trip_create_form").submit(function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            // Construct the payload object
+            var payload = {
+                "data": {
+                    "type": "TripScheduleCreateView",
+                    "attributes": {
+                        "bus_type": $("#bus-dropdown").val(),
+                        "total_seats": $("#total-seats").val(),
+                        "number_plate": $("#number-plate-dropdown").val(),
+                        "features": $("#features-dropdown").val() || [], // Get selected features
+                        "origin": $("#origin").val(),
+                        "destination": $("#destination").val(),
+                        "departure_date": $("#departure_date").val(),
+                        "departure_time": $("#departure_time").val()
+                    }
+                }
+            }
+
+            // Convert the payload object to a JSON string
+            var payloadString = JSON.stringify(payload);
+
+            // Send AJAX request
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/v1/trip-schedules/',
+                type: 'POST',
+                data: payloadString ,
+                contentType: 'application/vnd.api+json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+                },
+                success: function(response) {
+                    console.log('Success:', response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    </script>
 </body>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-            const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0ODkyODMxLCJpYXQiOjE3MTMxNjQ4MzEsImp0aSI6Ijk5YjIzMjAzZDljNDRkNGZhNWFjMTQ2YTZhZTBmZDBmIiwidXNlcl9pZCI6OX0.8dDNaXopAyrWrdTqut4-7sNLOnN2nyXhYLPMpchnLxo";
-    
-    // Fetch data from the backend API
-fetch('http://127.0.0.1:8000/api/v1/bus-list/', {
-    headers: {
-        'Authorization': "JWT " + accessToken 
-    }
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-    return response.json();
-})
-.then(data => {
-    console.log("Response data:", data); // Log the response data to inspect its structure
-    const buses = data.data; // Access the array of bus objects
-    
-    const busDropdown = document.getElementById('bus-dropdown');
-    const numberPlateDropdown = document.getElementById('number-plate-dropdown');
-    const totalSeatsInput = document.getElementById('total-seats');
-    const featureDropdown = document.getElementById('features-dropdown');
-    buses.forEach(bus => {
-        // Populate bus dropdown
-        const option = document.createElement('option');
-        option.value = bus.id; // Assuming bus id is available
-        option.textContent = `${bus.attributes.bus_type} (${bus.attributes.total_seats} seats)`;
-        busDropdown.appendChild(option);
-        
-        // Populate number plate dropdown
-        const plateOption = document.createElement('option');
-        plateOption.value = bus.attributes.number_plate;
-        plateOption.textContent = bus.attributes.number_plate;
-        numberPlateDropdown.appendChild(plateOption);
-
-        // Populate number plate dropdown
-        const featureOption = document.createElement('option');
-        featureOption.value = bus.relationships.features.data;
-        featureOption.textContent =  bus.relationships.features.data;
-        numberPlateDropdown.appendChild(featureOption);
-    });
-    
-    // Event listener for bus selection
-    busDropdown.addEventListener('change', function() {
-        const selectedBusId = this.value;
-        const selectedBus = buses.find(bus => bus.id === selectedBusId);
-        
-        // Update number plate field
-        numberPlateDropdown.value = selectedBus.attributes.number_plate;
-        
-        // Update total seats field
-        totalSeatsInput.value = selectedBus.attributes.total_seats;
-
-        featureDropdown.value = selectedBus.relationships.features.data;
-
-    });
-})
-.catch(error => console.error('Error fetching data:', error));
-
-$('#features-dropdown').select2({
-        placeholder: "Select a Feature",
-});
-
-// Ajax Request to get features
-$.ajax({
-        url: "http://127.0.0.1:8000/api/v1/features/",
-        type: "GET",
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
-        },
-        success: function(response) {
-            console.log("Response:", response);
-            // Check if response contains the data array
-            if (response.data && Array.isArray(response.data)) {
-                // Populate the dropdown with the retrieved features
-                response.data.forEach(function(feature) {
-                    // Access the ID and attributes object of each feature
-                    var featureId = feature.id;
-                    var attributes = feature.attributes;
-                    // Append the feature name and ID to the dropdown
-                    $('#features-dropdown').append('<option value="' + featureId + '">' + attributes.name + '</option>');
-                });
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error fetching features:", error);
-        }
-    });
-
-    $("#trip_create_form").submit(function(e) {
-    e.preventDefault(); // Prevent default form submission
-
-    //$('#tripcreatesubmitButton').val('Submitting');
-
-    // Construct the payload object
-    var payload = {
-        "data": {
-            "type": "TripScheduleCreateView",
-            "attributes": {
-                "bus_type": $("#bus-dropdown").val(),
-                "total_seats": $("#total-seats").val(),
-                "number_plate": $("#number-plate-dropdown").val(),
-                "features": $("#features-dropdown").val() || [], // Get selected features
-                "origin": $("#origin").val(),
-                "destination": $("#destination").val(),
-                "departure_date": $("#departure_date").val(),
-                "departure_time": $("#departure_time").val()
-            }
-        }
-    }
-
-
-    // Convert the payload object to a JSON string
-    var payloadString = JSON.stringify(payload);
-
-    // Iterate through FormData and print out each data individually
-   console.log("payload", payloadString)
-
-    // Send AJAX request
-    $.ajax({
-        url: 'http://127.0.0.1:8000/api/v1/trip-schedules/',
-        type: 'POST',
-        data: payloadString ,
-        contentType: 'application/vnd.api+json',
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken);
-        },
-        success: function(response) {
-            console.log('Success:', response);
-            //$('#tripcreatesubmitButton').val('Submit');
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
-            //$('#tripcreatesubmitButton').val('Submit');
-        }
-    });
-});
-
-})
-</script>
 </html>

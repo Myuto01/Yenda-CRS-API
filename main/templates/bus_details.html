@@ -35,14 +35,26 @@ body {
 
 .booked {
   background-color: red;
+  border: black;
+  border-style: solid;
+}
+
+/* Add this CSS code to define the style for booked seats */
+.seat.booked {
+  background-color: red;
+  cursor: not-allowed; /* Show not-allowed cursor for booked seats */
 }
 
 .available {
-  background-color: green;
+  background-color: white;
+  border: black;
+  border-style: solid;
 }
 
 .your-seat {
   background-color: blue;
+  border: black;
+  border-style: solid;
 }
 
 /* Seat grid styles */
@@ -109,6 +121,14 @@ body {
     <span>Your Seat</span>
   </div>
 
+  <div id="tripDetails">
+    <!-- Trip details will be dynamically generated here -->
+  </div>
+
+  <div id="tripResults">
+    <!-- Trip details will be dynamically generated here -->
+  </div>
+
   <div class="seatGrid" id="seatGrid">
     <!-- Seats will be dynamically generated here -->
   </div>
@@ -122,70 +142,110 @@ body {
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
-        $(document).ready(function() {
-            // Get trip ID from query parameter
-            var urlParams = new URLSearchParams(window.location.search);
-            var tripId = urlParams.get('id');
-            const selectedSeats = [];
+    $(document).ready(function() {
+      // Retrieve trip data
+      var tripsData = JSON.parse(localStorage.getItem('tripResults'));
 
-            // Fetch trip details based on trip ID
-            $.ajax({
-                url: "api/v1/bus-details/" + tripId,
-                type: "GET",
-                contentType: "application/json",
-                success: function(response) {
-                    console.log("Trip details:", response);
+      // Check if tripsData contains the 'data' key
+      if ('data' in tripsData && Array.isArray(tripsData.data)) {
+        var tripResultsList = $("#tripResults");
+        tripsData.data.forEach(function(trip) {
+          var listItem = $("<li></li>");
+          var link = $("<a></a>")
+            .text(trip.attributes.origin + " to " + trip.attributes.destination + " - " + trip.attributes.departure_date + " " + trip.attributes.departure_time)
+          var details = $("<p></p>")
+            .text("Company: " + trip.attributes.user.company_name + ", Price: " + trip.attributes.price +  ", Date: " + trip.attributes.departure_date + ", Time: " + trip.attributes.departure_time);
 
-                    // Display trip details
-                    var tripDetailsDiv = $("#tripDetails");
-                    tripDetailsDiv.append("<p>Bus Type: " + response.data.bus.bus_type + "</p>");
-                    tripDetailsDiv.append("<p>Total Seats: " + response.data.bus.total_seats + "</p>");
-                    tripDetailsDiv.append("<p>Number Plate: " + response.data.bus.number_plate + "</p>");
-                    tripDetailsDiv.append("<p>Available Seats: " + response.data.available_seats + "</p>");
-                    
-                    const totalSeats = response.data.bus.total_seats;
+          var featuresList = $("<ul></ul>");
+          trip.attributes.bus.features.forEach(function(feature) {
+            featuresList.append($("<li></li>").text(feature.name));
+          });
 
-                    // Generate seats dynamically
-                    for (let i = 1; i <= totalSeats; i++) {
-                        const seat = document.createElement('div');
-                        seat.className = 'seat';
-                        seat.textContent = i;
-                        seatGrid.appendChild(seat);
-                        seat.addEventListener('click', function() {
-                        // Toggle seat selection
-                        if (selectedSeats.includes(i)) {
-                            // Seat is already selected, deselect it
-                            const index = selectedSeats.indexOf(i);
-                            selectedSeats.splice(index, 1);
-                            seat.classList.remove('selected');
-                        } else {
-                            // Seat is not selected, select it
-                            selectedSeats.push(i);
-                            seat.classList.add('selected');
-                        }
-                        });
-                    }
-
-                    },
-                error: function(xhr, status, error) {
-                    console.error("Error fetching trip details:", error);
-                }
-            });
-            // Show modal when no seat is selected
-            confirmButton.addEventListener('click', function() {
-                if (selectedSeats.length === 0) {
-                modal.style.display = 'block';
-                } else {
-                // Save selected seats to localStorage
-                localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
-
-                // Proceed to passenger details page
-                window.location.href = '{% url 'enter-passenger-details' %}';
-                }
-            });
-
-            ;
+          listItem.append(link);
+          listItem.append(details);
+          listItem.append(featuresList);
+          tripResultsList.append(listItem);
         });
-    </script>
+      } else {
+        // Handle case where tripsData does not have 'data' key or it is not an array
+        console.error("The 'data' key is missing or not an array in tripsData:", tripsData);
+      }
+
+      // Get trip ID from query parameter
+      var urlParams = new URLSearchParams(window.location.search);
+      var tripId = urlParams.get('id');
+      const selectedSeats = [];
+      const confirmButton = document.getElementById('confirmButton');
+      const closeModal = document.getElementsByClassName('close')[0];
+
+      // Fetch trip details based on trip ID
+      $.ajax({
+    url: "api/v1/bus-details/" + tripId, // Replace tripId with the actual trip ID
+    type: "GET",
+    contentType: "application/json",
+    success: function(response) {
+      console.log("Trip details:", response);
+
+      // Display trip details
+      var tripDetailsDiv = $("#tripDetails");
+      tripDetailsDiv.append("<p>Available Seats: " + response.data.available_seats + "</p>");
+
+      const totalSeats = response.data.bus.total_seats;
+      const bookedSeats = response.data.booked_seats;
+
+      // Generate seats dynamically
+      for (let i = 1; i <= totalSeats; i++) {
+        const seat = document.createElement('div');
+        seat.className = 'seat';
+        seat.textContent = i;
+        
+        // Check if the seat is booked
+        if (bookedSeats.includes(i)) {
+          seat.classList.add('booked');
+          seat.disabled = true; // Disable selection for booked seats
+        }
+        
+        seatGrid.appendChild(seat);
+        
+        seat.addEventListener('click', function() {
+          // Toggle seat selection
+          if (!seat.classList.contains('booked')) {
+            if (selectedSeats.includes(i)) {
+              // Seat is already selected, deselect it
+              const index = selectedSeats.indexOf(i);
+              selectedSeats.splice(index, 1);
+              seat.classList.remove('selected');
+            } else {
+              // Seat is not selected, select it
+              selectedSeats.push(i);
+              seat.classList.add('selected');
+            }
+          }
+        });
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error("Error fetching trip details:", error);
+    }
+  });
+
+      // Show modal when no seat is selected
+      confirmButton.addEventListener('click', function() {
+        if (selectedSeats.length === 0) {
+          modal.style.display = 'block';
+        } else {
+          // Save selected seats to localStorage
+          localStorage.setItem('selectedSeats', JSON.stringify(selectedSeats));
+
+          // Proceed to passenger details page
+          window.location.href = '{% url 'enter-passenger-details' %}';
+        }
+      });
+
+      // Close modal
+      closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+      });
+    });
+  </script>
 </body>
-</html>
