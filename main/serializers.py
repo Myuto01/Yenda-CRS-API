@@ -195,6 +195,7 @@ class TripSubmissionSerializer(serializers.ModelSerializer):
         fields = [
             'trip_id',
             'bus_id',
+            'buyer_user_id',
             'passenger_name',
             'passenger_phonenumber',
             'passenger_email',
@@ -204,7 +205,7 @@ class TripSubmissionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Extract the bus instance from validated data
         bus = validated_data.get('bus')
-
+                
         # Extract seat numbers from validated data
         seat_numbers = validated_data.get('seat_number')
 
