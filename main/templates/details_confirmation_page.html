@@ -35,14 +35,15 @@
 
     <div id="passengerDetails"></div>
 
-    <button id="submitButton">Submit</button> <!-- Submit button -->
-
+    <button id="submitButton" style="display: none;">Submit</button> 
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
 
             const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NjU3NzgxLCJpYXQiOjE3MTM5Mjk3ODEsImp0aSI6IjY2ZmZiNjQ1ZTQ4ZjRkMzJhNmQ4ODQ1ZDE3MzY5ODc2IiwidXNlcl9pZCI6MTF9.7fm6g3lbrL_Y_nd12XaLsuWqCK6QTY-BgflTWrh4Ays"
            
+            // Initializing the buyer user Id
             var buyer_user_id;
 
             $.ajax({
@@ -55,6 +56,8 @@
                 success: function(response) {
                     console.log('User ID:', response.data.user_id);
                     buyer_user_id = response.data.user_id
+                    $('#submitButton').show();
+
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
@@ -76,9 +79,11 @@
                 var passengerPhoneNumbers = [];
                 var passengerEmails = [];
                 var seatNumbers = [];
+                var formDataKeysToRemove = []; // Declare a global array to store formDataKeys
 
                 selectedSeats.forEach(function(seat) {
                     const formDataKey = 'passengerDetails_' + seat;
+                    formDataKeysToRemove.push(formDataKey); // Store formDataKey in the global array
                     const formData = JSON.parse(localStorage.getItem(formDataKey));
                     if (formData) {
                         const parsedFormData = decodeURIComponent(formData.replace(/\+/g, ' ')); // Decode form data
@@ -98,7 +103,7 @@
             }
 
 
-            var trip; // Declare trip variable outside the loop
+    var trip; // Declare trip variable outside the loop
 
     // Retrieve trip data
     var tripsData = JSON.parse(localStorage.getItem('tripResults'));
@@ -163,7 +168,14 @@
             data: formDataString,
             success: function(response) {
                 console.log('Form submitted successfully:', response);
-                // Handle success response
+
+                localStorage.removeItem('tripResults'); 
+                localStorage.removeItem('selectedSeats'); 
+                formDataKeysToRemove.forEach(function(formDataKey) {
+                            localStorage.removeItem(formDataKey);
+                        });
+
+                window.location.href = '{% url 'home' %}';
             },
             error: function(xhr, status, error) {
                 console.error('Error submitting form:', error);

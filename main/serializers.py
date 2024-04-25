@@ -216,6 +216,11 @@ class TripSubmissionSerializer(serializers.ModelSerializer):
             seat.is_booked = True
             seat.save()
 
+        buyer_user_id = validated_data.get('buyer_user_id')
+
+        if not buyer_user_id:
+            raise serializers.ValidationError("Invalid User.")
+
         # Update the active boolean to True
         validated_data['active']=True
 
@@ -226,7 +231,7 @@ class TicketSerializer(serializers.ModelSerializer):
 
     bus = BusSerializer()
     trip = TripScheduleSerializer()
-    
+
     class Meta:
         model = Ticket
         fields = '__all__'
