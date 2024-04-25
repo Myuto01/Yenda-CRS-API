@@ -200,6 +200,7 @@ class TripSubmissionSerializer(serializers.ModelSerializer):
             'passenger_phonenumber',
             'passenger_email',
             'seat_number',
+            'active',
         ]
 
     def create(self, validated_data):
@@ -215,5 +216,17 @@ class TripSubmissionSerializer(serializers.ModelSerializer):
             seat.is_booked = True
             seat.save()
 
-        # Call the superclass's create method to create the Ticket instance
+        # Update the active boolean to True
+        validated_data['active']=True
+
+        # Call the supercla ss's create method to create the Ticket instance
         return super().create(validated_data)
+
+class TicketSerializer(serializers.ModelSerializer):
+
+    bus = BusSerializer()
+    trip = TripScheduleSerializer()
+    
+    class Meta:
+        model = Ticket
+        fields = '__all__'

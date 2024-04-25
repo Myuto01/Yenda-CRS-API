@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Details Page</title>
+</head>
+<body>
+  <div id="detailsContainer">
+    <!-- Details will be dynamically rendered here -->
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Get the user_id from the query parameter in the URL
+      var user_id = new URLSearchParams(window.location.search).get('user_id');
+      
+      // Fetch details based on the user_id
+      $.ajax({
+            url: '/api/v1/ticket-details/?buyer_user_id=' + user_id,
+            type: 'GET',
+            success: function(response) {
+                // Render details on the page
+                var detailsHtml = '<h1>User Details</h1>';
+                
+                // Iterate over the data array
+                response.data.forEach(function(ticket) {
+                    var attributes = ticket.attributes;
+                    console.log('attributes', attributes)
+                    // Extract ticket details
+                    var companyName = attributes.trip.user.company_name
+                    var tripTime = attributes.trip.departure_time
+                    var tripOrigin = attributes.trip.origin
+                    var tripDestination = attributes.trip.destination
+                    var busTripNumberPlate = attributes.bus.number_plate
+                    var tripPrice = attributes.trip.price
+                    var passengerName = attributes.passenger_name.replace(/[\[\]']+/g, '');;
+                    var passengerPhoneNumber = attributes.passenger_phonenumber.replace(/[\[\]']+/g, '');;
+                    var passengerEmail = attributes.passenger_email.replace(/[\[\]']+/g, '');;
+                    var seatNumber = attributes.seat_number.replace(/[\[\]']+/g, '');;
+                    
+                    // Build HTML for each ticket
+                    detailsHtml += '<div class="ticket-details">';
+                    detailsHtml += '<p>Company Name: ' + companyName + '</p>';
+                    detailsHtml += '<p>Time: ' + tripTime + '</p>';
+                    detailsHtml += '<p>Origin: ' + tripOrigin + '</p>';
+                    detailsHtml += '<p>Destination: ' + tripDestination + '</p>';
+                    detailsHtml += '<p>Passenger Name: ' + passengerName + '</p>';
+                    detailsHtml += '<p>Number Plate: ' + busTripNumberPlate + '</p>';
+                    detailsHtml += '<p>Price: ' + tripPrice + '</p>';
+                    detailsHtml += '<p>Phone Number: ' + passengerPhoneNumber + '</p>';
+                    detailsHtml += '<p>Email: ' + passengerEmail + '</p>';
+                    detailsHtml += '<p>Seat Number: ' + seatNumber + '</p>';
+                    detailsHtml += '</div>';
+                });
+
+                // Add ticket details HTML to the container
+                $('#detailsContainer').html(detailsHtml);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+  </script>
+</body>
+</html>

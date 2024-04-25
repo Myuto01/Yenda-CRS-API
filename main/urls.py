@@ -15,12 +15,14 @@ urlpatterns = [
     path('api/v1/create-features/', views.FeatureCreateAPIView.as_view(), name='feature-create'),
     path('api/v1/bus-list/', views.BusListView.as_view(), name='bus-list'),
     path('api/v1/create-driver-details/', views.CreateDriverDetailsAPIView.as_view(), name='create-driver-details'),
-    path('bus_details.html', views.bus_details_view, name='bus_details'),
     path('api/v1/trip-submission/', views.TripSubmissionAPIView.as_view(), name='trip-submission'),
+    path('api/v1/ticket-details/', views.TicketDetailsAPIView.as_view(), name='ticket-details'),
 
-    #Remove
+
     
-    path('test/', views.test_view, name="test"),
+    #Remove
+    path('home/', views.home_view, name='home'),
+    path('test/', views.test_view, name="test"), # CReate Bus
     path('trip-create/', views.trip_create_view, name="trip-create-view"),
     path('create-driver/', views.create_driver_details, name="create-driver"),
     path('trip-search/', views.trip_search, name="trip-search"),
@@ -28,5 +30,7 @@ urlpatterns = [
     path('bus-details/', views.bus_details_view, name="bus-details"),
     path('enter-passenger-details/', views.enter_passenger_details_view, name="enter-passenger-details"),
     path('confirm-details', views.confirm_passenger_details_view, name='confirm-details'),
+    path('tickets.html', views.tickets_view, name='tickets'),
+    path('bus_details.html', views.bus_details_view, name='bus_details'),
 
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

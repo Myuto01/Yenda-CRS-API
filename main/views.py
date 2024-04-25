@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from json import JSONDecodeError
 from rest_framework import views, status, renderers, generics
-from .models import User, TripSchedule, Bus, Feature, DriverDetails, Seat
+from .models import User, TripSchedule, Bus, Feature, DriverDetails, Seat, Ticket
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer, CreateDriverDetailsSerializer, TripSubmissionSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer, CreateDriverDetailsSerializer, TripSubmissionSerializer, TicketSerializer
 from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number
 from .permissions import AllowAnyPermission
 from twilio.rest import Client
@@ -22,6 +22,10 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.decorators import  permission_classes
 
 #Remove
+
+def home_view(request):
+    return render(request, 'home.html')
+
 def test_view(request): #Bus Creation  View
     return render(request, 'test.html')
 
@@ -45,6 +49,9 @@ def enter_passenger_details_view(request):
 
 def confirm_passenger_details_view(request):
     return render(request, 'details_confirmation_page.html')
+
+def tickets_view(request):
+    return render(request, 'tickets.html')
 
 ##############################################################################
 
@@ -437,4 +444,16 @@ class TripSubmissionAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TicketDetailsAPIView(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        buyer_user_id = request.GET.get('buyer_user_id')
+        ticket_details_for_user = Ticket.objects.filter(buyer_user_id=buyer_user_id)
+        serializer = TicketSerializer(ticket_details_for_user, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
