@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+</head>
+<body>
+    <video id="video" width="100%" height="100%" autoplay></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let qrCodeData = '';
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function(err) {
+                console.error('Error accessing camera:', err);
+            });
+
+        video.addEventListener('canplay', function() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            setInterval(decodeQRCode, 100);
+        });
+
+        function decodeQRCode() {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            if (code) {
+                qrCodeData = code.data;
+                console.log('QR Code Data:', qrCodeData);
+                // Call a function to handle the QR code data
+                handleQRCodeData(qrCodeData);
+            }
+        }
+
+        function handleQRCodeData(data) {
+            // Here you can send the QR code data to the server via AJAX
+            // Example AJAX request using jQuery
+            $.ajax({
+                url: 'api/v1/verify_ticket/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ qr_data: data }),
+                success: function(response) {
+                    console.log('Server Response:', response);
+                    // Handle the response from the server
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    // Handle the error
+                }
+            });
+        }
+    </script>
+</body>
+</html>

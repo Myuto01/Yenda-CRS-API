@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        /* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+    </style>
+</head>
+<body>
+    <h4>Profile Picture Edit</h4>
+    <h4>User name from localStorage</h4>
+    <h4>User's number from localStorage</h4>
+
+    <button id="changeNameButton">Change Name</button>
+
+    <!-- The modal -->
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <form id="nameChangeForm">
+          <label for="newName">New Name:</label>
+          <input type="text" id="newName" name="newName">
+          <label for="newName">New Last Name:</label>
+          <input type="text" id="newLastName" name="newLastName">
+          <input type="submit" value="Submit" id="newNameSubmit">
+        </form>
+      </div>
+    </div>
+    
+    
+    <button id="changeNumberButton">Change Number</button>
+
+    <!-- The modal -->
+    <div id="changeNumberModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <form id="numberChangeForm">
+            <label for="newName">New Number:</label>
+            <input type="text" id="newNumber" name="newNumber">
+            <input type="submit" value="Submit" id="newNumberSubmit">
+          </form>
+        </div>
+      </div>
+
+    <button>Change Password</button>
+    <button>Deactivate Account</button>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("changeNameButton");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal
+btn.onclick = function() {
+  modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+
+// Change Phone Number Modal
+// Get the modal
+var modal = document.getElementById("changeNumberModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("changeNumberButton");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal
+btn.onclick = function() {
+  modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+
+
+
+
+
+// Handle form submission
+$("#nameChangeForm").submit(function(e) {
+  event.preventDefault(); // Prevent default form submission
+
+  const access_Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NjU3NzgxLCJpYXQiOjE3MTM5Mjk3ODEsImp0aSI6IjY2ZmZiNjQ1ZTQ4ZjRkMzJhNmQ4ODQ1ZDE3MzY5ODc2IiwidXNlcl9pZCI6MTF9.7fm6g3lbrL_Y_nd12XaLsuWqCK6QTY-BgflTWrh4Ays"
+
+    // Create an empty payload object
+    var payload = {};
+
+    // Get the values from the form fields
+    var newName = $("#newName").val().trim(); // Trim to remove leading/trailing spaces
+    var newLastName = $("#newLastName").val().trim(); // Trim to remove leading/trailing spaces
+    var NewNumber = $("newNumber")
+    
+    // Add the values to the payload only if they are not empty and are valid strings
+    if (newName !== "") {
+        payload["first_name"] = newName;
+    }
+
+    if (newLastName !== "") {
+        payload["last_name"] = newLastName;
+    }
+
+    if (NewNumber !== "") {
+        payload["phone_number"] = NewNumber;
+    }
+
+    var payloadString = JSON.stringify(payload);
+    
+    console.log('data sent:', payloadString)
+    
+    // AJAX request
+    $.ajax({
+        url: "https://yenda-app-api.onrender.com/user/11/update/",
+        type: "PUT",
+        data: payloadString,
+        contentType: "application/json",
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("Authorization", "Bearer " + access_Token);
+        },
+        success: function(response) {
+        // Handle success
+        console.log("Name changed successfully:", response);
+        modal.style.display = "none"; // Close the modal
+        },
+        error: function(xhr, status, error) {
+        // Handle error
+        console.error("Error changing name:", error);
+        }
+    });
+});
+
+</script>
+
+
+</body>
+</html>

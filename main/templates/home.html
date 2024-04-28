@@ -6,14 +6,25 @@
     <title>Document</title>
 </head>
 <body>
+
     <button id="viewDetailsButton">Tickets</button>
+
+    <button id="profileButton">Profile</button>
+
 </body>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
+    // Check for access token and user information in localStorage
+    const accessToken = localStorage.getItem("access_token");
+
+    // Redirect to login if no access token or user information
+    if (!accessToken ) {
+    window.location.href = "{% url 'login' %}";
+    return; // Exit the function if redirected
+    }
 $(document).ready(function() {
 
-    const access_Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NjU3NzgxLCJpYXQiOjE3MTM5Mjk3ODEsImp0aSI6IjY2ZmZiNjQ1ZTQ4ZjRkMzJhNmQ4ODQ1ZDE3MzY5ODc2IiwidXNlcl9pZCI6MTF9.7fm6g3lbrL_Y_nd12XaLsuWqCK6QTY-BgflTWrh4Ays"
         
     var buyer_user_id;
         $('#viewDetailsButton').on('click', function() {
@@ -22,7 +33,7 @@ $(document).ready(function() {
             type: 'GET',
             contentType: "application/json",
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "Bearer " + access_Token);
+                xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
             },
             success: function(response) {
                 var buyer_user_id = response.data.user_id;
@@ -35,6 +46,12 @@ $(document).ready(function() {
             }
         });
     });
+
+    document.getElementById("profileButton").addEventListener("click", function() {
+        // Redirect the user to the desired URL
+        window.location.href = "/profile/";
+    });
+
 });
 </script>
 </html>

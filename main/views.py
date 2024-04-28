@@ -53,6 +53,15 @@ def confirm_passenger_details_view(request):
 def tickets_view(request):
     return render(request, 'tickets.html')
 
+def profile_view(request):
+    return render(request, 'profile.html')
+    
+def account_details_view(request):
+    return render(request, 'account_details.html')
+
+def qr_code_scanner_view(request):
+    return render(request, 'qr_code_scanner.html')
+
 ##############################################################################
 
 class RegistrationAPIView(APIView):
@@ -453,7 +462,55 @@ class TicketDetailsAPIView(APIView):
 
     def get(self, request):
         buyer_user_id = request.GET.get('buyer_user_id')
-        ticket_details_for_user = Ticket.objects.filter(buyer_user_id=buyer_user_id)
+        ticket_details_for_user = Ticket.objects.filter(buyer_user_id=buyer_user_id, active=True)
         serializer = TicketSerializer(ticket_details_for_user, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class InactiveTicketDetailsAPIView(APIView):
+    
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        buyer_user_id = request.GET.get('buyer_user_id')
+        ticket_details_for_user = Ticket.objects.filter(buyer_user_id=buyer_user_id, active=False)
+        serializer = TicketSerializer(ticket_details_for_user, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class VerifyTicket(APIView):
+    def post(self, request):
+        # Extract QR code data from the request
+        qr_data = request.data.get('qr_data')
+
+        # Validate and verify ticket based on QR code data
+        try:
+            ticket = Ticket.objects.get(qr_code=qr_data)
+
+            # Perform additional verification logic here if needed
+            # For example: Check if the ticket is valid, hasn't been used, etc.
+
+            # If ticket is verified, return ticket details
+            ticket_details = {
+                'trip_id': ticket.trip_id,
+                'bus_id': ticket.bus_id,
+                'passenger_name': ticket.passenger_name,
+                'seat_number': ticket.seat_number,
+                # Add more ticket details as needed
+            }
+            return Response({'verified': True, 'ticket_details': ticket_details})
+        except Ticket.DoesNotExist:
+            # Ticket not found or verification failed
+            return Response({'verified': False, 'error': 'Ticket not found or invalid'})
+
+"""
+class TicketDetailsAPIView(APIView):
+    
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        buyer_user_id = request.GET.get('buyer_user_id')
+        ticket_details_for_user = Ticket.objects.filter(buyer_user_id=buyer_user_id).first()
+        serializer = TicketSerializer(ticket_details_for_user, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+"""

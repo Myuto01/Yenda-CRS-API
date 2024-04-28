@@ -16,10 +16,15 @@
             <input type="submit" value="submit" id="tripsearchsubmitButton">
             
         </form>
+
+        <br><br>
+        
+        <button id="viewDetailsButton">Tickets</button>
+
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
+        $(document).ready(function() {
 
             $("#trip_search_form").submit(function(e) {
                 e.preventDefault(); // Prevent default form submission
@@ -52,6 +57,30 @@
                     }
                 });
             });
+        
+        // Tickets Button 
+        const access_Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NjU3NzgxLCJpYXQiOjE3MTM5Mjk3ODEsImp0aSI6IjY2ZmZiNjQ1ZTQ4ZjRkMzJhNmQ4ODQ1ZDE3MzY5ODc2IiwidXNlcl9pZCI6MTF9.7fm6g3lbrL_Y_nd12XaLsuWqCK6QTY-BgflTWrh4Ays"
+        
+        var buyer_user_id;
+            $('#viewDetailsButton').on('click', function() {
+                $.ajax({
+                url: 'https://yenda-app-api.onrender.com/api/v1/user_id',
+                type: 'GET',
+                contentType: "application/json",
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + access_Token);
+                },
+                success: function(response) {
+                    var buyer_user_id = response.data.user_id;
+                    // Redirect to the details page with the user_id as a query parameter
+                    console.log(window.location.origin + '/tickets.html?user_id=' + buyer_user_id);
+                    window.location.href = window.location.origin + '/tickets.html?user_id=' + buyer_user_id;
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
 });
 </script>
 </html>

@@ -7,6 +7,9 @@ from phonenumber_field.modelfields import PhoneNumberField
 import datetime
 from datetime import time
 import random
+import qrcode
+from io import BytesIO
+from django.core.files import File
 
 def profile_pics_upload_path(instance, filename):
     # Upload to "citizen_id/username/front" or "citizen_id/username/back"
@@ -124,3 +127,26 @@ class Ticket(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     is_used = models.BooleanField(default=False)
     buyer_user_id = models.IntegerField(default=0)
+    qr_code = models.ImageField(upload_to='qr_codes/', blank=True)
+
+    def save(self, *args, **kwargs):
+        # Generate QR code data
+        qr_data = f"Trip: {self.trip}, Bus: {self.bus}, Passenger Name: {self.passenger_name}, Seat Number: {self.seat_number}"
+        
+        # Generate QR code image
+        qr = qrcode.make(qr_data)
+
+        # Create a BytesIO object to hold the image data
+        img_io = BytesIO()
+
+        # Save the image to the BytesIO object in JPEG format
+        qr.save(img_io, 'JPEG')
+
+        # Set the position to the beginning of the stream
+        img_io.seek(0)
+
+        # Set the QR code image field with the BytesIO object
+        # This will save the image to the field
+        self.qr_code.save(f'qr_code_{self.pk}.jpg', File(img_io), save=False)
+
+        super().save(*args, **kwargs)

@@ -17,7 +17,8 @@ urlpatterns = [
     path('api/v1/create-driver-details/', views.CreateDriverDetailsAPIView.as_view(), name='create-driver-details'),
     path('api/v1/trip-submission/', views.TripSubmissionAPIView.as_view(), name='trip-submission'),
     path('api/v1/ticket-details/', views.TicketDetailsAPIView.as_view(), name='ticket-details'),
-
+    path('api/v1/inactive-ticket-details/', views.InactiveTicketDetailsAPIView.as_view(), name='inactive-ticket-details'),
+    path('api/v1/verify_ticket/', views.VerifyTicket.as_view(), name='verify_ticket'),
 
     
     #Remove
@@ -32,5 +33,9 @@ urlpatterns = [
     path('confirm-details', views.confirm_passenger_details_view, name='confirm-details'),
     path('tickets.html', views.tickets_view, name='tickets'),
     path('bus_details.html', views.bus_details_view, name='bus_details'),
+    path('profile/', views.profile_view, name='profile'),
+    path('account-details/', views.account_details_view, name='account-details'),
+   
+    path('qr-code-scanner/', views.qr_code_scanner_view, name='qr-code-scanner')
 
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

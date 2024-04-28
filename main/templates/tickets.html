@@ -6,6 +6,12 @@
   <title>Details Page</title>
 </head>
 <body>
+ 
+
+  <!-- Buttons to render different pages -->
+  <button id="renderCurrentPage">Render Current Page</button>
+  <button id="renderOtherPage">Render Other Page</button>
+
   <div id="detailsContainer">
     <!-- Details will be dynamically rendered here -->
   </div>
@@ -13,55 +19,107 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
     $(document).ready(function() {
-      // Get the user_id from the query parameter in the URL
-      var user_id = new URLSearchParams(window.location.search).get('user_id');
-      
-      // Fetch details based on the user_id
-      $.ajax({
-            url: '/api/v1/ticket-details/?buyer_user_id=' + user_id,
-            type: 'GET',
-            success: function(response) {
-                // Render details on the page
-                var detailsHtml = '<h1>User Details</h1>';
-                
-                // Iterate over the data array
-                response.data.forEach(function(ticket) {
-                    var attributes = ticket.attributes;
-                    console.log('attributes', attributes)
-                    // Extract ticket details
-                    var companyName = attributes.trip.user.company_name
-                    var tripTime = attributes.trip.departure_time
-                    var tripOrigin = attributes.trip.origin
-                    var tripDestination = attributes.trip.destination
-                    var busTripNumberPlate = attributes.bus.number_plate
-                    var tripPrice = attributes.trip.price
-                    var passengerName = attributes.passenger_name.replace(/[\[\]']+/g, '');;
-                    var passengerPhoneNumber = attributes.passenger_phonenumber.replace(/[\[\]']+/g, '');;
-                    var passengerEmail = attributes.passenger_email.replace(/[\[\]']+/g, '');;
-                    var seatNumber = attributes.seat_number.replace(/[\[\]']+/g, '');;
-                    
-                    // Build HTML for each ticket
-                    detailsHtml += '<div class="ticket-details">';
-                    detailsHtml += '<p>Company Name: ' + companyName + '</p>';
-                    detailsHtml += '<p>Time: ' + tripTime + '</p>';
-                    detailsHtml += '<p>Origin: ' + tripOrigin + '</p>';
-                    detailsHtml += '<p>Destination: ' + tripDestination + '</p>';
-                    detailsHtml += '<p>Passenger Name: ' + passengerName + '</p>';
-                    detailsHtml += '<p>Number Plate: ' + busTripNumberPlate + '</p>';
-                    detailsHtml += '<p>Price: ' + tripPrice + '</p>';
-                    detailsHtml += '<p>Phone Number: ' + passengerPhoneNumber + '</p>';
-                    detailsHtml += '<p>Email: ' + passengerEmail + '</p>';
-                    detailsHtml += '<p>Seat Number: ' + seatNumber + '</p>';
-                    detailsHtml += '</div>';
-                });
+      // Function to render the current page
+      function renderCurrentPage() {
+        var user_id = new URLSearchParams(window.location.search).get('user_id');
+        $.ajax({
+          url: '/api/v1/ticket-details/?buyer_user_id=' + user_id,
+          type: 'GET',
+          success: function(response) {
+            // Render details on the page
+            var detailsHtml = '<h1>User Details</h1>';
+            response.data.forEach(function(ticket) {
+              var attributes = ticket.attributes;
+              var companyName = attributes.trip.user.company_name;
+              var tripTime = attributes.trip.departure_time;
+              var tripOrigin = attributes.trip.origin;
+              var tripDestination = attributes.trip.destination;
+              var busTripNumberPlate = attributes.bus.number_plate;
+              var tripPrice = attributes.trip.price;
+              var passengerName = attributes.passenger_name.replace(/[\[\]']+/g, '');
+              var passengerPhoneNumber = attributes.passenger_phonenumber.replace(/[\[\]']+/g, '');
+              var passengerEmail = attributes.passenger_email.replace(/[\[\]']+/g, '');
+              var seatNumber = attributes.seat_number.replace(/[\[\]']+/g, '');
 
-                // Add ticket details HTML to the container
-                $('#detailsContainer').html(detailsHtml);
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-            }
+              detailsHtml += '<div class="ticket-details">';
+              detailsHtml += '<p>Company Name: ' + companyName + '</p>';
+              detailsHtml += '<p>Time: ' + tripTime + '</p>';
+              detailsHtml += '<p>Origin: ' + tripOrigin + '</p>';
+              detailsHtml += '<p>Destination: ' + tripDestination + '</p>';
+              detailsHtml += '<p>Passenger Name: ' + passengerName + '</p>';
+              detailsHtml += '<p>Number Plate: ' + busTripNumberPlate + '</p>';
+              detailsHtml += '<p>Price: ' + tripPrice + '</p>';
+              detailsHtml += '<p>Phone Number: ' + passengerPhoneNumber + '</p>';
+              detailsHtml += '<p>Email: ' + passengerEmail + '</p>';
+              detailsHtml += '<p>Seat Number: ' + seatNumber + '</p>';
+              detailsHtml += '</div>';
+            });
+            $('#detailsContainer').html(detailsHtml);
+          },
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
+          }
         });
+      }
+
+      // Function to render the other page
+      function renderOtherPage() {
+        var user_id = new URLSearchParams(window.location.search).get('user_id');
+        $.ajax({
+          url: '/api/v1/inactive-ticket-details/?buyer_user_id=' + user_id,
+          type: 'GET',
+          success: function(response) {
+            // Render details on the other page
+            // You can customize this part based on the response from the other API
+            console.log('Render details from other page:', response);
+            // Render details on the page
+            var detailsHtml = '<h1>User Details</h1>';
+            response.data.forEach(function(ticket) {
+              var attributes = ticket.attributes;
+              var companyName = attributes.trip.user.company_name;
+              var tripTime = attributes.trip.departure_time;
+              var tripOrigin = attributes.trip.origin;
+              var tripDestination = attributes.trip.destination;
+              var busTripNumberPlate = attributes.bus.number_plate;
+              var tripPrice = attributes.trip.price;
+              var passengerName = attributes.passenger_name.replace(/[\[\]']+/g, '');
+              var passengerPhoneNumber = attributes.passenger_phonenumber.replace(/[\[\]']+/g, '');
+              var passengerEmail = attributes.passenger_email.replace(/[\[\]']+/g, '');
+              var seatNumber = attributes.seat_number.replace(/[\[\]']+/g, '');
+
+              detailsHtml += '<div class="ticket-details">';
+              detailsHtml += '<p>Company Name: ' + companyName + '</p>';
+              detailsHtml += '<p>Time: ' + tripTime + '</p>';
+              detailsHtml += '<p>Origin: ' + tripOrigin + '</p>';
+              detailsHtml += '<p>Destination: ' + tripDestination + '</p>';
+              detailsHtml += '<p>Passenger Name: ' + passengerName + '</p>';
+              detailsHtml += '<p>Number Plate: ' + busTripNumberPlate + '</p>';
+              detailsHtml += '<p>Price: ' + tripPrice + '</p>';
+              detailsHtml += '<p>Phone Number: ' + passengerPhoneNumber + '</p>';
+              detailsHtml += '<p>Email: ' + passengerEmail + '</p>';
+              detailsHtml += '<p>Seat Number: ' + seatNumber + '</p>';
+              detailsHtml += '</div>';
+            });
+            $('#detailsContainer').html(detailsHtml);
+          },
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
+          }
+        });
+      }
+
+      // Event listener for rendering the current page button
+      $('#renderCurrentPage').click(function() {
+        renderCurrentPage();
+      });
+
+      // Event listener for rendering the other page button
+      $('#renderOtherPage').click(function() {
+        renderOtherPage();
+      });
+
+      // Initial render (you can change this based on your requirements)
+      renderCurrentPage();
     });
   </script>
 </body>
