@@ -130,8 +130,8 @@ class Ticket(models.Model):
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True)
 
     def save(self, *args, **kwargs):
-        # Generate QR code data
-        qr_data = f"Trip: {self.trip}, Bus: {self.bus}, Passenger Name: {self.passenger_name}, Seat Number: {self.seat_number}"
+        # Construct QR code data
+        qr_data = f"Trip: {self.trip}, Bus: {self.bus}, Number Plate: {self.bus.number_plate}, Origin: {self.trip.origin}, Destination: {self.trip.destination}, Departure Date: {self.trip.departure_date}, Departure Time: {self.trip.departure_time}, Passenger Name: {self.passenger_name}, Seat Number: {self.seat_number}"
         
         # Generate QR code image
         qr = qrcode.make(qr_data)
@@ -146,7 +146,7 @@ class Ticket(models.Model):
         img_io.seek(0)
 
         # Set the QR code image field with the BytesIO object
-        # This will save the image to the field
         self.qr_code.save(f'qr_code_{self.pk}.jpg', File(img_io), save=False)
 
         super().save(*args, **kwargs)
+

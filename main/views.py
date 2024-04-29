@@ -484,26 +484,27 @@ class InactiveTicketDetailsAPIView(APIView):
 
 class VerifyTicket(APIView):
 
-    authentication_classes = []
-    permission_classes = []
-    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         # Extract QR code data from the request
         qr_data = request.data.get('qr_data')
+        print("qr_data:", qr_data)
 
         # Validate and verify ticket based on QR code data
         try:
             ticket = Ticket.objects.get(qr_code=qr_data)
-
-            # Perform additional verification logic here if needed
-            # For example: Check if the ticket is valid, hasn't been used, etc.
+            print("Ticket:", ticket)
+            
+            # Additional verification logic if needed
 
             # If ticket is verified, return ticket details
             ticket_details = {
                 'trip_id': ticket.trip_id,
                 'bus_id': ticket.bus_id,
-                'passenger_name': ticket.passenger_name,
-                'seat_number': ticket.seat_number,
+                'passenger_names': ticket.passenger_name.split(', '),  # Split passenger names into a list
+                'seat_numbers': ticket.seat_number.split(', '),  # Split seat numbers into a list
                 # Add more ticket details as needed
             }
             return Response({'verified': True, 'ticket_details': ticket_details})
