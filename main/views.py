@@ -483,6 +483,10 @@ class InactiveTicketDetailsAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class VerifyTicket(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+    
     def post(self, request):
         # Extract QR code data from the request
         qr_data = request.data.get('qr_data')
