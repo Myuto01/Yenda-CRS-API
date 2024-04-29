@@ -22,6 +22,7 @@ urlpatterns = [
 
     
     #Remove
+    path('login/', views    .login_view, name='login'),
     path('home/', views.home_view, name='home'),
     path('test/', views.test_view, name="test"), # CReate Bus
     path('trip-create/', views.trip_create_view, name="trip-create-view"),
@@ -36,6 +37,6 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('account-details/', views.account_details_view, name='account-details'),
    
-    path('qr-code-scanner/', views.qr_code_scanner_view, name='qr-code-scanner')
+    path('qr-coBde-scanner/', views.qr_code_scanner_view, name='qr-code-scanner')
 
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

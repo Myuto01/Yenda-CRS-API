@@ -23,6 +23,9 @@ from rest_framework.decorators import  permission_classes
 
 #Remove
 
+def login_view(request):
+    return render(request, 'login.html')
+
 def home_view(request):
     return render(request, 'home.html')
 
@@ -61,6 +64,8 @@ def account_details_view(request):
 
 def qr_code_scanner_view(request):
     return render(request, 'qr_code_scanner.html')
+
+
 
 ##############################################################################
 

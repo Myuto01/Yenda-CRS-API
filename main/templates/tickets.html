@@ -26,6 +26,7 @@
           url: '/api/v1/ticket-details/?buyer_user_id=' + user_id,
           type: 'GET',
           success: function(response) {
+            console.log('Response', response)
             // Render details on the page
             var detailsHtml = '<h1>User Details</h1>';
             response.data.forEach(function(ticket) {
@@ -40,6 +41,7 @@
               var passengerPhoneNumber = attributes.passenger_phonenumber.replace(/[\[\]']+/g, '');
               var passengerEmail = attributes.passenger_email.replace(/[\[\]']+/g, '');
               var seatNumber = attributes.seat_number.replace(/[\[\]']+/g, '');
+              var qrCodeUrl = attributes.qr_code; // Assuming attributes.qr_code contains the URL of the QR code image
 
               detailsHtml += '<div class="ticket-details">';
               detailsHtml += '<p>Company Name: ' + companyName + '</p>';
@@ -52,6 +54,7 @@
               detailsHtml += '<p>Phone Number: ' + passengerPhoneNumber + '</p>';
               detailsHtml += '<p>Email: ' + passengerEmail + '</p>';
               detailsHtml += '<p>Seat Number: ' + seatNumber + '</p>';
+              detailsHtml += '<img src="' + qrCodeUrl + '" alt="QR Code">';
               detailsHtml += '</div>';
             });
             $('#detailsContainer').html(detailsHtml);
