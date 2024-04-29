@@ -37,6 +37,6 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('account-details/', views.account_details_view, name='account-details'),
    
-    path('qr-coBde-scanner/', views.qr_code_scanner_view, name='qr-code-scanner')
+    path('qr-code-scanner/', views.qr_code_scanner_view, name='qr-code-scanner')
 
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
