@@ -482,10 +482,13 @@ class InactiveTicketDetailsAPIView(APIView):
         serializer = TicketSerializer(ticket_details_for_user, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+import ast
+
 class VerifyTicket(APIView):
 
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    authentication_classes = []
+    permission_classes = []
+
 
     def post(self, request):
         # Extract QR code data from the request
@@ -494,17 +497,36 @@ class VerifyTicket(APIView):
 
         # Validate and verify ticket based on QR code data
         try:
-            ticket = Ticket.objects.get(qr_code=qr_data)
-            print("Ticket:", ticket)
+            # Split the QR code data into individual details
+            details = qr_data.split(', ')
             
-            # Additional verification logic if needed
+            print("details:", details)
+
+          # Extract passenger names
+            passenger_name = details[16].split(': ')[1]  # Extract the string representation of the list
+            print("Passenger Names:", passenger_name)
+            
+
+          
+
+            # Extract seat numbers
+            seat_number = details[18].split(': ')[1]  # Extract the string representation of the list
+            print("seat_number:", seat_number)
+           
+
+            # Find the ticket based on extracted details
+            ticket = Ticket.objects.get(
+                                        passenger_name=passenger_name,
+                                        seat_number=seat_number)
 
             # If ticket is verified, return ticket details
             ticket_details = {
                 'trip_id': ticket.trip_id,
                 'bus_id': ticket.bus_id,
-                'passenger_names': ticket.passenger_name.split(', '),  # Split passenger names into a list
-                'seat_numbers': ticket.seat_number.split(', '),  # Split seat numbers into a list
+                'passenger_name': ticket.passenger_name,
+                'passenger_phonenumber': ticket.passenger_phonenumber,
+                'passenger_email': ticket.passenger_email,
+                'seat_number': ticket.seat_number,
                 # Add more ticket details as needed
             }
             return Response({'verified': True, 'ticket_details': ticket_details})

@@ -47,7 +47,7 @@
             // Here you can send the QR code data to the server via AJAX
             // Example AJAX request using jQuery
             $.ajax({
-                url: 'https://yenda-crs-api-2.onrender.com/api/v1/verify_ticket/',
+                url: 'http://127.0.0.1:8000/api/v1/verify_ticket/',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ qr_data: data }),
