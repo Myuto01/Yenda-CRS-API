@@ -482,13 +482,11 @@ class InactiveTicketDetailsAPIView(APIView):
         serializer = TicketSerializer(ticket_details_for_user, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-import ast
 
 class VerifyTicket(APIView):
-
+    
     authentication_classes = []
     permission_classes = []
-
 
     def post(self, request):
         # Extract QR code data from the request
@@ -497,42 +495,41 @@ class VerifyTicket(APIView):
 
         # Validate and verify ticket based on QR code data
         try:
-            # Split the QR code data into individual details
-            details = qr_data.split(', ')
-            
-            print("details:", details)
+            details = {}
+            for item in qr_data.split(', '):
+                print("Splitting item:", item)
+                try:
+                    key, value = item.split(': ', 1)  # Split only once
+                    print("Extracted key:", key)
+                    print("Extracted value:", value)
+                    
+                    # Extract passenger name and seat number
+                    if '[' in value and ']' in value:
+                        # Remove square brackets and split by comma
+                        value = value.strip('[]')
+                        value_parts = value.split(',')
+                        for part in value_parts:
+                            try:
+                                sub_key, sub_value = part.strip().split(': ', 1)  # Split only once
+                                print("  Sub key:", sub_key)
+                                print("  Sub value:", sub_value)
+                                details[sub_key] = sub_value
+                            except ValueError:
+                                # Skip elements that cannot be split into sub key and sub value
+                                print("  Skipping sub element:", part)
+                                continue
+                    else:
+                        details[key] = value
+                except ValueError:
+                    # Skip elements that cannot be split into key and value
+                    print("Skipping element:", item)
+                    continue
+        except Exception as e:
+            print("Error occurred during QR code processing:", e)
 
-          # Extract passenger names
-            passenger_name = details[16].split(': ')[1]  # Extract the string representation of the list
-            print("Passenger Names:", passenger_name)
-            
 
-          
 
-            # Extract seat numbers
-            seat_number = details[18].split(': ')[1]  # Extract the string representation of the list
-            print("seat_number:", seat_number)
-           
 
-            # Find the ticket based on extracted details
-            ticket = Ticket.objects.get(
-                                        passenger_name=passenger_name,
-                                        seat_number=seat_number)
-
-            # If ticket is verified, return ticket details
-            ticket_details = {
-                'trip_id': ticket.trip_id,
-                'bus_id': ticket.bus_id,
-                'passenger_name': ticket.passenger_name,
-                'passenger_phonenumber': ticket.passenger_phonenumber,
-                'passenger_email': ticket.passenger_email,
-                'seat_number': ticket.seat_number,
-                # Add more ticket details as needed
-            }
-            return Response({'verified': True, 'ticket_details': ticket_details})
-        except Ticket.DoesNotExist:
-            # Ticket not found or verification failed
-            return Response({'verified': False, 'error': 'Ticket not found or invalid'})
 
 """
 class TicketDetailsAPIView(APIView):

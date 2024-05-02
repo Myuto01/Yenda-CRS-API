@@ -131,7 +131,7 @@ class Ticket(models.Model):
 
     def save(self, *args, **kwargs):
         # Construct QR code data
-        qr_data = f"Trip: {self.trip},Trip_id: {self.trip.id}, Bus: {self.bus},Bus_id: {self.bus.id}, Number Plate: {self.bus.number_plate}, Origin: {self.trip.origin}, Destination: {self.trip.destination}, Departure Date: {self.trip.departure_date}, Departure Time: {self.trip.departure_time}, Passenger Name: {self.passenger_name}, Seat Number: {self.seat_number}"
+        qr_data = f"Trip_id: {self.trip.id} , Bus_id: {self.bus.id},  Origin: {self.trip.origin}, Departure Time: {self.trip.departure_time}, Passenger Name: {self.passenger_name}, Seat Number: {self.seat_number}"
         
         # Generate QR code image
         qr = qrcode.make(qr_data)
