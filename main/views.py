@@ -495,7 +495,7 @@ class VerifyTicket(APIView):
 
         # Validate and verify ticket based on QR code data
         try:
-            details = {}
+            ticket_details = {}
             for item in qr_data.split(', '):
                 print("Splitting item:", item)
                 try:
@@ -504,32 +504,51 @@ class VerifyTicket(APIView):
                     print("Extracted value:", value)
                     
                     # Extract passenger name and seat number
-                    if '[' in value and ']' in value:
-                        # Remove square brackets and split by comma
-                        value = value.strip('[]')
-                        value_parts = value.split(',')
-                        for part in value_parts:
-                            try:
-                                sub_key, sub_value = part.strip().split(': ', 1)  # Split only once
-                                print("  Sub key:", sub_key)
-                                print("  Sub value:", sub_value)
-                                details[sub_key] = sub_value
-                            except ValueError:
-                                # Skip elements that cannot be split into sub key and sub value
-                                print("  Skipping sub element:", part)
-                                continue
-                    else:
-                        details[key] = value
+                    if key == 'Passenger Name':
+                        # Leave square brackets intact
+                        value = value.strip()
+                    elif key == 'Seat Number':
+                        # Leave square brackets intact
+                        value = value.strip()
+                    ticket_details[key] = value
                 except ValueError:
                     # Skip elements that cannot be split into key and value
                     print("Skipping element:", item)
                     continue
+
+            # Query the Ticket model based on extracted data
+            ticket = Ticket.objects.filter(
+                trip_id=ticket_details.get('Trip_id'),
+                bus_id=ticket_details.get('Bus_id'),
+                passenger_name=ticket_details.get('Passenger Name'),
+                seat_number=ticket_details.get('Seat Number')
+            ).first()
+
+            if ticket:
+                # Ticket found, prepare response data
+                response_data = {
+                    "status": "success",
+                    "ticket_details": {
+                        "passenger_name": ticket.passenger_name,
+                        "passenger_phonenumber": ticket.passenger_phonenumber,
+                        "passenger_email": ticket.passenger_email,
+                        "seat_number": ticket.seat_number,
+                        "confirmed": ticket.confirmed,
+                        # Add bus details
+                        "bus_details": {
+                            "bus_id": ticket.bus.id,
+                            "Number Plate": ticket.bus.number_plate,
+                            # Add more bus details as needed
+                        }
+                    }
+                }
+                return Response(response_data)
+            else:
+                # Ticket not found
+                return Response({"status": "error", "message": "Ticket not found"})
         except Exception as e:
             print("Error occurred during QR code processing:", e)
-
-
-
-
+            return Response({"status": "error", "message": "Error processing QR code"})
 
 """
 class TicketDetailsAPIView(APIView):
