@@ -486,16 +486,17 @@ class TicketDetailsAPIView(APIView):
         ticket_details_for_user = Ticket.objects.filter(buyer_user_id=buyer_user_id, active=True)
         serializer = TicketSerializer(ticket_details_for_user, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
+
 class UpdateTicketActiveStatus(APIView):
     authentication_classes = []
     permission_classes = []
 
     def post(self, request):
         ticket_id = request.data.get('ticket_id')  
+        print('Ticket Id:', ticket_id)
         try:
             ticket = Ticket.objects.get(id=ticket_id)
-            ticket.active = True  
+            ticket.active = False 
             ticket.save()
             print('Done')
             return Response({'success': True}, status=status.HTTP_200_OK)
