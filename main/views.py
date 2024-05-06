@@ -445,19 +445,35 @@ class CreateDriverDetailsAPIView(APIView):
 
 
 class TripSubmissionAPIView(APIView):
-
     authentication_classes = []
     permission_classes = []
     
     def post(self, request):
         data = request.data
-        print("Data:", data)
-        serializer = TripSubmissionSerializer(data=data)
-        print("Serializer:", serializer)
+        
+        # Print original data
+        print("Original data:", data)
+        
+        # Remove brackets and quotation marks from the data
+        cleaned_data = {}
+        for key, value in data.items():
+            print(f"Processing {key}: {value}")
+            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], str):
+                # Strip off brackets and quotation marks
+                cleaned_value = [v.replace("[", "").replace("]", "").replace("'", "").replace('"', '') for v in value]
+                print(f"Stripped {key}: {value} -> {cleaned_value}")
+                cleaned_data[key] = cleaned_value
+            else:
+                cleaned_data[key] = value
+        
+        serializer = TripSubmissionSerializer(data=cleaned_data)
+        
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class TicketDetailsAPIView(APIView):
@@ -470,9 +486,25 @@ class TicketDetailsAPIView(APIView):
         ticket_details_for_user = Ticket.objects.filter(buyer_user_id=buyer_user_id, active=True)
         serializer = TicketSerializer(ticket_details_for_user, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+        
+class UpdateTicketActiveStatus(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        ticket_id = request.data.get('ticket_id')  
+        try:
+            ticket = Ticket.objects.get(id=ticket_id)
+            ticket.active = True  
+            ticket.save()
+            print('Done')
+            return Response({'success': True}, status=status.HTTP_200_OK)
+        except Ticket.DoesNotExist:
+            print('Failed')
+            return Response({'success': False, 'error': 'Ticket not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class InactiveTicketDetailsAPIView(APIView):
-    
+        
     authentication_classes = []
     permission_classes = []
 

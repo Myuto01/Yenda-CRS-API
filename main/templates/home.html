@@ -60,7 +60,7 @@
                 var destination = $("#destination").val();
                 var date = $("#date").val();
 
-                var url = 'https://yenda-crs-api-2.onrender.com/api/v1/trip-search/?origin=' + origin + '&destination=' + destination + '&date=' + date;
+                var url = 'http://127.0.0.1:8000/api/v1/trip-search/?origin=' + origin + '&destination=' + destination + '&date=' + date;
 
                 // Send AJAX GET request
                 $.ajax({

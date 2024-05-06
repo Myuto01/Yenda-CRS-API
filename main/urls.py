@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/v1/ticket-details/', views.TicketDetailsAPIView.as_view(), name='ticket-details'),
     path('api/v1/inactive-ticket-details/', views.InactiveTicketDetailsAPIView.as_view(), name='inactive-ticket-details'),
     path('api/v1/verify_ticket/', views.VerifyTicket.as_view(), name='verify_ticket'),
+    path('api/v1/update_active_status/', views.UpdateTicketActiveStatus.as_view(), name='update-ticket-active-status'),
 
     
     #Remove
@@ -36,7 +37,6 @@ urlpatterns = [
     path('bus_details.html', views.bus_details_view, name='bus_details'),
     path('profile/', views.profile_view, name='profile'),
     path('account-details/', views.account_details_view, name='account-details'),
-   
-    path('qr-code-scanner/', views.qr_code_scanner_view, name='qr-code-scanner')
+    path('qr-code-scanner/', views.qr_code_scanner_view, name='qr-code-scanner'),
 
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

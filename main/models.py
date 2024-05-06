@@ -88,10 +88,6 @@ class Feature(models.Model):
     def __str__(self):
        return self.name
 
-    
-
-
-
 class TripSchedule(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)  
