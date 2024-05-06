@@ -106,6 +106,7 @@
                 var passengerPhoneNumber = attributes.passenger_phonenumber.replace(/[\[\]']+/g, '');
                 var passengerEmail = attributes.passenger_email.replace(/[\[\]']+/g, '');
                 var seatNumber = attributes.seat_number.replace(/[\[\]']+/g, '');
+                var qrCodeUrl = attributes.qr_code; // Assuming attributes.qr_code contains the URL of the QR code image
 
                 detailsHtml += '<div class="ticket-details">';
                 detailsHtml += '<p>Company Name: ' + companyName + '</p>';
@@ -118,6 +119,8 @@
                 detailsHtml += '<p>Phone Number: ' + passengerPhoneNumber + '</p>';
                 detailsHtml += '<p>Email: ' + passengerEmail + '</p>';
                 detailsHtml += '<p>Seat Number: ' + seatNumber + '</p>';
+                detailsHtml += '<img src="' + qrCodeUrl + '" alt="QR Code">';
+
                 detailsHtml += '</div>';
               });
               $('#detailsContainer').html(detailsHtml);
