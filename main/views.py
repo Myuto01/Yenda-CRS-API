@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
@@ -18,7 +18,7 @@ from rest_framework.exceptions import AuthenticationFailed, APIException
 #from django.core.exceptions import MultipleObjectsReturned
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import json
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import  permission_classes
 
 #Remove
@@ -65,7 +65,53 @@ def account_details_view(request):
 def qr_code_scanner_view(request):
     return render(request, 'qr_code_scanner.html')
 
+def bus_list_view(request):
+    return render(request, 'bus_list.html')
 
+def edit_bus_view(request):
+    return render(request, 'edit_bus.html')
+
+
+class EditBusView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Retrieve the JSON data from the request body
+        try:
+            json_data = json.loads(request.data['jsonData'])
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+        # Retrieve the bus_id from the JSON data
+        bus_id = json_data.get('bus_id')
+
+        # Check if bus_id is present
+        if not bus_id:
+            return JsonResponse({'error': 'Bus ID is missing from the data'}, status=400)
+
+        # Retrieve the bus object from the database
+        bus = get_object_or_404(Bus, pk=bus_id)
+
+        # Update the bus object with the new data
+        bus.bus_type = json_data.get('bus_type')
+        bus.total_seats = json_data.get('total_seats')
+        bus.number_plate = json_data.get('number_plate')
+        bus.status = json_data.get('status')
+
+        # If 'features' is a ManyToManyField or similar, handle it accordingly
+        features = json_data.get('features', [])
+        bus.features.set(features)
+
+        if 'seat_picture' in request.FILES:
+            seat_picture = request.FILES['seat_picture']
+            bus.seat_picture.save(seat_picture.name, seat_picture, save=True)
+
+        # Save the changes to the bus object
+        bus.save()
+
+        # Return a success response
+        return JsonResponse({'success': True})
 
 ##############################################################################
 
@@ -159,12 +205,10 @@ class BusCreateView(APIView):
 
             user = request.user
             bus_type = serializer.validated_data['bus_type']
-            print("Bus Type:", bus_type)
             total_seats = serializer.validated_data['total_seats']
             number_plate = serializer.validated_data['number_plate']
             status = serializer.validated_data['status']
             feature_names = serializer.validated_data.get('features', [])
-            print('feature_names:', feature_names)
 
             seat_picture = None
 
@@ -273,7 +317,7 @@ class TripSearchView(APIView):
         destination = request.query_params.get('destination')
         print('destination :', destination)
 
-        date = request.query_params.get('date')  # Assuming the date format is 'YYYY-MM-DD'
+        date = request.query_params.get('date')  
         print('date :', date)
 
         # Filter trip details based on search criteria

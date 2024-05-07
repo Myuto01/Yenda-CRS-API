@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus List | Yenda</title>
+</head>
+<body>
+    <div id="busDetailsContainer" class="container">
+        <!-- Bus details will be rendered here -->
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        
+
+        const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
+
+fetch('http://127.0.0.1:8000/api/v1/bus-list/', {
+    headers: {
+        'Authorization': "JWT " + accessToken 
+    }
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+})
+.then(responseData => {
+    console.log("Response data:", responseData); // Log the response data to inspect its structure
+
+    // Check if responseData.data is an array
+    if (Array.isArray(responseData.data)) {
+        renderBusDetails(responseData.data); // Pass the array to renderBusDetails
+    } else {
+        console.error('Data array is missing or not properly formatted:', responseData.data);
+    }
+})
+.catch(error => {
+    console.error('Error fetching data:', error);
+});
+
+
+function renderBusDetails(data) {
+    const container = document.getElementById('busDetailsContainer');
+
+    data.forEach(bus => {
+        const busId = bus.id; // Assuming bus ID is present in your data
+        const busType = bus.attributes.bus_type;
+        const numberPlate = bus.attributes.number_plate;
+        const totalSeats = bus.attributes.total_seats;
+        const status = bus.attributes.status;
+
+        const busElement = document.createElement('div');
+        busElement.classList.add('bus');
+
+        // Add a click event listener to each bus element
+        busElement.addEventListener('click', function() {
+            // Save the bus ID in localStorage when clicked (optional)
+            localStorage.setItem('selectedBusId', busId);
+            console.log(`Bus ID ${busId} saved to localStorage.`);
+
+            // Redirect to the edit page with the bus ID as a query parameter
+            window.location.href = '/edit-bus/';
+        });
+
+        const busTypeElement = document.createElement('p');
+        busTypeElement.textContent = `Bus Type: ${busType}`;
+
+        const numberPlateElement = document.createElement('p');
+        numberPlateElement.textContent = `Number Plate: ${numberPlate}`;
+
+        const totalSeatsElement = document.createElement('p');
+        totalSeatsElement.textContent = `Total Seats: ${totalSeats}`;
+
+        const statusElement = document.createElement('p');
+        statusElement.textContent = `Status: ${status}`;
+
+        busElement.appendChild(busTypeElement);
+        busElement.appendChild(numberPlateElement);
+        busElement.appendChild(totalSeatsElement);
+        busElement.appendChild(statusElement);
+
+        container.appendChild(busElement);
+    });
+}
+
+
+       
+    </script>
+</body>
+</html>
