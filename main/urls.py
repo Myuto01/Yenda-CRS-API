@@ -21,9 +21,16 @@ urlpatterns = [
     path('api/v1/verify_ticket/', views.VerifyTicket.as_view(), name='verify_ticket'),
     path('api/v1/update_active_status/', views.UpdateTicketActiveStatus.as_view(), name='update-ticket-active-status'),
     path('api/v1/edit_bus/', views.EditBusView.as_view(), name='edit-bus'),
-    
+    path('api/v1/driver/', views.DriverListView.as_view(), name='driver-list'),
+    path('api/v1/driver-details/', views.DriverDetailsView.as_view(), name='driver-list'),
+    path('driver_details.html', views.driver_details_view, name='driver-details-page'),
+
+
+
+
+
     #Remove
-    path('login/', views    .login_view, name='login'),
+    path('login/', views.login_view, name='login'),
     path('home/', views.home_view, name='home'),
     path('test/', views.test_view, name="test"), # CReate Bus
     path('trip-create/', views.trip_create_view, name="trip-create-view"),
@@ -40,5 +47,5 @@ urlpatterns = [
     path('qr-code-scanner/', views.qr_code_scanner_view, name='qr-code-scanner'),
     path('bus-list/', views.bus_list_view, name='bus-list'),
     path('edit-bus/', views.edit_bus_view, name='edit-bus'),
-
+    path('driver-list/', views.driver_list_view)
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

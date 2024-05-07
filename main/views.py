@@ -71,47 +71,37 @@ def bus_list_view(request):
 def edit_bus_view(request):
     return render(request, 'edit_bus.html')
 
+def driver_list_view(request):
+    return render(request, 'driver_list.html')
 
-class EditBusView(APIView):
+def driver_details_view(request):
+    return render(request, 'driver_details.html')
+
+class DriverDetailsView(APIView):
+
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # Retrieve the JSON data from the request body
+        driver_id = request.data.get('driver_id')  
+        
+        print("Driver", driver_id)
+
+        if not driver_id:
+            return Response({'error': 'Driver ID is required'}, status=400)
+
         try:
-            json_data = json.loads(request.data['jsonData'])
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+            # Retrieve the driver object from the database
+            driver = DriverDetails.objects.get(pk=driver_id)
+        except DriverDetails.DoesNotExist:
+            # If the driver does not exist, raise a NotFound exception
+            raise NotFound("Driver not found")
 
-        # Retrieve the bus_id from the JSON data
-        bus_id = json_data.get('bus_id')
+        # Serialize the driver object
+        serializer = CreateDriverDetailsSerializer(driver)
 
-        # Check if bus_id is present
-        if not bus_id:
-            return JsonResponse({'error': 'Bus ID is missing from the data'}, status=400)
-
-        # Retrieve the bus object from the database
-        bus = get_object_or_404(Bus, pk=bus_id)
-
-        # Update the bus object with the new data
-        bus.bus_type = json_data.get('bus_type')
-        bus.total_seats = json_data.get('total_seats')
-        bus.number_plate = json_data.get('number_plate')
-        bus.status = json_data.get('status')
-
-        # If 'features' is a ManyToManyField or similar, handle it accordingly
-        features = json_data.get('features', [])
-        bus.features.set(features)
-
-        if 'seat_picture' in request.FILES:
-            seat_picture = request.FILES['seat_picture']
-            bus.seat_picture.save(seat_picture.name, seat_picture, save=True)
-
-        # Save the changes to the bus object
-        bus.save()
-
-        # Return a success response
-        return JsonResponse({'success': True})
+        # Return the serialized data as a JSON response
+        return Response(serializer.data)
 
 ##############################################################################
 
@@ -242,7 +232,46 @@ class BusCreateView(APIView):
             return Response(serializer.errors, status=400)
 
 
+class EditBusView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request):
+        # Retrieve the JSON data from the request body
+        try:
+            json_data = json.loads(request.data['jsonData'])
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+        # Retrieve the bus_id from the JSON data
+        bus_id = json_data.get('bus_id')
+
+        # Check if bus_id is present
+        if not bus_id:
+            return JsonResponse({'error': 'Bus ID is missing from the data'}, status=400)
+
+        # Retrieve the bus object from the database
+        bus = get_object_or_404(Bus, pk=bus_id)
+
+        # Update the bus object with the new data
+        bus.bus_type = json_data.get('bus_type')
+        bus.total_seats = json_data.get('total_seats')
+        bus.number_plate = json_data.get('number_plate')
+        bus.status = json_data.get('status')
+
+        # If 'features' is a ManyToManyField or similar, handle it accordingly
+        features = json_data.get('features', [])
+        bus.features.set(features)
+
+        if 'seat_picture' in request.FILES:
+            seat_picture = request.FILES['seat_picture']
+            bus.seat_picture.save(seat_picture.name, seat_picture, save=True)
+
+        # Save the changes to the bus object
+        bus.save()
+
+        # Return a success response
+        return JsonResponse({'success': True})
 
 class TripScheduleCreateView(APIView):
 
@@ -486,7 +515,16 @@ class CreateDriverDetailsAPIView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class DriverListView(APIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        # Assuming YourModel has a ForeignKey to the User model
+        queryset = DriverDetails.objects.filter(user=request.user)  # Filter objects for the current user
+        serializer = CreateDriverDetailsSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 class TripSubmissionAPIView(APIView):
     authentication_classes = []

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Details</title>
+</head>
+<body>
+    <div id="driverDetailsContainer">
+        <!-- Details will be dynamically rendered here -->
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
+
+            $.ajax({
+                url: 'http://127.0.0.1:8000/api/v1/driver/',
+                type: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
+                },
+                success: function(response) {
+                    // Render driver details
+                    renderDriverDetails(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+
+            // Function to render driver details
+            function renderDriverDetails(response) {
+                var detailsHtml = '<h1>Driver Details</h1>';
+                response.data.forEach(function(driver) {
+                    var attributes = driver.attributes;
+                    var driverId = driver.id;
+                    var driverName = attributes.driver_name;
+                    var licenseImage = attributes.license_image;
+                    var licenseNumber = attributes.license_number;
+                    var nrcImage = attributes.nrc_image;
+                    var nrcNumber = attributes.nrc_number;
+                    var passportImage = attributes.passport_image;
+                    var passportNumber = attributes.passport_number;
+                    var phoneNumber = attributes.phone_number;
+
+                    detailsHtml += '<div class="driver-details" data-driver-id="' + driverId + '">';
+                    detailsHtml += '<p>Driver Name: ' + driverName + '</p>';
+                    detailsHtml += '<p>License Number: ' + licenseNumber + '</p>';
+                    detailsHtml += '<p>NRC Number: ' + nrcNumber + '</p>';
+                    detailsHtml += '<p>Passport Number: ' + passportNumber + '</p>';
+                    detailsHtml += '<p>Phone number: ' + phoneNumber + '</p>';
+                    detailsHtml += '<img src="' + licenseImage + '" alt="license Image">';
+                    detailsHtml += '<img src="' + nrcImage + '" alt="Nrc Image">';
+                    detailsHtml += '<img src="' + passportImage + '" alt="Passport Image">';
+                    detailsHtml += '</div>';
+                });
+                $('#driverDetailsContainer').html(detailsHtml);
+
+                // Attach event listener to each driver details
+                $('.driver-details').click(function() {
+                    // Extract the driver ID
+                    var driverId = $(this).data('driver-id');
+                    // Redirect to the driver details page with the driver ID as a query parameter
+                    window.location.href = '/driver_details.html?driver_id=' + driverId;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
