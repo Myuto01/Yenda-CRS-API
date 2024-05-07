@@ -8,11 +8,73 @@
 <body>
     <div id="driverDetailsContainer">
         <!-- Driver details will be dynamically rendered here -->
+        
+    </div>
+
+    <button id="editDriverButton">
+        <i class="fas fa-edit"></i> Edit
+    </button>
+
+    <div id="driverEditModal" style="display: none;">
+        <form action="" method="post" id="editDriverForm">
+            <input type="text" name="driver_name" id="driver_name" placeholder="Edit Driver Name">
+
+            <input type="text" name="license_number" id="license_number" placeholder="Edit license_number">
+
+            <input type="text" name="nrc_number" id="nrc_number" placeholder="Edit nrc_number">
+
+            <input type="text" name="passport_number" id="passport_number" placeholder="Edit passport number">
+
+            <input type="tel" name="phone_number" id="phone_number" placeholder="Edit Phone number">
+
+            <input type="submit" value="Edit" id="editDriverDetailsButton">
+        </form>
+    </div>
+
+    <div id="driverDocumentsContainer">
+        <!-- Driver details will be dynamically rendered here -->
+    </div>
+
+    <button id="editDriverPicsButton">
+        <i class="fas fa-edit"></i> Edit
+    </button>
+
+    <div id="driverEditPicsModal" style="display: none;">
+        <form action="" method="post" id="editDriverPicsForm">
+            <input type="file" name="license_image" id="license_image" >
+
+            <input type="file" name="nrc_image" id="nrc_image" >
+
+            <input type="file" name="passport_image" id="passport_image">
+
+            <input type="submit" value="Edit" id="editDriverDetailsButton">
+        </form>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
+
+            $('#editDriverButton').click(function() {
+            $('#driverEditModal').css('display', 'block');
+            });
+
+            // Hide modal when close button is clicked
+            $('#closeModalButton').click(function() {
+                $('#driverEditModal').css('display', 'none');
+            });
+
+            //Pictures
+
+            $('#editDriverPicsButton').click(function() {
+            $('#driverEditPicsModal').css('display', 'block');
+            });
+
+            // Hide modal when close button is clicked
+            $('#closeModalButton').click(function() {
+                $('#driverEditModal').css('display', 'none');
+            });
+
             const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
 
             // Extract the driver ID from the query parameter
@@ -22,7 +84,6 @@
             var payload = {
                 driver_id: driverId
             };
-
 
             console.log('Driver', payload)
 
@@ -37,6 +98,7 @@
                 success: function(response) {
                     console.log('Details', response)
                     renderDriverDetails(response);
+                    renderDriverDocuments(response);
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
@@ -55,14 +117,7 @@
                 var passportImage = attributes.passport_image;
                 var passportNumber = attributes.passport_number;
                 var phoneNumber = attributes.phone_number;
-                console.log('Driver Name:', driverName);
-                console.log('License Image:', licenseImage);
-                console.log('License Number:', licenseNumber);
-                console.log('NRC Image:', nrcImage);
-                console.log('NRC Number:', nrcNumber);
-                console.log('Passport Image:', passportImage);
-                console.log('Passport Number:', passportNumber);
-                console.log('Phone Number:', phoneNumber);
+              
                 var detailsHtml = '<h1>Driver Details</h1>';
                 detailsHtml += '<p>Driver Name: ' + driverName + '</p>';
                 detailsHtml += '<p>License Number: ' + licenseNumber + '</p>';
@@ -75,7 +130,120 @@
 
                 $('#driverDetailsContainer').html(detailsHtml);
             }
+
+
+            function renderDriverDocuments(response) {
+                var attributes = response.data.attributes;
+                var passportImage = attributes.passport_image;
+                var licenseImage = attributes.license_image;
+                var passportImage = attributes.passport_image;
+                var nrcImage = attributes.nrc_image;
+
+                var detailsHtml = '<h1>Driver Documents</h1>';
+                detailsHtml += '<img src="' + licenseImage + '" alt="License Image">';
+                detailsHtml += '<img src="' + nrcImage + '" alt="NRC Image">';
+                detailsHtml += '<img src="' + passportImage + '" alt="Passport Image">';
+
+                $('#driverDocumentsContainer').html(detailsHtml);
+            }
+
+
+            $("#editDriverForm").submit(function(e) {
+                e.preventDefault(); // Prevent default form submission
+
+                $('#editDriverDetailsButton').val('Submitting');
+
+                // Construct the payload object
+                var payload = {
+                    driver_id: driverId,
+                    driver_name: $("input[name='driver_name']").val(),
+                    license_number: $("input[name='license_number']").val(),
+                    phone_number: $("input[name='phone_number']").val(),
+                    passport_number: $("#passport_number").val(),
+                    nrc_number: $("#nrc_number").val(), 
+                };
+
+                // Convert the payload object to a JSON string
+                var payloadString = JSON.stringify(payload);
+
+                // Access file data from the file input element
+                //var fileInput = document.getElementById('seat_picture');
+                //var fileData = fileInput.files[0]; 
+
+                // Create a FormData object to send both file data and JSON data
+                //var formDataToSend = new FormData();
+                //formDataToSend.set('jsonData', payloadString);
+
+                // Check if a file has been selected
+                //if (fileData) {
+                    // File is selected, include seat_picture field in the form data
+                    //formDataToSend.append('seat_picture', fileData);
+                //}
+
+                console.log('PayLoad String:', payloadString)
+
+
+                // Send AJAX request
+                $.ajax({
+                    url: 'http://127.0.0.1:8000/api/v1/edit-driver-details/',
+                    type: 'POST',
+                    data: payloadString,
+                    contentType: 'application/json',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+                    },
+                    success: function(response) {
+                        console.log('Success:', response);
+                        $('#editDriverDetailsButton').val('Submit');
+                        location.reload(); 
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        $('#editDriverDetailsButton').val('Submit');
+                    }
+                });
+            });
+
+
+            $("#editDriverPicsForm").submit(function(e) {
+    e.preventDefault(); // Prevent default form submission
+
+    $('#editDriverDetailsButton').val('Submitting');
+
+    // Create FormData object to collect form data
+    var formData = new FormData();
+    formData.append('driver_id', driverId);
+    formData.append('license_image', $("input[name='license_image']")[0].files[0]); // Get the file object
+    formData.append('nrc_image', $("input[name='nrc_image']")[0].files[0]); // Get the file object
+    formData.append('passport_image', $("input[name='passport_image']")[0].files[0]); // Get the file object
+
+    console.log('Form data:', formData)
+    
+    // Send AJAX request
+    $.ajax({
+        url: 'http://127.0.0.1:8000/api/v1/edit-driver/pic-details/',
+        type: 'POST',
+        data: formData,
+        contentType: false, // Set contentType to false, FormData will take care of it
+        processData: false, // Prevent jQuery from automatically processing the data
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+        },
+        success: function(response) {
+            console.log('Success:', response);
+            $('#editDriverDetailsButton').val('Submit');
+            location.reload(); 
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            $('#editDriverDetailsButton').val('Submit');
+        }
+    });
+});
+
         });
+
+
     </script>
 </body>
 </html>

@@ -24,8 +24,8 @@ urlpatterns = [
     path('api/v1/driver/', views.DriverListView.as_view(), name='driver-list'),
     path('api/v1/driver-details/', views.DriverDetailsView.as_view(), name='driver-list'),
     path('driver_details.html', views.driver_details_view, name='driver-details-page'),
-
-
+    path('api/v1/edit-driver-details/', views.EditDriverDetailsView.as_view(), name='edit-driver-details'),
+    path('api/v1/edit-driver/pic-details/', views.EditDriverPicsDetailsView.as_view(), name="edit-driver-pic-details"),
 
 
 

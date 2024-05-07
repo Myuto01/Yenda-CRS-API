@@ -77,6 +77,75 @@ def driver_list_view(request):
 def driver_details_view(request):
     return render(request, 'driver_details.html')
 
+class EditDriverDetailsView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Retrieve the driver_id from the request data
+        driver_id = request.data.get('driver_id')
+
+        # Check if driver_id is present
+        if not driver_id:
+            return JsonResponse({'error': 'Driver ID is missing from the data'}, status=400)
+
+        # Retrieve the driver object from the database
+        driver = get_object_or_404(DriverDetails, pk=driver_id)
+
+        # Update driver attributes if the corresponding data is provided
+        if 'driver_name' in request.data and request.data['driver_name']:
+            driver.driver_name = request.data.get('driver_name')
+
+        if 'phone_number' in request.data and request.data['phone_number']:
+            driver.phone_number = request.data.get('phone_number')
+
+        if 'nrc_number' in request.data and request.data['nrc_number']:
+            driver.nrc_number = request.data.get('nrc_number')
+
+        if 'license_number' in request.data and request.data['license_number']:
+            driver.license_number = request.data.get('license_number')
+
+        if 'passport_number' in request.data and request.data['passport_number']:
+            driver.passport_number = request.data.get('passport_number')
+
+        # Save the changes to the driver object
+        driver.save()
+
+        # Return a success response
+        return JsonResponse({'success': True})
+
+class EditDriverPicsDetailsView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Retrieve the driver_id from the request data
+        driver_id = request.data.get('driver_id')
+
+        # Check if driver_id is present
+        if not driver_id:
+            return JsonResponse({'error': 'Driver ID is missing from the data'}, status=400)
+
+        # Retrieve the driver object from the database
+        driver = get_object_or_404(DriverDetails, pk=driver_id)
+
+        # Update driver attributes if the corresponding data is provided
+        if 'license_image' in request.FILES:
+            driver.license_image = request.FILES['license_image']
+
+        if 'nrc_image' in request.FILES:
+            driver.nrc_image = request.FILES['nrc_image']
+
+        if 'passport_image' in request.FILES:
+            driver.passport_image = request.FILES['passport_image']
+
+        # Save the changes to the driver object
+        driver.save()
+
+        # Return a success response
+        return JsonResponse({'success': True})
+
+
 class DriverDetailsView(APIView):
 
     authentication_classes = [JWTAuthentication]
