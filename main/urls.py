@@ -26,7 +26,7 @@ urlpatterns = [
     path('driver_details.html', views.driver_details_view, name='driver-details-page'),
     path('api/v1/edit-driver-details/', views.EditDriverDetailsView.as_view(), name='edit-driver-details'),
     path('api/v1/edit-driver/pic-details/', views.EditDriverPicsDetailsView.as_view(), name="edit-driver-pic-details"),
-
+    path('api/v1/trips-schedule/', views.TripScheduleListView.as_view(), name='trips-schedule'),
 
 
     #Remove
@@ -47,5 +47,6 @@ urlpatterns = [
     path('qr-code-scanner/', views.qr_code_scanner_view, name='qr-code-scanner'),
     path('bus-list/', views.bus_list_view, name='bus-list'),
     path('edit-bus/', views.edit_bus_view, name='edit-bus'),
-    path('driver-list/', views.driver_list_view)
+    path('driver-list/', views.driver_list_view),
+    path('trip-schedule/', views.trip_schedule_view )
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

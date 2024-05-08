@@ -77,6 +77,34 @@ def driver_list_view(request):
 def driver_details_view(request):
     return render(request, 'driver_details.html')
 
+def trip_schedule_view(request):
+    return render(request, 'trip_schedule.html')
+
+class TripScheduleListView(APIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Assuming YourModel has a ForeignKey to the User model
+        queryset = TripSchedule.objects.filter(user=request.user)  # Filter objects for the current user
+        trip_schedule_serializer = TripScheduleSerializer(queryset, many=True)
+        
+        # Iterate through each TripSchedule object and include driver details
+        for trip_schedule in trip_schedule_serializer.data:
+            driver_id = trip_schedule['driver']
+            driver_details = DriverDetails.objects.get(pk=driver_id)
+            driver_serializer = CreateDriverDetailsSerializer(driver_details)
+            trip_schedule['driver_details'] = driver_serializer.data
+        
+        response_data = {
+                'trip_schedule': trip_schedule_serializer.data,
+                'driver_details': driver_serializer.data 
+        }
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+
 class EditDriverDetailsView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]

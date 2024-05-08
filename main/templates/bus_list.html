@@ -51,6 +51,7 @@ function renderBusDetails(data) {
         const numberPlate = bus.attributes.number_plate;
         const totalSeats = bus.attributes.total_seats;
         const status = bus.attributes.status;
+        const features = bus.attributes.features;
 
         const busElement = document.createElement('div');
         busElement.classList.add('bus');
@@ -77,14 +78,27 @@ function renderBusDetails(data) {
         const statusElement = document.createElement('p');
         statusElement.textContent = `Status: ${status}`;
 
+        // Create a paragraph element to display features
+        const featuresElement = document.createElement('p');
+        let featuresText = 'Features: ';
+        features.forEach((feature, index) => {
+            featuresText += feature.name;
+            if (index !== features.length - 1) {
+                featuresText += ', '; // Add comma between feature names except for the last one
+            }
+        });
+        featuresElement.textContent = featuresText;
+
         busElement.appendChild(busTypeElement);
         busElement.appendChild(numberPlateElement);
         busElement.appendChild(totalSeatsElement);
         busElement.appendChild(statusElement);
+        busElement.appendChild(featuresElement); // Append the features element to the bus element
 
         container.appendChild(busElement);
     });
 }
+
 
 
        
