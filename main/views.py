@@ -349,20 +349,15 @@ class TripScheduleCreateView(APIView):
 
     def post(self, request):
         try:
-
             user = request.user
 
-           # Extract bus details from the request data
-            bus_type = request.data.get('bus_type')
-            number_plate = request.data.get('number_plate')
-            total_seats = request.data.get('total_seats')
-            features_data = request.data.get('features', [])  # Assuming features is a list of feature names or identifiers
+            features_data = request.data.get('features', []) 
 
             # Find or create the corresponding bus instance
             bus, created = Bus.objects.get_or_create(
-                bus_type=bus_type,
-                number_plate=number_plate,
-                total_seats=total_seats,
+                bus_type=request.data.get('bus_type'),
+                number_plate=request.data.get('number_plate'),
+                total_seats=request.data.get('total_seats'),
             )
 
             # Create or update features associated with the bus
@@ -377,29 +372,34 @@ class TripScheduleCreateView(APIView):
             # Save the bus instance
             bus.save()
 
+            driver, create =  DriverDetails.objects.get_or_create(
+                    pk=request.data.get('driver_id') 
+            )
+
+            driver_serializer = CreateDriverDetailsSerializer(driver)
+
             # Create the new trip schedule instance
             trip_schedule = TripSchedule.objects.create(
                 user=user,
                 bus=bus,
-                origin=request.data.get('origin', ''),
-                destination=request.data.get('destination', ''),
-                departure_date=request.data.get('departure_date', None),
-                departure_time=request.data.get('departure_time', None)
+                driver=driver,
+                origin=request.data.get('origin'),
+                destination=request.data.get('destination'),
+                departure_date=request.data.get('departure_date'),
+                departure_time=request.data.get('departure_time'),
+                price=request.data.get('price')
             )
-
             
-            # Return the serialized data of the created trip schedule
-            serializer = TripScheduleSerializer(trip_schedule)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            trip_schedule_serializer = TripScheduleSerializer(trip_schedule)
 
-        # This has been commented out because I am going to make the number plate unique, so buses with the same informations will be rear.
-        #except MultipleObjectsReturned as e:
-            # Return an error response with a user-friendly message
-            #error_message = "Multiple buses found with the same information. Please contact support for assistance."
-            #return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+            response_data = {
+                'trip_schedule': trip_schedule_serializer.data,
+                'driver_details': driver_serializer.data 
+            }
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
          
         except Exception as e:
-            # Return an error response with details of the exception
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class TripSearchView(APIView):

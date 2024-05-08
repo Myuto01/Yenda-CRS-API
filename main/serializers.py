@@ -118,6 +118,7 @@ class TripScheduleSerializer(serializers.ModelSerializer):
         fields = [
             'user',
             'bus', 
+            'driver',
             'origin', 
             'destination',
             'departure_date',
@@ -235,3 +236,5 @@ class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = '__all__'
+
+

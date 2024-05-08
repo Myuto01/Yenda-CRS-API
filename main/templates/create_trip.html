@@ -30,12 +30,24 @@
             <!-- Options will be populated dynamically by JavaScript -->
         </select>
 
+        <h2>Drivers:</h2>
+        <select name="driver" id="drivers-dropdown">
+            <!-- Options will be populated dynamically by JavaScript -->
+        </select>
+
         <!-- Trip form-->
         <input type="text" name="origin" id="origin" placeholder="Enter Origin" required>
+
         <input type="text" name="destination" id="destination" placeholder="Enter Destination" required>
+
         <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required>
+
         <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required>
+
+        <input type="number" name="price" id="price" placeholder="Enter Price" required>
+
         <input type="submit" id="tripcreatesubmitButton" value="Submit">
+
     </form>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -142,6 +154,32 @@
             }
         });
 
+        // Ajax Request to get features
+        $.ajax({
+            url: "http://127.0.0.1:8000/api/v1/driver/",
+            type: "GET",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
+            },
+            success: function(response) {
+                console.log("Driver Response:", response);
+                // Check if response contains the data array
+                if (response.data && Array.isArray(response.data)) {
+                    // Populate the dropdown with the retrieved features
+                    response.data.forEach(function(driver) {
+                        // Access the ID and attributes object of each feature
+                        var driverId = driver.id;
+                        var attributes = driver.attributes;
+                        // Append the feature name and ID to the dropdown
+                        $('#drivers-dropdown').append('<option value="' + driverId + '">' + attributes.driver_name + '</option>');
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching features:", error);
+            }
+        });
+
         $("#trip_create_form").submit(function(e) {
             e.preventDefault(); // Prevent default form submission
 
@@ -157,7 +195,9 @@
                         "origin": $("#origin").val(),
                         "destination": $("#destination").val(),
                         "departure_date": $("#departure_date").val(),
-                        "departure_time": $("#departure_time").val()
+                        "departure_time": $("#departure_time").val(),
+                        "price": $("#price").val(),
+                        "driver_id": $("#drivers-dropdown").val()
                     }
                 }
             }
