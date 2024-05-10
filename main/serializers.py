@@ -79,7 +79,8 @@ class FeatureSerializer(serializers.ModelSerializer):
 
 class BusSerializer(serializers.ModelSerializer):
     features = FeatureSerializer(many=True, read_only=True)
-
+    booked_seats_count = serializers.SerializerMethodField()
+    
     class Meta:
         model = Bus
         fields = [ 
@@ -89,8 +90,13 @@ class BusSerializer(serializers.ModelSerializer):
             'number_plate',
             'features', 
             'status', 
-            'seat_picture'
+            'seat_picture',
+            'booked_seats_count' 
         ]
+    
+    def get_booked_seats_count(self, bus):
+        # Get the count of booked seats for the given bus
+        return Seat.objects.filter(bus=bus, is_booked=True).count()
 
     def get_features(self, obj):
         return [feature.name for feature in obj.features.all()]
@@ -106,12 +112,19 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['company_name']  
 
-
+class CreateDriverDetailsSerializer(serializers.ModelSerializer):
+    license_image = serializers.ImageField(required=False)
+    nrc_image = serializers.ImageField(required=False)
+    passport_image = serializers.ImageField(required=False)
+    class Meta:
+        model = DriverDetails
+        fields = '__all__'
 
 class TripScheduleSerializer(serializers.ModelSerializer):
 
     user = UserSerializer()
     bus = BusSerializer()
+    driver = CreateDriverDetailsSerializer()
 
     class Meta:
         model = TripSchedule
@@ -125,25 +138,7 @@ class TripScheduleSerializer(serializers.ModelSerializer):
             'departure_time',
             'price'
         ]
-"""
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-    
-        # Convert departure_date string to datetime object
-        if instance.departure_date:
-            if isinstance(instance.departure_date, str):
-                representation['departure_date'] = datetime.datetime.strptime(instance.departure_date, '%Y-%m-%d').strftime('%Y-%m-%d')
-            else:
-                representation['departure_date'] = instance.departure_date.strftime('%Y-%m-%d')
-        # Convert departure_time string to datetime object
-        if instance.departure_time:
-            if isinstance(instance.departure_time, str):
-                representation['departure_time'] = datetime.datetime.strptime(instance.departure_time, '%H:%M:%S').strftime('%H:%M:%S')
-            else:
-                representation['departure_time'] = instance.departure_time.strftime('%H:%M:%S')
-        
-        return representation
-"""
+
 class FeatureSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -156,7 +151,6 @@ class FeatureSerializer(serializers.ModelSerializer):
         # Add the user to the validated data before saving
         validated_data['user'] = user
         return super().create(validated_data)
-
 
 
 class BusCreateSerializer(serializers.ModelSerializer):
@@ -173,13 +167,7 @@ class BusCreateSerializer(serializers.ModelSerializer):
         fields = ['bus_type', 'total_seats', 'number_plate', 'status', 'features', 'seat_picture']
 
 
-class CreateDriverDetailsSerializer(serializers.ModelSerializer):
-    license_image = serializers.ImageField(required=False)
-    nrc_image = serializers.ImageField(required=False)
-    passport_image = serializers.ImageField(required=False)
-    class Meta:
-        model = DriverDetails
-        fields = '__all__'
+
 
 class TripSubmissionSerializer(serializers.ModelSerializer):
     passenger_name = serializers.ListField(child=serializers.CharField())

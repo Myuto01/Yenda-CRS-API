@@ -1,32 +1,320 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trip Schedule</title>
+    <style>
+        /* Define CSS for the modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 70%;
+            top: 80px;
+            width: 35%;
+            height: 100%;
+        }
+
+        .edit-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 60%;
+            bottom: 28px;
+            width: 15%;
+            height: 100%;
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 20px;
+            left: -21px;
+            position: relative;
+        }
+
+        .edit-modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            border-radius: 20px;
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* CSS for highlighting the selected trip */
+        .trip-selected {
+            background-color: purple;
+            color: white;
+        }
+
+        #tripScheduleTable{
+            width: 50%;
+        }
+
+        #tripScheduleBody{
+            position: relative;
+            left: 60px;
+        }
+
+        #tripScheduleBody tr{
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .modal-header{
+            background-color: orangered;
+            color: white;
+            text-align: center;
+        }
+
+        #tripScheduleSave {
+            background-color: orangered;
+            color: white;
+            text-align: center;
+            width: 69%;
+            border-radius: 20px;
+            margin: 0px 23px;
+            cursor: pointer;
+        }
+
+        .modal-phonenumber::after {
+            content: ''; 
+            display: block; 
+            border-bottom: 1px solid black; 
+        }
+
+        .modal-departuretime {
+            top: 10px;
+            position: relative;
+        }
+
+        .modal-departuretime::after {
+            content: ''; 
+            display: block; 
+            border-bottom: 1px solid black; 
+        }
+
+        .modal-busnumber{
+            position: relative;
+            top: 15px;
+        }
+
+        .modal-seatssold{
+            left: 30px;
+            position: relative;
+            bottom: 2px;
+        }
+
+        .modal-seats{   
+            position: relative;
+            left: 90px;
+            bottom: 4px;
+        }
+
+        .modal-busnumber{
+            position: relative;
+            top: 15px;
+        }
+
+      
+
+    </style>
 </head>
 <body>
-    
-</body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script>
+    <button id="addTripButton">Add +</button>
 
-$(document).ready(function() {
-    const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE2ODY5NzM0LCJpYXQiOjE3MTUxNDE3MzQsImp0aSI6IjNhNTFiY2M1M2VmNTRiNWNhYzg2NTUxYmE4NGZhMGMwIiwidXNlcl9pZCI6OX0.b3sIZdxPCk56bP5DFTP_GD1GTc5caxTB1ypMN_IPZ0Y"
+    <table id="tripScheduleTable">
+        <thead>
+            <tr>
+                <th>Driver</th>
+                <th>Origin</th>
+                <th>Destination</th>
+                <th>Departure Time</th>
+            </tr>
+        </thead>
+
+        <tbody id="tripScheduleBody">
+            <!-- Trip schedule data will be inserted here dynamically -->
+        </tbody>
+
+        <!-- Modal -->
+        <div id="tripDetailsModal" class="modal">
+            <div class="modal-content">
+                <!-- Detailed trip information will be displayed here -->
+                <span class="close">&times;</span> <!-- Close button for the modal -->
+            </div>
+        </div>
+
+        <!-- Modal 2 -->
+        <div id="tripEditModal" class="edit-modal">
+            <div class="edit-modal-content">
+                <!-- Detailed trip information will be displayed here -->
+                <span class="close-edit">&times;</span> <!-- Close button for the modal -->
+            </div>
+        </div>
+
+
+    </table>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{% static 'main/js/access_token.js' %}"></script>
+    <script>
+       $(document).ready(function() {
+    $('#addTripButton').click(function() {
+        window.location.href = '/trip-create/';
+    });
+
+    const accessToken = localStorage.getItem('access_token')
+    
     $.ajax({
-        url: "http://127.0.0.1:8000/api/v1/trips-schedule/",
+        url: "/api/v1/trips-schedule/",
         type: "GET",
         beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "JWT " + accessToken); 
         },
         success: function(response) {
             console.log("Response:", response);
+            renderDriverDetails(response);
         },
         error: function(xhr, status, error) {
             console.error("Error fetching features:", error);
         }
     });
+
+    function renderDriverDetails(response) {
+        // Render trip schedules
+        if (response.data.trip_schedule && Array.isArray(response.data.trip_schedule)) {
+            var tripScheduleTable = $('#tripScheduleBody');
+            response.data.trip_schedule.forEach(function(trip) {
+                tripScheduleTable.append('<tr data-trip=\'' + JSON.stringify(trip) + '\'>' +
+                    '<td>' + trip.driver.driver_name + '</td>' +
+                    '<td>' + trip.origin + '</td>' +
+                    '<td>' + trip.destination + '</td>' +
+                    '<td>' + trip.departure_time + '</td>' +
+                    '</tr>');
+            });
+        } else {
+            console.error("Trip schedule not found in response or not an array.");
+        }
+    }
+
+    // Add click event listener to table rows
+    $('#tripScheduleBody').on('click', 'tr', function() {   
+
+        $('#tripScheduleBody').find('tr').removeClass('trip-selected').find('.check-mark').remove();
+
+        // Retrieve data associated with the clicked row
+        var tripData = $(this).data('trip');
+
+        $(this).addClass('trip-selected')
+
+        var departureDate =  tripData.departure_date
+        var formattedDate = departureDate.substring(0, 10);
+
+        // Populate modal with detailed information
+        var modalContent = $('#tripDetailsModal .modal-content');
+        modalContent.empty(); // Clear previous content
+
+        // Populate modal with detailed information
+        modalContent.append('<h3 class="modal-header">' + tripData.origin + ' to ' + tripData.destination + '</h3>');
+        modalContent.append('<p>' + tripData.driver.driver_name + '</p>');
+        modalContent.append('<small>    Driver <br> ' + '</small>');
+        modalContent.append('<small class="modal-phonenumber"> ' + tripData.driver.phone_number + '</small>');
+        modalContent.append('<small class="modal-departuretime" >Departure Time <br> ' + formattedDate + ' ' + tripData.departure_time + '</small>');
+        modalContent.append('<small class="modal-busnumber">Bus Number <br> ' + tripData.bus.number_plate + '</small>'
+        + '<small class="modal-seatssold">Seats Sold <br> ' + '</small>' + '<small class="modal-seats">' + tripData.bus.booked_seats_count + '/' +  tripData.bus.total_seats + '</small><br><br>');
+        modalContent.append(
+            '<label>Change Status</label>' + '<br>' +
+            '<select>' +
+                        '<option value="' + tripData.id + '">Upcoming</option>' +
+                        '<option value="' + tripData.id + '">In Progress</option>' +
+                    '</select> <br><br>');
+        modalContent.append('<div>' +
+                        '<label>Notes</label>' + '<br>' +
+                        '<textarea></textarea>' +
+                    '</div>');
+        modalContent.append('<button type="button" id="tripScheduleSave">' + 'Save' + '</button>    ')
+
+        // Add more detailed information as needed
+
+        // Show modal
+        $('#tripDetailsModal').show();
+    });
+
+    // Add click event listener to table rows for trip edit modal
+$('#tripScheduleTable').on('click', 'tr', function() {
+
+
+    // Retrieve data associated with the clicked row
+    var tripData = $(this).data('trip');
+
+    // Select the parent modal
+    var tripEditModal = $('#tripEditModal');
+
+    // Populate modal with detailed information
+    var modalContent = tripEditModal.find('.edit-modal-content');
+    
+    // Populate modal with detailed information
+    modalContent.empty(); // Clear previous content
+    modalContent.append('<p>Assign</p>');
+    modalContent.append('<p>Edit</p>');
+    modalContent.append('<p>Delete</p>');
+    console.log("Modal content HTML:", modalContent.html()); // Log modalContent HTML to check if content is appended correctly
+
+    // Show modal
+    tripEditModal.show();
 });
 
-</script>
+
+    // Close modal when clicking outside of it
+    $(window).click(function(event) {
+        if (event.target == $('#tripDetailsModal')[0]) {
+            $('#tripDetailsModal').hide();
+            $('#tripScheduleBody').find('tr').removeClass('trip-selected').find('.check-mark').remove();
+
+        }
+    });
+
+    // Close modal when clicking outside of it
+    $(window).click(function(event) {
+        if (event.target == $('#tripEditModal')[0]) {
+            $('#tripEditModal').hide();
+        }
+    });
+
+    // Close modal when clicking on the close button
+    $('.close').click(function() {
+        $('#tripDetailsModal').hide();
+    });
+
+    $('.close-edit').click(function() {
+        $('#tripEditModal').hide();
+    });
+});
+
+    </script>
+</body>
 </html>
+
