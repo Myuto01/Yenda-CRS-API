@@ -80,6 +80,76 @@ def driver_details_view(request):
 def trip_schedule_view(request):
     return render(request, 'trip_schedule.html')
 
+from rest_framework.exceptions import ValidationError
+
+class TripScheduleDelete(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            trip_schedule_serializer = TripScheduleSerializer(data=request.data)
+            
+            trip_schedule_serializer.is_valid(raise_exception=True)
+            
+            trip_id = request.data.get('trip_id')
+
+            trip_schedule = get_object_or_404(TripSchedule, pk=trip_id)
+
+            trip_schedule.delete()
+
+            return Response({'success': True}, status=status.HTTP_201_CREATED)
+        
+        except ValidationError as e:
+            return Response({'error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Handle other unexpected errors
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class TripScheduleUpdateView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Instantiate the serializer with request data
+            trip_schedule_serializer = TripScheduleSerializer(data=request.data)
+            
+            # Validate the serializer
+            trip_schedule_serializer.is_valid(raise_exception=True)
+            
+            trip_id = request.data.get('trip_id')
+
+            # Retrieve the trip schedule object
+            trip_schedule = get_object_or_404(TripSchedule, pk=trip_id)
+
+            # Update trip_schedule object with new data
+            if 'notes' in request.data and request.data['notes']:
+                notes = request.data.get('notes')
+                print("Notes:", notes)
+                trip_schedule.notes = notes
+
+            if 'trip_status' in request.data and request.data['trip_status']:
+                trip_status = request.data.get('trip_status')
+                print("Trip Status:", trip_status)
+                trip_schedule.trip_status = trip_status
+
+            
+            # Save the updated trip_schedule object
+            trip_schedule.save()
+            return Response({'success': trip_schedule_serializer.data}, status=status.HTTP_201_CREATED)
+
+        except ValidationError as e:
+            return Response({'error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Handle other unexpected errors
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class TripScheduleListView(APIView):
     
     authentication_classes = [JWTAuthentication]

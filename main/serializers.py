@@ -122,22 +122,14 @@ class CreateDriverDetailsSerializer(serializers.ModelSerializer):
 
 class TripScheduleSerializer(serializers.ModelSerializer):
 
-    user = UserSerializer()
-    bus = BusSerializer()
-    driver = CreateDriverDetailsSerializer()
+    user = UserSerializer(required=False)
+    bus = BusSerializer(required=False)
+    driver = CreateDriverDetailsSerializer(required=False)
 
     class Meta:
         model = TripSchedule
-        fields = [
-            'user',
-            'bus', 
-            'driver',
-            'origin', 
-            'destination',
-            'departure_date',
-            'departure_time',
-            'price'
-        ]
+        fields = '__all__'
+
 
 class FeatureSerializer(serializers.ModelSerializer):
 

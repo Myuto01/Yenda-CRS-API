@@ -27,7 +27,8 @@ urlpatterns = [
     path('api/v1/edit-driver-details/', views.EditDriverDetailsView.as_view(), name='edit-driver-details'),
     path('api/v1/edit-driver/pic-details/', views.EditDriverPicsDetailsView.as_view(), name="edit-driver-pic-details"),
     path('api/v1/trips-schedule/', views.TripScheduleListView.as_view(), name='trips-schedule'),
-
+    path('api/v1/trips-schedule-update/', views.TripScheduleUpdateView.as_view(), name='trips-schedule-update'),
+    path('api/v1/trips-schedule-delete/', views.TripScheduleDelete.as_view(), name='trip-schedule-delete'),
 
     #Remove
     path('login/', views.login_view, name='login'),
