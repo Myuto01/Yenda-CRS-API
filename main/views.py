@@ -108,6 +108,37 @@ class TripScheduleDelete(APIView):
             # Handle other unexpected errors
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class TripScheduleEditView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            trip_id = request.data.get('trip_id')
+
+            # Retrieve the trip schedule object
+            trip_schedule = get_object_or_404(TripSchedule, pk=trip_id)
+ 
+            # Extract non-empty fields from the request data
+            valid_data = {}
+            for field, value in request.data.items():
+                if value:
+                    valid_data[field] = value
+
+            # Update the trip schedule object with the valid data
+            trip_schedule_serializer = TripScheduleSerializer(trip_schedule, data=valid_data, partial=True)
+            trip_schedule_serializer.is_valid(raise_exception=True)
+            trip_schedule_serializer.save()
+
+            return Response({'success': trip_schedule_serializer.data}, status=status.HTTP_201_CREATED)
+
+        except ValidationError as e:
+            return Response({'error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Handle other unexpected errors
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class TripScheduleUpdateView(APIView):

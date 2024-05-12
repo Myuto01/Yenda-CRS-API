@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trip Schedule</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+   <style>
         /* Define CSS for the modal */
         .modal {
             display: none;
@@ -34,7 +35,7 @@
             z-index: 1;
             left: 0;
             top: 0;
-            width: 50%;
+            width: 80%;
             height: 100%;
         }
 
@@ -55,7 +56,7 @@
             margin: 15% auto; 
             padding: 20px;
             border: 1px solid #888;
-            width: 80%; 
+            width: 70%; 
             border-radius: 20px;
         }
 
@@ -63,7 +64,7 @@
             background-color: #fefefe;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
+            width: 100%; 
             border-radius: 20px;
         }
 
@@ -73,11 +74,22 @@
             float: right;
             font-size: 28px;
             font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-edit {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         .close:hover,
-        .close:focus {
-            color: black;
+        .close:focus,
+        .close-edit:hover
+        .close-edit:focus {
+            color: red;
             text-decoration: none;
             cursor: pointer;
         }
@@ -114,7 +126,8 @@
             text-align: center;
         }
 
-        #tripScheduleSave {
+        .trip-schedule-save,
+        .trip-schedule-edit{
             background-color: orangered;
             color: white;
             text-align: center;
@@ -166,10 +179,12 @@
         #tripDelete {
             cursor: pointer;
             color: red;
+            text-align: center;
         }
         
         #editTripButton{
             cursor: pointer;
+            text-align: center;
         }
 
         #editTripButton::after {
@@ -178,7 +193,16 @@
             border-bottom: 1px solid black; 
         }
 
-      
+        #addTripButton{
+            border-radius: 20px;
+            border-style: none;
+            background: orangered;
+            width: 8%;
+            /* height: 23%; */
+        }
+
+        
+
 
     </style>
 </head>
@@ -219,17 +243,26 @@
         <!-- Modal 3 -->
         <div id="EditTripModal" class="edit-trip-modal">
             <div class="edit-trip-modal-content">
-                <!-- Detailed trip information will be displayed here -->
-                <span class="close-edit">&times;</span> <!-- Close button for the modal -->
+                <span class="close-edit">&times;</span> 
+                <form id="trip_create_form">
+                    <input type="text" name="origin" id="origin" placeholder="Enter Origin" required>
+            
+                    <input type="text" name="destination" id="destination" placeholder="Enter Destination" required>
+            
+                    <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required>
+            
+                    <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required>
+            
+                    <input type="number" name="price" id="price" placeholder="Enter Price" required>
+            
+                    <input type="submit" id="tripeditsubmitButton" value="Submit">
+                </form>
             </div>
         </div>
-
-
-
-
     </table>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <script src="{% static 'main/js/access_token.js' %}"></script>
     <script>
        $(document).ready(function() {
@@ -319,7 +352,7 @@ $('#tripScheduleBody').on('click', 'tr', function() {
         modalContent.append('<div>' +
             '<label>Notes</label>' + '<br>' +
             '<p id="notesContent">' + tripData.notes + '</p>' +
-            '<button id="editNotesButton">Edit</button>' +
+            '<button id="editNotesButton" class="trip-schedule-edit">Edit</button>' +
         '</div>');
     } else {
         modalContent.append('<div>' +
@@ -329,9 +362,6 @@ $('#tripScheduleBody').on('click', 'tr', function() {
                 '<button type="button" class="trip-schedule-save">' + 'Save' + '</button>');
     }
 
-
-
-    // Show modal
     $('#tripDetailsModal').show();
 });
 
@@ -339,28 +369,46 @@ $('#tripScheduleBody').on('click', 'tr', function() {
 
     // Add click event listener to table rows for trip edit modal
 $(document).on('click', '#editTripButton', function(e) {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
 
-    // Retrieve data associated with the clicked row
     var tripData = $(this).data('trip');
 
-    // Select the parent modal
+    var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
+        if (!tripDataAttr) {
+            console.error("Trip data attribute not found.");
+            return;
+        }
+
+        var tripInfo;
+        try {
+            tripInfo = JSON.parse(tripDataAttr);
+            console.error("tripInfo:", tripInfo);
+        } catch (error) {
+            console.error("Error parsing trip data:", error);
+            return;
+        }
+
     var tripEditModal = $('#EditTripModal');
 
-    // Populate modal with detailed information
-    var modalContent = tripEditModal.find('.edit-trip-modal-content');
-    
-    // Populate modal with detailed information
-    modalContent.empty(); // Clear previous content
-    modalContent.append('<p>Assign</p>');
-    modalContent.append('<p>Edit</p>');
-    modalContent.append('<p>Delete</p>');
-    console.log("Modal content HTML:", modalContent.html()); // Log modalContent HTML to check if content is appended correctly
+    var currentOrigin = tripInfo.origin;
+    var currentDestination = tripInfo.destination;
+    var currentDepartureDate = tripInfo.departure_date;
+    var currentDepartureTime = tripInfo.departure_time;
+    var currentPrice = tripInfo.price;
 
-    // Show modal
+
+    $('#origin').val(currentOrigin);
+    $('#destination').val(currentDestination);
+    $('#departure_date').val(currentDepartureDate);
+    $('#departure_time').val(currentDepartureTime);
+    $('#price').val(currentPrice);
+
+
+
+
     tripEditModal.show();
 });
-
+ 
 $('#tripScheduleTable').on('click', 'tr', function() {
 
 
@@ -372,7 +420,6 @@ var modalContent = tripEditModal.find('.edit-modal-content');
 
 // Populate modal with detailed information
 modalContent.empty(); // Clear previous content
-modalContent.append('<p>Assign</p>');
 modalContent.append('<p id="editTripButton">Edit</p>');
 modalContent.append('<p id="tripDelete">Delete</p>');
 console.log("Modal content HTML:", modalContent.html()); 
@@ -413,6 +460,8 @@ tripEditModal.show();
 
     $('.close-edit').click(function() {
         $('#tripEditModal').hide();
+        $('#EditTripModal').hide();
+
     });
 
 
@@ -423,7 +472,7 @@ tripEditModal.show();
         $('#notesContent').replaceWith('<textarea id="notesArea">' + currentNote + '</textarea>');
         
         // Replace the edit button with a save button
-        $('#editNotesButton').replaceWith('<button type="button" class="trip-schedule-save">' + 'Save' + '</button>');
+        $('#editNotesButton').replaceWith('<button type="button">' + 'Save' + '</button>');
     });
 
     // Event listener for the save button
@@ -435,7 +484,7 @@ tripEditModal.show();
         $('#notesArea').replaceWith('<p id="notesContent">' + editedNote + '</p>');
         
         // Replace the save button with the edit button
-        $('#saveNotesButton').replaceWith('<button id="editNotesButton">Edit</button>');
+        $('#saveNotesButton').replaceWith('<button id="editNotesButton" class="trip-schedule-edit">Edit</button>');
     });
 
 
@@ -547,7 +596,66 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
 });
 
 });
+    </script>
 
+
+<script>
+    $(document).ready(function() {
+
+    const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
+
+    $(document).on('click', '#tripeditsubmitButton', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        console.log("clicked")
+        // Retrieve tripData associated with the clicked row
+        var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
+        if (!tripDataAttr) {
+            console.error("Trip data attribute not found.");
+            return;
+        }
+
+        var tripData;
+        try {
+            tripData = JSON.parse(tripDataAttr);
+        } catch (error) {
+            console.error("Error parsing trip data:", error);
+            return;
+        }
+
+        var tripID = tripData.id;
+
+        // Construct the payload object
+        var payload = {
+            "trip_id": tripID,
+            "origin": $("#origin").val(),
+            "destination": $("#destination").val(),
+            "departure_date": $("#departure_date").val(),
+            "departure_time": $("#departure_time").val(),
+        };
+
+        // Convert the payload object to a JSON string
+        var payloadString = JSON.stringify(payload);
+
+        // Send AJAX request
+        $.ajax({
+            url: 'http://127.0.0.1:8000/api/v1/trips-schedule-edit/',
+            type: 'POST',
+            data: payloadString,
+            contentType: 'application/json',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+            },
+            success: function(response) {
+                console.log('Success:', response);
+                
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            },
+        });
+});
+    });
     </script>
 </body>
 </html>

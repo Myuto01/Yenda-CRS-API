@@ -29,7 +29,7 @@ urlpatterns = [
     path('api/v1/trips-schedule/', views.TripScheduleListView.as_view(), name='trips-schedule'),
     path('api/v1/trips-schedule-update/', views.TripScheduleUpdateView.as_view(), name='trips-schedule-update'),
     path('api/v1/trips-schedule-delete/', views.TripScheduleDelete.as_view(), name='trip-schedule-delete'),
-
+    path ('api/v1/trips-schedule-edit/', views.TripScheduleEditView.as_view(), name='trips-schedule-edit'),
     #Remove
     path('login/', views.login_view, name='login'),
     path('home/', views.home_view, name='home'),
