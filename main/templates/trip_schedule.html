@@ -1,10 +1,12 @@
+{% extends 'base.html' %}
 {% load static %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trip Schedule</title>
+    <title>{% block title %} Trip Schedule {% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
    <style>
@@ -33,10 +35,10 @@
             display: none;
             position: fixed;
             z-index: 1;
-            left: 0;
-            top: 0;
+            top: 135px;
             width: 80%;
             height: 100%;
+            margin: 0px 400px;
         }
 
         /* Modal content */
@@ -53,20 +55,36 @@
 
         .edit-modal-content {
             background-color: #fefefe;
-            margin: 15% auto; 
+            margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 70%; 
+            width: 70%;
             border-radius: 20px;
+            position: relative;
+            top: 90px;
+            left: 45px;
         }
 
         .edit-trip-modal-content {
             background-color: #fefefe;
             padding: 20px;
             border: 1px solid #888;
-            width: 100%; 
+            width: 33%;
             border-radius: 20px;
+            height: 70%;
         }
+
+        #tripeditsubmitButton {
+            position: relative;
+            background: orangered;
+            border-radius: 20px;
+            width: 45%;
+            margin: 0 68px;
+            top: 15px;
+            color: white;
+        }
+
+
 
         /* Close button */
         .close {
@@ -96,14 +114,17 @@
 
         /* CSS for highlighting the selected trip */
         .trip-selected {
-            background-color: purple;
+            background-color: #6284FF;
             color: white;
         }
 
-        #tripScheduleTable{
+        #tripScheduleTable {
             width: 50%;
-            border: 1px solid transparent; 
-            border-collapse: collapse; 
+            border: 1px solid transparent;
+            border-collapse: collapse;
+            position: relative;
+            top: 160px;
+            left: 190px;
         }
 
         td, th {
@@ -115,9 +136,11 @@
             left: 60px;
         }
 
-        #tripScheduleBody tr{
+        #tripScheduleBody tr {
             border-radius: 20px;
             cursor: pointer;
+            position: relative;
+            right: 40px;
         }
 
         .modal-header{
@@ -159,16 +182,16 @@
             top: 15px;
         }
 
-        .modal-seatssold{
+        .modal-seatssold {
             left: 30px;
             position: relative;
-            bottom: 2px;
+            bottom: 10px;
         }
 
-        .modal-seats{   
+        .modal-seats {
             position: relative;
             left: 90px;
-            bottom: 4px;
+            bottom: 11px;
         }
 
         .modal-busnumber{
@@ -193,21 +216,30 @@
             border-bottom: 1px solid black; 
         }
 
-        #addTripButton{
+        #addTripButton {
             border-radius: 20px;
-            border-style: none;
             background: orangered;
             width: 8%;
-            /* height: 23%; */
+            position: relative;
+            top: 156px;
+            left: 60%;
+            color: white;
         }
 
+        .trips-header {
+            position: relative;
+            top: 185px;
+            left: 183px;
+            width: 0;
+        }
         
 
 
     </style>
 </head>
 <body>
-    <button id="addTripButton">Add +</button>
+    <h3 class="trips-header">Trips</h3>
+    <button id="addTripButton"> + Add </button>
 
     <table id="tripScheduleTable">
         <thead>
@@ -245,15 +277,20 @@
             <div class="edit-trip-modal-content">
                 <span class="close-edit">&times;</span> 
                 <form id="trip_create_form">
-                    <input type="text" name="origin" id="origin" placeholder="Enter Origin" required>
-            
-                    <input type="text" name="destination" id="destination" placeholder="Enter Destination" required>
-            
-                    <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required>
-            
-                    <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required>
-            
-                    <input type="number" name="price" id="price" placeholder="Enter Price" required>
+                    <label for="orign">Origin</label><br>
+                    <input type="text" name="origin" id="origin" placeholder="Enter Origin" required><br><br>
+                    
+                    <label for="destination">Destination</label><br>
+                    <input type="text" name="destination" id="destination" placeholder="Enter Destination" required><br><br>
+                    
+                    <label for="departure_date">Departure Date</label><br>
+                    <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required><br><br>
+                    
+                    <label for="departure_time">Departure Time</label><br>
+                    <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required><br><br>
+                    
+                    <label for="price">Price</label><br>
+                    <input type="number" name="price" id="price" placeholder="Enter Price" required><br><br>
             
                     <input type="submit" id="tripeditsubmitButton" value="Submit">
                 </form>
@@ -342,7 +379,7 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     modalContent.append('<small class="modal-busnumber">Bus Number <br> ' + tripData.bus.number_plate + '</small>'
     + '<small class="modal-seatssold">Seats Sold <br> ' + '</small>' + '<small class="modal-seats">' + tripData.bus.booked_seats_count + '/' +  tripData.bus.total_seats + '</small><br><br>');
     modalContent.append(
-        '<label>Change Status</label>' + '<br>' +
+        '<label style="font-weight: bold;">Change Status</label>' + '<br>' +
         '<select name="trip_status" id="tripStatus">' +
                     '<option value="Upcoming">Upcoming</option>' +
                     '<option value="In Progress">In Progress</option>' +
@@ -350,13 +387,13 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     // Display notes if available, otherwise show default text
     if (tripData.notes) {
         modalContent.append('<div>' +
-            '<label>Notes</label>' + '<br>' +
+            '<label style="font-weight: bold;">Notes</label>' + '<br>' +
             '<p id="notesContent">' + tripData.notes + '</p>' +
             '<button id="editNotesButton" class="trip-schedule-edit">Edit</button>' +
         '</div>');
     } else {
         modalContent.append('<div>' +
-                    '<label>Notes</label>' + '<br>' +
+                    '<label style="font-weight: bold;">Notes</label>' + '<br>' +
                     '<textarea id="notesArea"></textarea>' +
                 '</div>' +
                 '<button type="button" class="trip-schedule-save">' + 'Save' + '</button>');
@@ -472,7 +509,7 @@ tripEditModal.show();
         $('#notesContent').replaceWith('<textarea id="notesArea">' + currentNote + '</textarea>');
         
         // Replace the edit button with a save button
-        $('#editNotesButton').replaceWith('<button type="button">' + 'Save' + '</button>');
+        $('#editNotesButton').replaceWith('<button type="button" class="trip-schedule-save">' + 'Save' + '</button>');
     });
 
     // Event listener for the save button
@@ -484,7 +521,7 @@ tripEditModal.show();
         $('#notesArea').replaceWith('<p id="notesContent">' + editedNote + '</p>');
         
         // Replace the save button with the edit button
-        $('#saveNotesButton').replaceWith('<button id="editNotesButton" class="trip-schedule-edit">Edit</button>');
+        $('#saveNotesButton').replaceWith('<button id="editNotesButton" >Edit</button>');
     });
 
 
@@ -659,4 +696,5 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
     </script>
 </body>
 </html>
+{% endblock %}
 

@@ -80,6 +80,9 @@ def driver_details_view(request):
 def trip_schedule_view(request):
     return render(request, 'trip_schedule.html')
 
+def base_view(request):
+    return render(request, 'base.html')
+
 from rest_framework.exceptions import ValidationError
 
 class TripScheduleDelete(APIView):

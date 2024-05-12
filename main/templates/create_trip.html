@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,46 +9,115 @@
     <title>Bus Selection</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <style>
-        select {
-            width: 100%;
+      
+
+        .new-trip {
+            position: relative;
+            top: 100px;
+            left: 47%;
         }
+
+ 
+#tripcreatesubmitButton {
+    position: relative;
+    left: 290px;
+    width: 52%;
+    border-radius: 10px;
+    background: orangered;
+    color: white;
+    border-color: orangered;
+    cursor: pointer;
+    bottom: 220px;
+}
+
+label{
+    font-weight: 400;
+}
+
+.trip-bus-info-form {
+    left: 276px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 20%;
+    position: relative;
+    top: 129px;
+}
+
+.trip-details-entry-form {
+    width: 20%;
+    position: relative;
+    left: 730px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    bottom: 256px;
+}
+
+
+
+h2{
+    font-weight: 400;
+    font-size: 16px;
+}
+
+input,
+select {
+    border-radius: 10px;
+    height: 32px;
+}
+
+#trip_create_form {
+    position: relative;
+    left: 73px;
+}
+
     </style>
 </head>
 <body>
-    <h3>New Trip</h3>
+    <h3 class="new-trip">New Trip</h3>
+
     <form id="trip_create_form">
-        <h2>Select a bus:</h2>
-        <select id="bus-dropdown">
-            <!-- Options will be populated dynamically by JavaScript -->
-        </select>
-        <h2>Number Plate:</h2>
-        <select id="number-plate-dropdown">
-            <!-- Options will be populated dynamically by JavaScript -->
-        </select>
-        <h2>Total Seats:</h2>
-        <input type="text" id="total-seats" readonly>   
+        <div class="trip-bus-info-form">
+            <h2 class="select-bus">Select a bus:</h2>
+            <select id="bus-dropdown">
+                <!-- Options will be populated dynamically by JavaScript -->
+            </select>
+            <h2 class="bus-number-plate">Number Plate:</h2>
+            <select id="number-plate-dropdown">
+                <!-- Options will be populated dynamically by JavaScript -->
+            </select>
+            <h2 class="bus-total-seats">Total Seats:</h2>
+            <input type="text" id="total-seats" readonly>   
 
-        <h2>Features:</h2>
-        <select name="features[]" id="features-dropdown" multiple>
-            <!-- Options will be populated dynamically by JavaScript -->
-        </select>
+            <h2 class="bus-features">Features:</h2>
+            <select name="features[]" id="features-dropdown" multiple>
+                <!-- Options will be populated dynamically by JavaScript -->
+            </select>
 
-        <h2>Drivers:</h2>
-        <select name="driver" id="drivers-dropdown">
-            <!-- Options will be populated dynamically by JavaScript -->
-        </select>
+            <h2 class="bus-drivers">Drivers:</h2>
+            <select name="driver" id="drivers-dropdown">
+                <!-- Options will be populated dynamically by JavaScript -->
+            </select>
+        </div>
 
-        <!-- Trip form-->
-        <input type="text" name="origin" id="origin" placeholder="Enter Origin" required>
+        <div class="trip-details-entry-form">
+            <label for="origin" class="trip-origin-label">From</label>
+            <input type="text" name="origin" id="origin" placeholder="Enter Origin" required>
+            
+            <label for="destination" class="trip-destination-label">To</label>
+            <input type="text" name="destination" id="destination" placeholder="Enter Destination" required>
+            
+            <label for="departure_date" class="trip-departure-date">Departure Date</label>
+            <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required>
+            
+            <label for="departure_time" class="trip-departure-time-label">Departure Time</label>
+            <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required>
 
-        <input type="text" name="destination" id="destination" placeholder="Enter Destination" required>
+            <label for="price" class="trip-price-label">Price</label>
+            <input type="number" name="price" id="price" placeholder="Enter Price" required>
 
-        <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required>
-
-        <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required>
-
-        <input type="number" name="price" id="price" placeholder="Enter Price" required>
-
+        </div>
         <input type="submit" id="tripcreatesubmitButton" value="Submit">
 
     </form>
@@ -54,7 +126,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     <script>
-        const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
+
+        const accessToken = localStorage.getItem('access_token')
 
         // Fetch data from the backend API
         fetch('http://127.0.0.1:8000/api/v1/bus-list/', {
@@ -225,3 +298,4 @@
     </script>
 </body>
 </html>
+{% endblock %}

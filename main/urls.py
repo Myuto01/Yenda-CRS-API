@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/v1/trips-schedule-delete/', views.TripScheduleDelete.as_view(), name='trip-schedule-delete'),
     path ('api/v1/trips-schedule-edit/', views.TripScheduleEditView.as_view(), name='trips-schedule-edit'),
     #Remove
+    path('base/', views.base_view),
     path('login/', views.login_view, name='login'),
     path('home/', views.home_view, name='home'),
     path('test/', views.test_view, name="test"), # CReate Bus
