@@ -84,6 +84,32 @@ def base_view(request):
     return render(request, 'base.html')
 
 from rest_framework.exceptions import ValidationError
+class BusDeleteView(APIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            bus_serializer = BusSerializer(data=request.data)
+            
+            bus_serializer.is_valid(raise_exception=True)
+            
+            bus_id = request.data.get('bus_id')
+
+            bus = get_object_or_404(Bus, pk=bus_id)
+
+            bus.delete()
+
+            return Response({'success': True}, status=status.HTTP_201_CREATED)
+        
+        except ValidationError as e:
+            return Response({'error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Handle other unexpected errors
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class TripScheduleDelete(APIView):
 
@@ -443,10 +469,14 @@ class EditBusView(APIView):
         bus = get_object_or_404(Bus, pk=bus_id)
 
         # Update the bus object with the new data
-        bus.bus_type = json_data.get('bus_type')
-        bus.total_seats = json_data.get('total_seats')
-        bus.number_plate = json_data.get('number_plate')
-        bus.status = json_data.get('status')
+        if 'bus_type' in json_data:
+            bus.bus_type = json_data['bus_type']
+        if 'total_seats' in json_data:
+            bus.total_seats = json_data['total_seats']
+        if 'number_plate' in json_data:
+            bus.number_plate = json_data['number_plate']
+        if 'status' in json_data:
+            bus.status = json_data['status']
 
         # If 'features' is a ManyToManyField or similar, handle it accordingly
         features = json_data.get('features', [])
@@ -461,6 +491,7 @@ class EditBusView(APIView):
 
         # Return a success response
         return JsonResponse({'success': True})
+
 
 class TripScheduleCreateView(APIView):
 

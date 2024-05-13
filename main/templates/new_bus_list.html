@@ -257,11 +257,11 @@
     <table id="tripScheduleTable">
         <thead>
             <tr>
-                <th>Driver</th>
+                <th>Number Plate</th>
                 <th>Status</th>
-                <th>Origin</th>
-                <th>Destination</th>
-                <th>Departure Time</th>
+                <th>Seats</th>
+                <th>Model</th>
+                <th>Features</th>
             </tr>
         </thead>
 
@@ -323,7 +323,7 @@
     const accessToken = localStorage.getItem('access_token')
     
     $.ajax({
-        url: "/api/v1/trips-schedule/",
+        url: "http://127.0.0.1:8000/api/v1/bus-list/",
         type: "GET",
         beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "JWT " + accessToken); 
@@ -338,21 +338,29 @@
     });
 
     function renderDriverDetails(response) {
-    if (response.data.trip_schedule && Array.isArray(response.data.trip_schedule)) {
+    if (Array.isArray(response.data)) {
         var tripScheduleTable = $('#tripScheduleBody');
-        response.data.trip_schedule.forEach(function(trip) {
-            tripScheduleTable.append('<tr data-trip=\'' + JSON.stringify(trip) + '\'>' +
-                '<td><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + trip.driver.driver_name + '</td>' +
-                '<td id="tripStatus">' + trip.trip_status + '</td>' +
-                '<td>' + trip.origin + '</td>' +
-                '<td>' + trip.destination + '</td>' +
-                '<td>' + trip.departure_time + '</td>' +
+        response.data.forEach(function(bus) {
+            var attributes = bus.attributes; // Accessing attributes of each bus trip
+            
+            // Rendering each bus entry
+            tripScheduleTable.append('<tr data-bus=\'' + JSON.stringify(attributes) + '\'>' +
+                '<td><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + attributes.number_plate + '</td>' +
+                '<td id="tripStatus">' + attributes.status + '</td>' +
+                '<td>' + attributes.total_seats + '</td>' +
+                '<td>' + attributes.bus_type + '</td>' +
+                '<td>' + attributes.features.map(feature => feature.name).join(', ') + '</td>' +
                 '</tr>');
         });
     } else {
         console.error("Trip schedule not found in response or not an array.");
     }
 }
+
+
+
+
+
 
 // Add click event listener to table rows
 $('#tripScheduleBody').on('click', 'tr', function() {   
@@ -361,7 +369,7 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     $('.check-mark').hide();
 
     // Retrieve data associated with the clicked row
-    var tripDataAttr = $(this).attr('data-trip');
+    var tripDataAttr = $(this).attr('data-bus');
     if (!tripDataAttr) {
         return;
     }
@@ -376,41 +384,18 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     $(this).addClass('trip-selected');
     $(this).find('.check-mark').show();
 
-    var departureDate =  tripData.departure_date
-    var formattedDate = departureDate.substring(0, 10);
 
     // Populate modal with detailed information
     var modalContent = $('#tripDetailsModal .modal-content');
     modalContent.empty(); // Clear previous content
 
     // Populate modal with detailed information
-    modalContent.append('<h3 class="modal-header">' + tripData.origin + ' to ' + tripData.destination + '</h3>');
-    modalContent.append('<p>' + tripData.driver.driver_name + '</p>');
-    modalContent.append('<small>    Driver <br> ' + '</small>');
-    modalContent.append('<small class="modal-phonenumber"> ' + tripData.driver.phone_number + '</small>');
-    modalContent.append('<small class="modal-departuretime" >Departure Time <br> ' + formattedDate + ' ' + tripData.departure_time + '</small>');
-    modalContent.append('<small class="modal-busnumber">Bus Number <br> ' + tripData.bus.number_plate + '</small>'
-    + '<small class="modal-seatssold">Seats Sold <br> ' + '</small>' + '<small class="modal-seats">' + tripData.bus.booked_seats_count + '/' +  tripData.bus.total_seats + '</small><br><br>');
-    modalContent.append(
-        '<label style="font-weight: bold;">Change Status</label>' + '<br>' +
-        '<select name="trip_status" id="tripStatus">' +
-                    '<option value="Upcoming">Upcoming</option>' +
-                    '<option value="In Progress">In Progress</option>' +
-                '</select> <br><br>');
-    // Display notes if available, otherwise show default text
-    if (tripData.notes) {
-        modalContent.append('<div>' +
-            '<label style="font-weight: bold;">Notes</label>' + '<br>' +
-            '<p id="notesContent">' + tripData.notes + '</p>' +
-            '<button id="editNotesButton" class="trip-schedule-edit">Edit</button>' +
-        '</div>');
-    } else {
-        modalContent.append('<div>' +
-                    '<label style="font-weight: bold;">Notes</label>' + '<br>' +
-                    '<textarea id="notesArea"></textarea>' +
-                '</div>' +
-                '<button type="button" class="trip-schedule-save">' + 'Save' + '</button>');
-    }
+    modalContent.append('<small>    Bus Number <br> ' + '</small>');
+    modalContent.append('<small class="modal-phonenumber"> ' + tripData.number_plate + '</small>');
+    modalContent.append('<small class="modal-departuretime" > Total Seats <br> ' + tripData.total_seats + '</small>');
+    modalContent.append('<small class="modal-busnumber"> Model <br> ' + tripData.number_plate + '</small>'
+    + '<small class="modal-seatssold">Features<br> ' + '</small>' + '<small class="modal-seats">' +  bus.attributes.features.map(feature => feature.name).join(', ') +'</small><br><br>');
+    
 
     $('#tripDetailsModal').show();
 });
@@ -423,7 +408,7 @@ $(document).on('click', '#editTripButton', function(e) {
 
     var tripData = $(this).data('trip');
 
-    var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
+    var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-bus');
         if (!tripDataAttr) {
             console.error("Trip data attribute not found.");
             return;
@@ -453,15 +438,10 @@ $(document).on('click', '#editTripButton', function(e) {
     $('#departure_time').val(currentDepartureTime);
     $('#price').val(currentPrice);
 
-
-
-
     tripEditModal.show();
 });
  
 $('#tripScheduleTable').on('click', 'tr', function() {
-
-
 // Select the parent modal
 var tripEditModal = $('#tripEditModal');
 
@@ -515,34 +495,15 @@ tripEditModal.show();
     });
 
 
-    // Event listener for the edit button
-    $(document).on('click', '#editNotesButton', function() {
-        // Replace the note content with a textarea
-        var currentNote = $('#notesContent').text().trim();
-        $('#notesContent').replaceWith('<textarea id="notesArea">' + currentNote + '</textarea>');
-        
-        // Replace the edit button with a save button
-        $('#editNotesButton').replaceWith('<button type="button" class="trip-schedule-save">' + 'Save' + '</button>');
-    });
-
-    // Event listener for the save button
-    $(document).on('click', '#saveNotesButton', function() {
-        // Get the edited note content
-        var editedNote = $('#notesArea').val().trim();
-
-        // Replace the textarea with the edited note content
-        $('#notesArea').replaceWith('<p id="notesContent">' + editedNote + '</p>');
-        
-        // Replace the save button with the edit button
-        $('#saveNotesButton').replaceWith('<button id="editNotesButton" >Edit</button>');
-    });
+    
+    
 
 
 
     $(document).on('click', '#tripDelete', function() {
         console.log("clicked")
         // Retrieve tripData associated with the clicked row
-        var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
+        var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-bus');
         if (!tripDataAttr) {
             console.error("Trip data attribute not found.");
             return;
@@ -556,11 +517,11 @@ tripEditModal.show();
             return;
         }
 
-        var tripID = tripData.id;
+        var busID = tripData.id;
 
         // Construct the payload object
         var payload = {
-            trip_id: tripID,
+            bus_id: tripID,
         };
 
         // Convert the payload object to a JSON string
@@ -568,7 +529,7 @@ tripEditModal.show();
 
         // Send AJAX request
         $.ajax({
-            url: 'http://127.0.0.1:8000/api/v1/trips-schedule-delete/',
+            url: 'http://127.0.0.1:8000/api/v1/delete-bus/',
             type: 'POST',
             data: payloadString,
             contentType: 'application/json',
@@ -584,67 +545,7 @@ tripEditModal.show();
             },
         });
 });
-    // Event listener for the save button
-$("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
-    e.preventDefault(); // Prevent default form submission
-
-    // Retrieve tripData associated with the clicked row
-    var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
-    if (!tripDataAttr) {
-        console.error("Trip data attribute not found.");
-        return;
-    }
-
-    var tripData;
-    try {
-        tripData = JSON.parse(tripDataAttr);
-    } catch (error) {
-        console.error("Error parsing trip data:", error);
-        return;
-    }
-
-    var tripID = tripData.id;
-
-    // Get notes value from textarea
-    var notes = $("#notesArea").val();
-
-    // Get selected trip status from the dropdown
-    var tripStatus = $('select[name="trip_status"]').val();
-
-    // Construct the payload object
-    var payload = {
-        trip_id: tripID,
-        notes: notes,
-        trip_status: tripStatus
-    };
-
-    // Convert the payload object to a JSON string
-    var payloadString = JSON.stringify(payload);
-
-    // Send AJAX request
-    $.ajax({
-        url: 'http://127.0.0.1:8000/api/v1/trips-schedule-update/',
-        type: 'POST',
-        data: payloadString,
-        contentType: 'application/json',
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken);
-        },
-        success: function(response) {
-            console.log('Success:', response);
-            $('#notesContent').text(response.data.success.notes); 
-            $('#tripStatus').text(response.data.success.trip_status); 
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
-        },
-        complete: function() {
-            $('.trip-schedule-save').val('Save'); // Reset button text
-            $('#tripDetailsModal').hide(); // Hide modal after saving
-        }
-    });
-});
-
+    
 });
     </script>
 
@@ -659,7 +560,7 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
 
         console.log("clicked")
         // Retrieve tripData associated with the clicked row
-        var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
+        var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-bus');
         if (!tripDataAttr) {
             console.error("Trip data attribute not found.");
             return;
