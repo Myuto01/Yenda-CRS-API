@@ -363,6 +363,7 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     // Retrieve data associated with the clicked row
     var tripDataAttr = $(this).attr('data-trip');
     if (!tripDataAttr) {
+        console.error("Trip data attribute not found.");
         return;
     }
 
@@ -370,6 +371,7 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     try {
         tripData = JSON.parse(tripDataAttr);
     } catch (error) {
+        console.error("Error parsing trip data:", error);
         return;
     }
 
@@ -421,8 +423,6 @@ $('#tripScheduleBody').on('click', 'tr', function() {
 $(document).on('click', '#editTripButton', function(e) {
     e.preventDefault();
 
-    var tripData = $(this).data('trip');
-
     var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
         if (!tripDataAttr) {
             console.error("Trip data attribute not found.");
@@ -453,14 +453,10 @@ $(document).on('click', '#editTripButton', function(e) {
     $('#departure_time').val(currentDepartureTime);
     $('#price').val(currentPrice);
 
-
-
-
     tripEditModal.show();
 });
  
 $('#tripScheduleTable').on('click', 'tr', function() {
-
 
 // Select the parent modal
 var tripEditModal = $('#tripEditModal');

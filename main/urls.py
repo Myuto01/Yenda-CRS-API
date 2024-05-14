@@ -31,7 +31,7 @@ urlpatterns = [
     path('api/v1/trips-schedule-delete/', views.TripScheduleDelete.as_view(), name='trip-schedule-delete'),
     path('api/v1/trips-schedule-edit/', views.TripScheduleEditView.as_view(), name='trips-schedule-edit'),
     path('api/v1/delete-bus/', views.BusDeleteView.as_view(), name='delete-bus'),
-
+    path('api/v1/driver-delete/', views.DriverDeleteView.as_view(), name='delete driver'),
     #Remove
 
     path('base/', views.base_view),

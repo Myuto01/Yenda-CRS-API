@@ -84,6 +84,34 @@ def base_view(request):
     return render(request, 'base.html')
 
 from rest_framework.exceptions import ValidationError
+
+
+class DriverDeleteView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            driver_serializer = CreateDriverDetailsSerializer(data=request.data)
+            
+            driver_serializer.is_valid(raise_exception=True)
+            
+            driver_id = request.data.get('driver_id')
+
+            driver = get_object_or_404(DriverDetails, pk=driver_id)
+
+            driver.delete()
+
+            return Response({'success': "Deleted Successfully"}, status=status.HTTP_201_CREATED)
+        
+        except ValidationError as e:
+            return Response({'error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Handle other unexpected errors
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class BusDeleteView(APIView):
     
     authentication_classes = [JWTAuthentication]
@@ -237,7 +265,7 @@ class EditDriverDetailsView(APIView):
 
         # Retrieve the driver object from the database
         driver = get_object_or_404(DriverDetails, pk=driver_id)
-
+        driver_serializer = CreateDriverDetailsSerializer(driver)
         # Update driver attributes if the corresponding data is provided
         if 'driver_name' in request.data and request.data['driver_name']:
             driver.driver_name = request.data.get('driver_name')
@@ -258,7 +286,7 @@ class EditDriverDetailsView(APIView):
         driver.save()
 
         # Return a success response
-        return JsonResponse({'success': True})
+        return Response({'success': driver_serializer.data}, status=status.HTTP_201_CREATED)
 
 class EditDriverPicsDetailsView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -274,6 +302,8 @@ class EditDriverPicsDetailsView(APIView):
 
         # Retrieve the driver object from the database
         driver = get_object_or_404(DriverDetails, pk=driver_id)
+        
+        driver_serializer = CreateDriverDetailsSerializer(driver)
 
         # Update driver attributes if the corresponding data is provided
         if 'license_image' in request.FILES:
@@ -289,7 +319,7 @@ class EditDriverPicsDetailsView(APIView):
         driver.save()
 
         # Return a success response
-        return JsonResponse({'success': True})
+        return Response({'success': driver_serializer.data}, status=status.HTTP_201_CREATED)
 
 
 class DriverDetailsView(APIView):

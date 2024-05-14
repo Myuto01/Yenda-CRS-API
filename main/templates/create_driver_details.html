@@ -1,39 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create driver details | Yenda</title>
+    <style>
+        #driver_create_form{
+            top: 125px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 30%;
+            left: 20px;
+            gap: 7px;
+        }
+        input{
+            border-radius: 10px;
+            height: 32px;
+        }
+        input:hover{
+            border-color: #FF7300;
+        }
+        
+        .driver-create-form-container {
+            background: white;
+            width: 88%;
+            position: relative;
+            top: 140px;
+            left: 114px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Adjust values as needed */
+        }
+
+    .driver-details-header {
+        position: relative;
+        top: 140px;
+        left: 120px;
+        width: 30%;
+    }
+
+    .driver-details-file{
+        position: relative;
+        left: 700px;
+        width: 77%;
+        bottom: 385px;
+    }
+
+    #drivercreatesubmitButton{
+        position: relative;
+        bottom: 285px;
+        left: 850px;
+        width: 30%;
+        color: white;
+        background: #FF7300;
+        cursor: pointer;
+    }
+
+    #drivercreatecancelButton{
+        position: relative;
+        bottom: 325px;
+        left: 970px;
+        border-radius: 10px;
+        height: 32px;
+        width: 30%;
+        color: black;
+        cursor: pointer;
+    }
+
+    #drivercreatecancelButton:hover{
+      border-color: #FF7300;
+    }
+
+    </style>
 </head>
 <body>
+<h3 class="driver-details-header">Add Details</h3>
+<div class="driver-create-form-container">
     <form id="driver_create_form">
-        <input  type="text" id="driver_name" name="driver_name" placeholder="John Doe" required>
+        <h3 style="text-align: center;">Driver Details</h3>
 
+        <label for="driver_name">Driver Name</label>
+        <input type="text" id="driver_name" name="driver_name" placeholder="John Doe" required>
+    
+        <label for="license_number">License Number*</label>
         <input type="text" id="license_number" name="license_number" placeholder="1234-5678-90" required>
-
+    
+        <label for="nrc_number">NRC Number*</label>
         <input type="text" id="nrc_number" name="nrc_number" placeholder="805154/10/1" required>
-
+    
+        <label for="phone_number">Phone Number*</label>
         <input type="tel" id="phone_number" name="phone_number" placeholder="0966142238" required>
-
-        <input type="text" id="passport_number" name="passport_number" placeholder="134567" >
-
-        <!--Include File inputs as well-->
-        <input type="file" id="license_image" name="license_image">
-
-        <input type="file" id="nrc_image" name="nrc_image">
-
-        <input type="file" id="passport_image" name="passport_image">
-
-
+    
+        <label for="passport_number">Passport Number</label>
+        <input type="text" id="passport_number" name="passport_number" placeholder="134567">
         
+        <div class="driver-details-file">
+            <!-- Include File inputs as well -->
+            <h3 style="text-align: center;">Driver Documents</h3><br>
+            <p style="text-align: center;">Documents should be clear</p><br>
+            <label for="license_image">License </label>
+            <input type="file" id="license_image" name="license_image">
+        
+            <label for="nrc_image">NRC</label>
+            <input type="file" id="nrc_image" name="nrc_image">
+        
+            <label for="passport_image">Passport</label>
+            <input type="file" id="passport_image" name="passport_image">
+        </div>
+       
         <input type="submit" id="drivercreatesubmitButton" value="Submit">
-
+        <button type="button" id="drivercreatecancelButton">Cancel</button>
     </form>
+</div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-    const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0ODkyODMxLCJpYXQiOjE3MTMxNjQ4MzEsImp0aSI6Ijk5YjIzMjAzZDljNDRkNGZhNWFjMTQ2YTZhZTBmZDBmIiwidXNlcl9pZCI6OX0.8dDNaXopAyrWrdTqut4-7sNLOnN2nyXhYLPMpchnLxo";
+    const accessToken = localStorage.getItem('access_token')
 
     $("#driver_create_form").submit(function(e) {
         e.preventDefault(); // Prevent default form submission
@@ -99,3 +184,4 @@
 
 </body>
 </html>
+{% endblock %}

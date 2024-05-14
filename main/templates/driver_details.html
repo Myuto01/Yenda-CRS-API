@@ -1,11 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Details</title>
+    <title>{% block title %} Driver Details {% endblock %}</title>
+
+    <style>
+
+        .driver-details-container{
+            padding: 50px;
+            width: 89%;
+            position: relative;
+            top: 105px;
+            left: 120px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Adjust values as needed */
+        }
+
+        #driverEditModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            bottom: 28px;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            overflow: auto; /* Enable scrolling if content overflows */
+        }
+
+        #driverEditPicsModal{
+            display: none;
+            position: fixed;
+            z-index: 1;
+            bottom: 28px;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            overflow: auto; /* Enable scrolling if content overflows */
+        }
+
+        #editDriverForm {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
+            border-radius: 20px;
+            position: relative;
+            left: 45px;
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            bottom: 115px;
+        }
+
+        #editDriverPicsForm{
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
+            border-radius: 20px;
+            position: relative;
+            left: 45px;
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            bottom: 80px;
+        }
+
+        label{
+            margin: 0 40px;
+        }
+
+        input {
+            width: 78%;
+            border-radius: 10px;
+            height: 32px;
+            margin: 0 35px;
+        }
+
+        input:hover {
+            border-color: #FF7300;
+        }
+
+        #editDriverDetailsButton{
+            background: #FF7300;
+            color: white;
+            cursor: pointer;
+        }
+
+        #cancelDriverDetailsButton {
+            width: 79%;
+            border-radius: 10px;
+            height: 32px;
+            margin: 0 34px;
+            background: white;
+            color: #FF7300;
+            border-color: #FF7300;
+            cursor: pointer;
+        }
+
+        #cancelDriverPicDetailsButton{
+            width: 79%;
+            border-radius: 10px;
+            height: 32px;
+            margin: 0 34px;
+            background: white;
+            color: #FF7300;
+            border-color: #FF7300;
+            cursor: pointer;
+        }
+
+
+        #editDriverDetailsButton:hover,
+        #cancelDriverDetailsButton:hover,
+        #cancelDriverPicDetailsButton:hover{
+            border-color: #6284FF;
+        }
+
+        .driver-info{
+            display: flex;
+            flex-direction: row;
+            gap: 155px;
+        }
+
+        .contact-info{
+            display: flex;
+            flex-direction: row;
+            gap: 117px;
+        }
+
+        #editDriverButton{
+            margin-left: 100%;
+            position: relative;
+            bottom: 165px;
+            background: white;
+            border-style: none;
+            cursor: pointer;
+        }
+
+        #editDriverPicsButton{
+            margin-left: 100%;
+            position: relative;
+            bottom: 165px;
+            background: white;
+            border-style: none;
+            cursor: pointer;
+        }
+
+        .document-details{
+            display: flex;
+            flex-direction: row;
+            gap: 120px;
+        }
+    </style>
 </head>
 <body>
+    <div class="driver-details-container">
     <div id="driverDetailsContainer">
         <!-- Driver details will be dynamically rendered here -->
         
@@ -15,21 +174,7 @@
         <i class="fas fa-edit"></i> Edit
     </button>
 
-    <div id="driverEditModal" style="display: none;">
-        <form action="" method="post" id="editDriverForm">
-            <input type="text" name="driver_name" id="driver_name" placeholder="Edit Driver Name">
-
-            <input type="text" name="license_number" id="license_number" placeholder="Edit license_number">
-
-            <input type="text" name="nrc_number" id="nrc_number" placeholder="Edit nrc_number">
-
-            <input type="text" name="passport_number" id="passport_number" placeholder="Edit passport number">
-
-            <input type="tel" name="phone_number" id="phone_number" placeholder="Edit Phone number">
-
-            <input type="submit" value="Edit" id="editDriverDetailsButton">
-        </form>
-    </div>
+    
 
     <div id="driverDocumentsContainer">
         <!-- Driver details will be dynamically rendered here -->
@@ -38,44 +183,79 @@
     <button id="editDriverPicsButton">
         <i class="fas fa-edit"></i> Edit
     </button>
+</div>
 
-    <div id="driverEditPicsModal" style="display: none;">
-        <form action="" method="post" id="editDriverPicsForm">
-            <input type="file" name="license_image" id="license_image" >
+<div id="driverEditModal" style="display: none;">
+    <form action="" method="post" id="editDriverForm">
+        <h4 style="text-align: center;">Driver Details</h4>
+        <label for="driver_name">Edit Driver Name:</label>
+        <input type="text" name="driver_name" id="driver_name" placeholder="Edit Driver Name">
+    
+        <label for="license_number">Edit License Number:</label>
+        <input type="text" name="license_number" id="license_number" placeholder="Edit License Number">
+    
+        <label for="nrc_number">Edit NRC Number:</label>
+        <input type="text" name="nrc_number" id="nrc_number" placeholder="Edit NRC Number">
+    
+        <label for="passport_number">Edit Passport Number:</label>
+        <input type="text" name="passport_number" id="passport_number" placeholder="Edit Passport Number">
+    
+        <label for="phone_number">Edit Phone Number:</label>
+        <input type="tel" name="phone_number" id="phone_number" placeholder="Edit Phone Number">
+    
+        <input type="submit" value="Save" id="editDriverDetailsButton">
+        <button type="button" id="cancelDriverDetailsButton">Cancel</button>
+    </form>
+</div>
 
-            <input type="file" name="nrc_image" id="nrc_image" >
-
-            <input type="file" name="passport_image" id="passport_image">
-
-            <input type="submit" value="Edit" id="editDriverDetailsButton">
-        </form>
-    </div>
-
+<div id="driverEditPicsModal" style="display: none;">
+    <form action="" method="post" id="editDriverPicsForm">
+        <h4 style="text-align: center;">Driver Details</h4>
+        <small style="text-align: center;">Documents must be clear</small>
+    
+        <label for="license_image">License Image:</label>
+        <input type="file" name="license_image" id="license_image">
+    
+        <label for="nrc_image">NRC Image:</label>
+        <input type="file" name="nrc_image" id="nrc_image">
+    
+        <label for="passport_image">Passport Image:</label>
+        <input type="file" name="passport_image" id="passport_image">
+    
+        <input type="submit" value="Save" id="editDriverDetailsButton">
+        <button type="button" id="cancelDriverPicDetailsButton">Cancel</button>
+    </form>
+    
+</div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
 
-            $('#editDriverButton').click(function() {
-            $('#driverEditModal').css('display', 'block');
+            $(window).click(function(event) {
+                if (event.target == $('#driverEditModal')[0]) {
+                    $('#driverEditModal').hide();
+                }
             });
+
+            
 
             // Hide modal when close button is clicked
-            $('#closeModalButton').click(function() {
-                $('#driverEditModal').css('display', 'none');
+            $(window).click(function(event) {
+                if (event.target == $('#driverEditPicsModal')[0]) {
+                    $('#driverEditPicsModal').hide();
+                }
             });
 
-            //Pictures
-
-            $('#editDriverPicsButton').click(function() {
-            $('#driverEditPicsModal').css('display', 'block');
+            $('#cancelDriverDetailsButton').click(function() {
+                $('#driverEditModal').hide();
             });
 
-            // Hide modal when close button is clicked
-            $('#closeModalButton').click(function() {
-                $('#driverEditModal').css('display', 'none');
+            $('#cancelDriverPicDetailsButton').click(function() {
+                $('#driverEditPicsModal').hide();
             });
 
-            const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
+            
+            const accessToken = localStorage.getItem('access_token')
 
             // Extract the driver ID from the query parameter
             var urlParams = new URLSearchParams(window.location.search);
@@ -86,6 +266,8 @@
             };
 
             console.log('Driver', payload)
+            
+            var driverName, licenseImage, licenseNumber, nrcImage, nrcNumber, passportImage, passportNumber, phoneNumber;
 
             // Make an AJAX request to fetch the full details of the selected driver
             $.ajax({
@@ -109,43 +291,81 @@
             // Function to render driver details
             function renderDriverDetails(response) {
                 var attributes = response.data.attributes;
-                var driverName = attributes.driver_name;
-                var licenseImage = attributes.license_image;
-                var licenseNumber = attributes.license_number;
-                var nrcImage = attributes.nrc_image;
-                var nrcNumber = attributes.nrc_number;
-                var passportImage = attributes.passport_image;
-                var passportNumber = attributes.passport_number;
-                var phoneNumber = attributes.phone_number;
+                driverName = attributes.driver_name;
+                licenseImage = attributes.license_image;
+                licenseNumber = attributes.license_number;
+                nrcImage = attributes.nrc_image;
+                nrcNumber = attributes.nrc_number;
+                passportImage = attributes.passport_image;
+                passportNumber = attributes.passport_number;
+                phoneNumber = attributes.phone_number;
               
-                var detailsHtml = '<h1>Driver Details</h1>';
-                detailsHtml += '<p>Driver Name: ' + driverName + '</p>';
-                detailsHtml += '<p>License Number: ' + licenseNumber + '</p>';
-                detailsHtml += '<p>NRC Number: ' + nrcNumber + '</p>';
-                detailsHtml += '<p>Passport Number: ' + passportNumber + '</p>';
-                detailsHtml += '<p>Phone number: ' + phoneNumber + '</p>';
-                detailsHtml += '<img src="' + licenseImage + '" alt="License Image">';
-                detailsHtml += '<img src="' + nrcImage + '" alt="NRC Image">';
-                detailsHtml += '<img src="' + passportImage + '" alt="Passport Image">';
+                var detailsHtml = '<h3>Driver details</h3>';
+                detailsHtml += '<div class="driver-info">';
+                detailsHtml += '<p>Driver Name:<br><strong> ' + driverName + '</strong></p>';
+                detailsHtml += '<p>License Number:<br><strong>' + licenseNumber + '</strong></p>';
+                detailsHtml += '<p>NRC Number:<br><strong> ' + nrcNumber + '</strong></p>';
+                detailsHtml += '</div><br>'; // Close driver-info div
+
+                detailsHtml += '<div class="contact-info">';
+                detailsHtml += '<p>Passport Number:<br> <strong>' + passportNumber + '</strong></p>';
+                detailsHtml += '<p>Phone number:<br> <strong>' + phoneNumber + '</strong></p>';
+                detailsHtml += '</div><br>'; // Close contact-info div
 
                 $('#driverDetailsContainer').html(detailsHtml);
+
             }
 
 
             function renderDriverDocuments(response) {
                 var attributes = response.data.attributes;
-                var passportImage = attributes.passport_image;
-                var licenseImage = attributes.license_image;
-                var passportImage = attributes.passport_image;
-                var nrcImage = attributes.nrc_image;
+                passportImage = attributes.passport_image;
+                licenseImage = attributes.license_image;
+                passportImage = attributes.passport_image;
+                nrcImage = attributes.nrc_image;
 
-                var detailsHtml = '<h1>Driver Documents</h1>';
-                detailsHtml += '<img src="' + licenseImage + '" alt="License Image">';
-                detailsHtml += '<img src="' + nrcImage + '" alt="NRC Image">';
-                detailsHtml += '<img src="' + passportImage + '" alt="Passport Image">';
+                var detailsHtml = '<h3>Driver documents</h3>';
+                detailsHtml += '<div class="document-details">'; // Start of div
+                detailsHtml += '<p>Drivers License <br> <a href="' + licenseImage + '" target="_blank">' + 'License Image' + '</a></p>';
+                detailsHtml += '<p>NRC <br> <a href="' + nrcImage + '" target="_blank">' + 'NRC Image' + '</a></p>';
+                detailsHtml += '</div> <br>'; // End of div
+                detailsHtml += '<p>Passport <br> <a href="' + passportImage + '" target="_blank">' + 'Passport Image' + '</a></p>';
 
                 $('#driverDocumentsContainer').html(detailsHtml);
-            }
+
+
+            }   
+
+            $('#editDriverButton').click(function() {
+                var driverEditModal = $('#driverEditModal');
+
+                // Populate modal fields with driver details
+                $('#driver_name').val(driverName);
+                $('#license_number').val(licenseNumber);
+                $('#nrc_number').val(nrcNumber);
+                $('#passport_number').val(passportNumber);
+                $('#phone_number').val(phoneNumber);
+
+                driverEditModal.show();
+            });
+
+            //Pictures
+            $('#editDriverPicsButton').click(function() {
+                var driverEditPicsModal = $('#driverEditPicsModal');
+
+                // Populate modal fields with image URLs
+                $('#license_image_link').attr('href', licenseImage);
+                $('#nrc_image_link').attr('href', nrcImage);
+                $('#passport_image_link').attr('href', passportImage);
+
+                driverEditPicsModal.show();
+            });
+
+
+            
+
+            
+
 
 
             $("#editDriverForm").submit(function(e) {
@@ -247,3 +467,4 @@
     </script>
 </body>
 </html>
+{% endblock %}
