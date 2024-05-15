@@ -64,7 +64,7 @@ class Bus(models.Model):
     seat_picture = models.ImageField(upload_to='media/buses/', null=True, blank=True)
 
     def __str__(self):
-        return f"User: {self.user}, Bus: {self.bus_type}, Number Plate: {self.number_plate}"
+        return f"ID: {self.id}, User: {self.user}, Bus: {self.bus_type}, Number Plate: {self.number_plate}"
 
 class Seat(models.Model):
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)
@@ -112,6 +112,7 @@ class TripSchedule(models.Model):
 
 
 class Ticket(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=9)
     trip = models.ForeignKey(TripSchedule, on_delete=models.CASCADE)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default="")
     passenger_name = models.CharField(max_length=255, default="", null=True)

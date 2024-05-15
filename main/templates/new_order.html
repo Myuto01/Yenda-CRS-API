@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!--new_order.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} New Order {% endblock %}</title>
+    <style>
+        .new-order-header{
+            position: relative;
+            top: 100px;
+            left: 145px;
+            width: 10%;
+        }
+
+        #newOrderForm {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+    margin-left: 7%;
+}
+
+.new_order_a {
+    position: relative;
+    top: 134px;
+    display: flex;
+    gap: 0px;
+    flex-direction: column;
+}
+
+.new_order_b {
+    margin-left: 174%;
+    width: 120%;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    position: relative;
+    bottom: 278px;
+    left: 115px;
+}
+
+#newOrderSubmitButton {
+    position: relative;
+    bottom: 195px;
+    left: 860px;
+    width: 50%;
+    cursor: pointer;
+    background: #FF7300;
+    color: white;
+}
+
+        #newOrderSubmitButton:hover{
+            border: 2px solid #FF7300;
+            color: white;
+            border-color: #6284FF;
+        }
+      
+        input,
+        select{
+            width: 155%;
+            border-radius: 10px;
+            height: 32px;
+        }
+
+        input:hover,
+        select:hover{
+            border: 1px solid #FF7300;
+        }
+
+        .neworder-form {
+    background: white;
+    width: 89%;
+    position: relative;
+    top: 140px;
+    left: 101px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    height: 20%;
+}
+    </style>
+</head>
+<body>
+     <h3 class="new-order-header">New Order</h3>
+     <div class="neworder-form">
+        <form method="post" action="" id="newOrderForm">
+            <div class="new_order_a">
+                <label for="trip_origin">Origin:</label>
+                <input type="text" name="trip_origin" id="trip_origin" placeholder="Enter trip origin" required><br>
+                
+                <label for="trip_destination">Destination:</label>
+                <input type="text" name="trip_destination" id="trip_destination" placeholder="Enter trip destination" required><br>
+                
+                <label for="trip_date">Date:</label>
+                <input type="date" name="trip_date" id="trip_date" required><br>
+                
+                <label for="trip_time">Time:</label>
+                <input type="time" name="trip_time" id="trip_time" placeholder="Enter trip destination" required><br>
+                
+                <label for="busSelect">Select Bus:</label>
+                <select name="busSelect" id="busSelect" required>
+                    <option value="" disabled selected hidden>Select bus</option>
+                    
+                </select><br>
+
+            </div>
+
+            <div class="new_order_b">
+                <label for="passenger_name">Passenger Name:</label>
+                <input type="text" name="passenger_name" id="passenger_name" placeholder="Enter passenger name" required><br>
+            
+                <label for="passenger_phonenumber">Passenger Phone Number:</label>
+                <input type="tel" name="passenger_phonenumber" id="passenger_phonenumber" placeholder="Enter phone number" required><br>
+                
+                <label for="passenger_seatnumber">Seat Number:</label>
+                <input type="number" name="passenger_seatnumber" id="passenger_seatnumber" placeholder="Enter seat number" required><br>
+            
+                <label for="payment_method">Payment Method:</label>
+                <select name="payment_method" id="payment_method" required>
+                    <option value="" disabled selected hidden>Choose payment method</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Mobile Money">Mobile Money</option>
+                </select><br>
+        </div>
+
+            <input type="submit" value="Proceed" id="newOrderSubmitButton">
+        
+        </form>
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            
+            const accessToken = localStorage.getItem('access_token')
+
+            $.ajax({
+                url: "http://127.0.0.1:8000/api/v1/bus-list/",
+                type: "GET",
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("Authorization", "JWT " + accessToken); 
+                },
+                success: function(response) {
+                    console.log("Response:", response);
+                    renderBusOptions(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching features:", error);
+                }
+            });
+
+            function renderBusOptions(response) {
+                if (Array.isArray(response.data)) {
+                    var selectElement = $('#busSelect');
+
+                    // Clear existing options
+                    selectElement.empty();        
+
+                    response.data.forEach(function(bus) {
+                        // Accessing attributes of each bus trip
+                        var attributes = bus.attributes;
+
+                        // Add each bus as an option
+                        selectElement.append($('<option>', {
+                            value: bus.id,
+                            text: attributes.number_plate
+                        }));
+                    });
+                } else {
+                    console.error("Bus data not found in response or not an array.");
+                }
+            }
+
+            $('#newOrderSubmitButton').click(function(e) {
+            e.preventDefault();
+                var access_token = localStorage.getItem('access_token')
+                // Serialize form data
+                var formData = {
+                    "passenger_name": $("#passenger_name").val(),
+                    "passenger_phonenumber": $("#passenger_phonenumber").val(),
+                    "seat_number": $("#passenger_seatnumber").val(),
+                    "trip": {
+                        "origin": $("#trip_origin").val(),
+                        "destination": $("#trip_destination").val(),
+                        "departure_date": $("#trip_date").val(),
+                        "departure_time": $("#trip_time").val()
+                    },
+                    "bus": {
+                        "bus_id": $("#busSelect").val()
+                    }
+                }
+                    
+    
+                var formDataString = JSON.stringify(formData);
+                
+                console.log("Data:", formDataString)
+    
+                $.ajax({
+                    url: '/api/v1/new-order/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: formDataString,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("Authorization", "JWT " + access_token);
+                    },
+                    success: function(response) {
+                        console.log('Response:', response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error submitting form:', error);
+                        // Handle error response
+                    }
+                });
+            });
+    });
+    </script>
+    </body>
+    </html>
+{% endblock %}

@@ -210,11 +210,13 @@ class TripSubmissionSerializer(serializers.ModelSerializer):
 
 class TicketSerializer(serializers.ModelSerializer):
 
-    bus = BusSerializer()
+    bus = BusSerializer(required=False)
     trip = TripScheduleSerializer()
 
     class Meta:
         model = Ticket
         fields = '__all__'
+
+
 
 

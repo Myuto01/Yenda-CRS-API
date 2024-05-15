@@ -15,7 +15,6 @@ from twilio.base.exceptions import TwilioException
 from rest_framework.parsers import JSONParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import AuthenticationFailed, APIException
-#from django.core.exceptions import MultipleObjectsReturned
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import json
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -83,7 +82,74 @@ def trip_schedule_view(request):
 def base_view(request):
     return render(request, 'base.html')
 
+def order_list_view(request):
+    return render(request, 'order_list.html')
+
+def new_order_view(request):
+    return render(request, 'new_order.html')
+
 from rest_framework.exceptions import ValidationError
+
+class NewOrderView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = TicketSerializer(data=request.data)
+        if serializer.is_valid():
+            # Retrieve bus ID from the payload
+            bus_id = request.data.get('bus', {}).get('bus_id')
+            print('Bus Id', bus_id)
+            # Check if bus_id is provided
+            if not bus_id:
+                return Response({'error': 'Bus ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                # Retrieve the Bus instance corresponding to the provided bus_id
+                bus = Bus.objects.get(pk=bus_id)
+                print('Bus:', bus)
+            except Bus.DoesNotExist:
+                return Response({'error': 'Invalid Bus ID'}, status=status.HTTP_400_BAD_REQUEST)
+                    
+            # Create new trip
+            trip_data = request.data.get('trip')
+            trip = TripSchedule.objects.create(
+                origin=trip_data.get('origin'),
+                destination=trip_data.get('destination'),
+                departure_date=trip_data.get('departure_date'),
+                departure_time=trip_data.get('departure_time'),
+                bus=bus 
+            )
+
+            print('Done')
+
+            # Create new ticket associated with the trip
+            ticket = Ticket.objects.create(
+                passenger_name=request.data.get('passenger_name'),
+                passenger_phonenumber=request.data.get('passenger_phonenumber'),
+                seat_number=request.data.get('seat_number'),
+                trip=trip,
+                bus=bus
+            )
+            print('Done')
+            # Serialize the created ticket and return response
+            serialized_ticket = TicketSerializer(ticket)
+            print('serialized_ticket', serialized_ticket)
+            return Response(serialized_ticket.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TicketListView(APIView):
+    
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Assuming YourModel has a ForeignKey to the User model
+        queryset = Ticket.objects.filter(user=request.user)  # Filter objects for the current user
+        serializer = TicketSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class DriverDeleteView(APIView):

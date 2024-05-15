@@ -31,8 +31,12 @@ urlpatterns = [
     path('api/v1/trips-schedule-delete/', views.TripScheduleDelete.as_view(), name='trip-schedule-delete'),
     path('api/v1/trips-schedule-edit/', views.TripScheduleEditView.as_view(), name='trips-schedule-edit'),
     path('api/v1/delete-bus/', views.BusDeleteView.as_view(), name='delete-bus'),
-    path('api/v1/driver-delete/', views.DriverDeleteView.as_view(), name='delete driver'),
+    path('api/v1/driver-delete/', views.DriverDeleteView.as_view(), name='delete-driver'),
+    path('api/v1/ticket-list/', views.TicketListView.as_view(), name='ticket-list'),
+    path('api/v1/new-order/', views.NewOrderView.as_view(), name='new-order'),
+
     #Remove
+
 
     path('base/', views.base_view),
     path('login/', views.login_view, name='login'),
@@ -52,6 +56,9 @@ urlpatterns = [
     path('qr-code-scanner/', views.qr_code_scanner_view, name='qr-code-scanner'),
     path('bus-list/', views.bus_list_view, name='bus-list'),
     path('edit-bus/', views.edit_bus_view, name='edit-bus'),
-    path('driver-list/', views.driver_list_view),
-    path('trip-schedule/', views.trip_schedule_view, name="trip-schedule" )
+    path('driver-list/', views.driver_list_view, name='driver-list'),
+    path('trip-schedule/', views.trip_schedule_view, name='trip-schedule' ),
+    path('order-list/', views.order_list_view, name='order-list'),
+    path('new-order/', views.new_order_view, name='new-order-template'),
+
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

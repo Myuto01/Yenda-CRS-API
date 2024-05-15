@@ -302,7 +302,7 @@ body.dark {
           <li class="item">
             <div href="#" class="nav_link submenu_item">
               <span class="navlink_icon">
-                <i class="bx bx-home-alt"></i>
+                <i class='bx bxs-dashboard'></i>
               </span>
               <span class="navlink">Home</span>
               <i class="bx bx-chevron-right arrow-left"></i>
@@ -320,12 +320,13 @@ body.dark {
           <!-- duplicate this li tag if you want to add or remove  navlink with submenu -->
           <!-- start -->
           <li class="item">
-            <div href="#" class="nav_link submenu_item">
+            <div href="{% url 'trip-schedule' %}" class="nav_link submenu_item">
               <span class="navlink_icon">
-                <i class="bx bx-grid-alt"></i>
+                <i class="fa fa-road" aria-hidden="true"></i>
               </span>
               <span class="navlink">Trip Schedule</span>
               <i class="bx bx-chevron-right arrow-left"></i>
+              
             </div>
 
             <ul class="menu_items submenu">
@@ -343,9 +344,9 @@ body.dark {
           <!-- duplicate these li tag if you want to add or remove navlink only -->
           <!-- Start -->
           <li class="item">
-            <a href="#" class="nav_link">
+            <a href="{% url 'bus-list' %}" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bxs-magic-wand"></i>
+                <i class='bx bxs-bus'></i>
               </span>
               <span class="navlink">Buses</span>
             </a>
@@ -353,17 +354,17 @@ body.dark {
           <!-- End -->
 
           <li class="item">
-            <a href="#" class="nav_link">
+            <a href="{% url 'driver-list' %}" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bx-loader-circle"></i>
+                <i class="fa fa-id-card-o" aria-hidden="true"></i>
               </span>
               <span class="navlink">Drivers</span>
             </a>
           </li>
           <li class="item">
-            <a href="#" class="nav_link">
+            <a href="{% url 'order-list' %}" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bx-filter"></i>
+                <i class='bx bxs-coupon'></i>
               </span>
               <span class="navlink">Orders</span>
             </a>
@@ -371,7 +372,7 @@ body.dark {
           <li class="item">
             <a href="#" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bx-cloud-upload"></i>
+                <i class="fa fa-bar-chart" aria-hidden="true"></i>
               </span>
               <span class="navlink">Analytics</span>
             </a>
@@ -382,7 +383,7 @@ body.dark {
           <li class="item">
             <a href="#" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bx-flag"></i>
+                <i class='bx bxs-cog'></i>
               </span>
               <span class="navlink">Settings</span>
             </a>
@@ -390,7 +391,7 @@ body.dark {
           <li class="item">
             <a href="#" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bx-medal"></i>
+                <i class='bx bxs-help-circle' ></i>
               </span>
               <span class="navlink">Help and Support</span>
             </a>
@@ -398,17 +399,17 @@ body.dark {
           <li class="item">
             <a href="#" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bx-cog"></i>
+                <i class="fa fa-qrcode" aria-hidden="true"></i>
               </span>
               <span class="navlink">Scan Code</span>
             </a>
           </li>
           <li class="item">
-            <a href="#" class="nav_link">
+            <a href="{% url 'new-order' %}" class="nav_link">
               <span class="navlink_icon">
-                <i class="bx bx-layer"></i>
+                <i class='bx bx-plus'></i>
               </span>
-              <span class="navlink">Features</span>
+              <span class="navlink">New Order</span>
             </a>
           </li>
         </ul>
@@ -482,11 +483,7 @@ submenuItems.forEach((item, index) => {
   });
 });
 
-if (window.innerWidth < 768) {
-  sidebar.classList.add("close");
-} else {
-  sidebar.classList.remove("close");
-}
+
     </script>
   </body>
 </html>
