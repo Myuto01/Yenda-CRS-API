@@ -371,21 +371,7 @@ color: white
         </table>
     </div>
 
-     <!-- Modal -->
-     <div id="tripDetailsModal" class="modal">
-        <div class="modal-content">
-            <!-- Detailed trip information will be displayed here -->
-            <span class="close">&times;</span> <!-- Close button for the modal -->
-        </div>
-    </div>
-
-    <!-- Modal 2 -->
-    <div id="tripEditModal" class="edit-modal">
-        <div class="edit-modal-content">
-            <!-- Detailed trip information will be displayed here -->
-            <span class="close-edit">&times;</span> <!-- Close button for the modal -->
-        </div>
-    </div>
+     
 
     <!-- Modal 3 -->
     <div id="EditTripModal" class="edit-trip-modal">
@@ -456,9 +442,9 @@ function filterResults(searchTerm) {
 }
 
 
-                $('#closeSearchResults').on('click', function() {
-                    $('#searchResults').hide();
-                });
+$('#closeSearchResults').on('click', function() {
+    $('#searchResults').hide();
+});
 
             
     const accessToken = localStorage.getItem('access_token')
@@ -478,8 +464,15 @@ function filterResults(searchTerm) {
         }
     });
 
-function renderDriverDetails(response) {
+    function renderDriverDetails(response) {
     if (Array.isArray(response.data)) {
+        // Sort the array by departure date and time
+        response.data.sort((a, b) => {
+            const dateA = new Date(a.attributes.trip.departure_date + 'T' + a.attributes.trip.departure_time);
+            const dateB = new Date(b.attributes.trip.departure_date + 'T' + b.attributes.trip.departure_time);
+            return dateB - dateA; // Sort in descending order
+        });
+
         var tripScheduleTable = $('#tripScheduleBody');
         response.data.forEach(function(ticket) {
             // Accessing attributes of each bus trip
@@ -489,7 +482,6 @@ function renderDriverDetails(response) {
             var phoneNumber = extractPassengerName(attributes.passenger_phonenumber);
             var departureDate = stripDate(attributes.trip.departure_date)
             var departureTime = stripSeconds(attributes.trip.departure_time)
-
 
             // Include ID in the data-bus attribute
             var ticketData = {
@@ -534,190 +526,6 @@ function stripSeconds(timeString) {
     return timeString.split(":").slice(0, 2).join(":");
 }
 
- 
-$('#tripScheduleTable').on('click', 'tr', function() {
-
-    $('#tripScheduleBody').find('tr').removeClass('trip-selected');
-    $('.check-mark').hide();
-
-    // Select the clicked row, mark it as selected, and show the check mark
-    $(this).addClass('trip-selected');
-    $(this).find('.check-mark').show();
-
-// Select the parent modal
-var tripEditModal = $('#tripEditModal');
-
-// Populate modal with detailed information
-var modalContent = tripEditModal.find('.edit-modal-content');
-
-// Populate modal with detailed information
-modalContent.empty(); // Clear previous content
-modalContent.append('<p id="editTripButton">Edit</p>');
-modalContent.append('<p id="editTripButton">Deactivate</p>');
-modalContent.append('<p id="tripDelete">Delete</p>');
-
-// Show modal
-tripEditModal.show();
-});
-
-$(document).on('click', '#editTripButton', function(e) {
-    e.preventDefault();
-
-    var DriverDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-driver');
-        if (!DriverDataAttr) {
-            console.error("Trip data attribute not found.");
-            return;
-        }
-
-        var tripInfo;
-        try {
-            tripInfo = JSON.parse(DriverDataAttr);
-            console.log("tripInfo:", tripInfo);
-        } catch (error) {
-            console.error("Error parsing trip data:", error);
-            return;
-        }
-
-    var tripEditModal = $('#EditTripModal');
-
-    var currentDriverName = tripInfo.driver_name;
-    var currentLicenseNumber = tripInfo.license_number;
-    var currentNrcNumber = tripInfo.nrc_number;
-    var currentPhoneNumber = tripInfo.phone_number;
-    var currentPassportNumber= tripInfo.passport_number;
-
-
-    $('#driver_name').val(currentDriverName);
-    $('#license_number').val(currentLicenseNumber);
-    $('#nrc_number').val(currentNrcNumber);
-    $('#phone_number').val(currentPhoneNumber);
-    $('#passport_number').val(currentPassportNumber);
-
-    tripEditModal.show();
-});
-
-
-    // Close modal when clicking outside of it
-    $(window).click(function(event) {
-        if (event.target == $('#tripEditModal')[0]) {
-            $('#tripEditModal').hide();
-        }
-    });
-
-    // Close modal when clicking outside of it
-    $(window).click(function(event) {
-        if (event.target == $('#EditTripModal')[0]) {
-            $('#EditTripModal').hide();
-        }
-    });
-
-    $('.close-edit').click(function() {
-        $('#tripEditModal').hide();
-        $('#EditTripModal').hide();
-
-    });
-
-$(document).on('click', '#tripeditsubmitButton', function(e) {
-        e.preventDefault(); // Prevent default form submission
-
-        console.log("clicked")
-        // Retrieve driverData associated with the clicked row
-        var DriverDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-driver');
-        if (!DriverDataAttr) {
-            console.error("Driver data attribute not found.");
-            return;
-        }
-
-        var driverData;
-        try {
-            driverData = JSON.parse(DriverDataAttr);
-        } catch (error) {
-            console.error("Error parsing driver data:", error);
-            return;
-        }
-
-        var driverID = driverData.id;
-
-        // Construct the payload object
-        var payload = {
-            "driver_id": driverID,
-            "driver_name": $("#driver_name").val(),
-            "license_number": $("#license_number").val(),
-            "nrc_number": $("#nrc_number").val(),
-            "phone_number": $("#phone_number").val(),
-            "passport_number": $("#passport_number").val(),
-        };
-
-        // Convert the payload object to a JSON string
-        var payloadString = JSON.stringify(payload);
-
-        // Send AJAX request
-        $.ajax({
-            url: 'http://127.0.0.1:8000/api/v1/edit-driver-details/',
-            type: 'POST',
-            data: payloadString,
-            contentType: 'application/json',
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "JWT " + accessToken);
-            },
-            success: function(response) {
-                console.log('Success:', response);
-                
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-            },
-        });
-});
-
-
-    $(document).on('click', '#tripDelete', function() {
-        console.log("clicked")
-        // Retrieve driverData associated with the clicked row
-        var DriverDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-driver');
-        if (!DriverDataAttr) {
-            console.error("Trip data attribute not found.");
-            return;
-        }
-
-        var driverData;
-        try {
-            driverData = JSON.parse(DriverDataAttr);
-            console.log("Error parsing trip data:", driverData);
-        } catch (error) {
-            console.error("Error parsing trip data:", error);
-            return;
-        }
-
-        var DriverID = driverData.id;
-
-        // Construct the payload object
-        var payload = {
-            driver_id: DriverID,
-        };
-
-        // Convert the payload object to a JSON string
-        var payloadString = JSON.stringify(payload);
-
-        // Send AJAX request
-        $.ajax({
-            url: 'http://127.0.0.1:8000/api/v1/driver-delete/',
-            type: 'POST',
-            data: payloadString,
-            contentType: 'application/json',
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "JWT " + accessToken);
-            },
-            success: function(response) {
-                console.log('Success:', response);
-                
-            },
-            error: function(xhr, status, error) {
-                console.error('Error:', error);
-            },
-        });
-});
-    
 });
     </script>
 

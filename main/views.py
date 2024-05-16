@@ -14,11 +14,12 @@ from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
 from rest_framework.parsers import JSONParser
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.exceptions import AuthenticationFailed, APIException
+from rest_framework.exceptions import AuthenticationFailed, APIException, ValidationError
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import json
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import  permission_classes
+from django.db import IntegrityError
 
 #Remove
 
@@ -88,8 +89,6 @@ def order_list_view(request):
 def new_order_view(request):
     return render(request, 'new_order.html')
 
-from rest_framework.exceptions import ValidationError
-
 class NewOrderView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -97,21 +96,16 @@ class NewOrderView(APIView):
     def post(self, request):
         serializer = TicketSerializer(data=request.data)
         if serializer.is_valid():
-            # Retrieve bus ID from the payload
             bus_id = request.data.get('bus', {}).get('bus_id')
-            print('Bus Id', bus_id)
-            # Check if bus_id is provided
+
             if not bus_id:
                 return Response({'error': 'Bus ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
-                # Retrieve the Bus instance corresponding to the provided bus_id
                 bus = Bus.objects.get(pk=bus_id)
-                print('Bus:', bus)
             except Bus.DoesNotExist:
                 return Response({'error': 'Invalid Bus ID'}, status=status.HTTP_400_BAD_REQUEST)
                     
-            # Create new trip
             trip_data = request.data.get('trip')
             trip = TripSchedule.objects.create(
                 origin=trip_data.get('origin'),
@@ -121,20 +115,28 @@ class NewOrderView(APIView):
                 bus=bus 
             )
 
-            print('Done')
+            if Seat.objects.filter(bus=bus, seat_number=request.data.get('seat_number')).exists():
+                    return Response({'error': 'Seat number is already taken'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Create new ticket associated with the trip
+            try:
+                # Attempt to create the Seat instance
+                seat = Seat.objects.create(
+                    bus=bus,
+                    seat_number=request.data.get('seat_number'),
+                    is_booked=True
+                )
+            except IntegrityError:
+                return Response({'error': 'Seat number could not be booked'}, status=status.HTTP_400_BAD_REQUEST)
+
             ticket = Ticket.objects.create(
                 passenger_name=request.data.get('passenger_name'),
                 passenger_phonenumber=request.data.get('passenger_phonenumber'),
-                seat_number=request.data.get('seat_number'),
+                seat_number=seat,
                 trip=trip,
                 bus=bus
             )
-            print('Done')
-            # Serialize the created ticket and return response
+
             serialized_ticket = TicketSerializer(ticket)
-            print('serialized_ticket', serialized_ticket)
             return Response(serialized_ticket.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -238,10 +240,10 @@ class TripScheduleEditView(APIView):
     def post(self, request):
         try:
             trip_id = request.data.get('trip_id')
-
+            print('Trip:', trip_id)
             # Retrieve the trip schedule object
             trip_schedule = get_object_or_404(TripSchedule, pk=trip_id)
- 
+            print('trip_schedule', trip_schedule)
             # Extract non-empty fields from the request data
             valid_data = {}
             for field, value in request.data.items():
@@ -575,8 +577,9 @@ class EditBusView(APIView):
             bus.status = json_data['status']
 
         # If 'features' is a ManyToManyField or similar, handle it accordingly
-        features = json_data.get('features', [])
-        bus.features.set(features)
+        if 'features' in json_data:
+            features = json_data.get('features', [])
+            bus.features.set(features)
 
         if 'seat_picture' in request.FILES:
             seat_picture = request.FILES['seat_picture']
@@ -585,8 +588,10 @@ class EditBusView(APIView):
         # Save the changes to the bus object
         bus.save()
 
+        bus_serializer = BusSerializer(bus)
+
         # Return a success response
-        return JsonResponse({'success': True})
+        return Response(bus_serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TripScheduleCreateView(APIView):

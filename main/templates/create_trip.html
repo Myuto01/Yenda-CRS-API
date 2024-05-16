@@ -255,7 +255,7 @@ select {
 
         $("#trip_create_form").submit(function(e) {
             e.preventDefault(); // Prevent default form submission
-
+            $('#tripcreatesubmitButton').val('Submitting...');
             // Construct the payload object
             var payload = {
                 "data": {
@@ -289,9 +289,12 @@ select {
                 },
                 success: function(response) {
                     console.log('Success:', response);
+                    $('#tripcreatesubmitButton').val('Submit');
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
+                    $('#tripcreatesubmitButton').val('Submit');
+
                 }
             });
         });

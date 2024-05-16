@@ -383,11 +383,11 @@ function renderDriverDetails(response) {
 
             // Rendering each bus entry
             tripScheduleTable.append('<tr data-driver=\'' + JSON.stringify(busData) + '\'>' +
-                '<td><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + attributes.driver_name + '</td>' +
-                '<td id="tripStatus">' + attributes.license_number + '</td>' +
-                '<td>' + attributes.nrc_number + '</td>' +
-                '<td>' + attributes.passport_number + '</td>' +
-                '<td>' +  attributes.phone_number + '</td>' + // Check if features exist
+                '<td id="driverName"><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + attributes.driver_name + '</td>' +
+                '<td id="driverLicenseNumber">' + attributes.license_number + '</td>' +
+                '<td id="driverNrcNumber">' + attributes.nrc_number + '</td>' +
+                '<td id="driverPassportNumber">' + attributes.passport_number + '</td>' +
+                '<td id="driverPhoneNumber">' +  attributes.phone_number + '</td>' + // Check if features exist
                 '</tr>');
         });
     } else {
@@ -525,6 +525,16 @@ $(document).on('click', '#tripeditsubmitButton', function(e) {
             },
             success: function(response) {
                 console.log('Success:', response);
+                $('#tripScheduleBody').find('tr.trip-selected td#driverName').text(response.data.success.driver_name);
+                
+                $('#tripScheduleBody').find('tr.trip-selected td#driverLicenseNumber').text(response.data.success.license_number);
+
+                $('#tripScheduleBody').find('tr.trip-selected td#driverNrcNumber').text(response.data.success.nrc_number);
+
+                $('#tripScheduleBody').find('tr.trip-selected td#driverPassportNumber').text(response.data.success.passport_number);
+
+                $('#tripScheduleBody').find('tr.trip-selected td#driverPhoneNumber').text(response.data.success.phone_number);
+
                 
             },
             error: function(xhr, status, error) {
@@ -583,8 +593,6 @@ $(document).on('click', '#tripeditsubmitButton', function(e) {
     
 });
     </script>
-
-
 </body>
 </html>
 {% endblock %}

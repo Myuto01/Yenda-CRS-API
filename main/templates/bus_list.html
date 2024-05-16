@@ -386,11 +386,11 @@
 
             // Rendering each bus entry
             tripScheduleTable.append('<tr data-bus=\'' + JSON.stringify(busData) + '\'>' +
-                '<td><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + attributes.number_plate + '</td>' +
+                '<td id="numberPlate"><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + attributes.number_plate + '</td>' +
                 '<td id="tripStatus">' + attributes.status + '</td>' +
-                '<td>' + attributes.total_seats + '</td>' +
-                '<td>' + attributes.bus_type + '</td>' +
-                '<td>' + (attributes.features ? attributes.features.map(feature => feature.name).join(', ') : '') + '</td>' + // Check if features exist
+                '<td id="totalSeats">' + attributes.total_seats + '</td>' +
+                '<td id="busType">' + attributes.bus_type + '</td>' +
+                '<td id="Features">' + (attributes.features ? attributes.features.map(feature => feature.name).join(', ') : '') + '</td>' + // Check if features exist
                 '</tr>');
         });
     } else {
@@ -747,7 +747,19 @@ $(document).on('click', '#submitButton', function(e) {
         success: function(response) {
             console.log('Success:', response);
             $('#submitButton').val('Submit');
-            localStorage.removeItem('selectedBusId');
+            $('#tripScheduleBody').find('tr.trip-selected td#numberPlate').text(response.data.attributes.number_plate);
+
+            $('#tripScheduleBody').find('tr.trip-selected td#tripStatus').text(response.data.attributes.status);
+
+            $('#tripScheduleBody').find('tr.trip-selected td#totalSeats').text(response.data.attributes.total_seats);
+
+            $('#tripScheduleBody').find('tr.trip-selected td#busType').text(response.data.attributes.bus_type);
+
+            $('#tripScheduleBody').find('tr.trip-selected td#Features').text(response.data.attributes.features ? response.data.attributes.features.map(feature => feature.name).join(', ') : '');
+
+
+
+
         },
         error: function(xhr, status, error) {
             console.error('Error:', error);

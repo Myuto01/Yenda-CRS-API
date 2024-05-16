@@ -130,6 +130,31 @@ class TripScheduleSerializer(serializers.ModelSerializer):
         model = TripSchedule
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        bus_data = validated_data.pop('bus', None)
+        driver_data = validated_data.pop('driver', None)
+        print('Driver:', driver_data)
+
+        instance = super().update(instance, validated_data)
+
+        if user_data:
+            user_serializer = UserSerializer(instance.user, data=user_data)
+            if user_serializer.is_valid():
+                user_serializer.save()
+
+        if bus_data:
+            bus_serializer = BusSerializer(instance.bus, data=bus_data)
+            if bus_serializer.is_valid():
+                bus_serializer.save()
+
+        if driver_data:
+            driver_serializer = CreateDriverDetailsSerializer(instance.driver, data=driver_data)
+            if driver_serializer.is_valid():
+                driver_serializer.save()
+
+        return instance
+
 
 class FeatureSerializer(serializers.ModelSerializer):
 

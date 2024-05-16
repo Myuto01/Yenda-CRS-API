@@ -132,21 +132,21 @@
         }
 
         #tripScheduleTable {
-            width: 50%;
+            width: 100%;
             border: 1px solid transparent;
             border-collapse: collapse;
             position: relative;
-            top: 160px;
-            left: 190px;
+            bottom: 55px;
+            left: -16px;
         }
 
         td, th {
             border: 0 solid transparent; /* Sets the border color of cells and headers to transparent */
         }
   
-        #tripScheduleBody{
+        #tripScheduleBody {
             position: relative;
-            left: 60px;
+            left: 44px;
         }
 
         #tripScheduleBody tr {
@@ -237,79 +237,102 @@
             top: 156px;
             left: 60%;
             color: white;
+            cursor: pointer;
+        }
+
+        #addTripButton:hover {
+            border-color: #6284FF;
         }
 
         .trips-header {
             position: relative;
             top: 185px;
-            left: 183px;
+            left: 115px;
+            font-size: 28px;
             width: 0;
         }
         
 
+    .trips-table-form   {
+        padding: 83px 50px;
+        background: white;
+        width: 68%;
+        position: relative;
+        top: 176px;
+        left: 105px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 
+    }
     </style>
 </head>
 <body>
     <h3 class="trips-header">Trips</h3>
     <button id="addTripButton"> + Add </button>
+    
+    <div class="trips-table-form">
+    
+        <table id="tripScheduleTable">
+            <thead>
+                <tr>
+                    <th>Driver</th>
+                    <th>Status</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Departure Time</th>
+                </tr>
+            </thead>
 
-    <table id="tripScheduleTable">
-        <thead>
-            <tr>
-                <th>Driver</th>
-                <th>Status</th>
-                <th>Origin</th>
-                <th>Destination</th>
-                <th>Departure Time</th>
-            </tr>
-        </thead>
-
-        <tbody id="tripScheduleBody">
-            <!-- Trip schedule data will be inserted here dynamically -->
-        </tbody>
-
-        <!-- Modal -->
-        <div id="tripDetailsModal" class="modal">
-            <div class="modal-content">
-                <!-- Detailed trip information will be displayed here -->
-                <span class="close">&times;</span> <!-- Close button for the modal -->
-            </div>
-        </div>
-
-        <!-- Modal 2 -->
-        <div id="tripEditModal" class="edit-modal">
-            <div class="edit-modal-content">
-                <!-- Detailed trip information will be displayed here -->
-                <span class="close-edit">&times;</span> <!-- Close button for the modal -->
-            </div>
-        </div>
-
-        <!-- Modal 3 -->
-        <div id="EditTripModal" class="edit-trip-modal">
-            <div class="edit-trip-modal-content">
-                <span class="close-edit">&times;</span> 
-                <form id="trip_create_form">
-                    <label for="orign">Origin</label><br>
-                    <input type="text" name="origin" id="origin" placeholder="Enter Origin" required><br><br>
-                    
-                    <label for="destination">Destination</label><br>
-                    <input type="text" name="destination" id="destination" placeholder="Enter Destination" required><br><br>
-                    
-                    <label for="departure_date">Departure Date</label><br>
-                    <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required><br><br>
-                    
-                    <label for="departure_time">Departure Time</label><br>
-                    <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required><br><br>
-                    
-                    <label for="price">Price</label><br>
-                    <input type="number" name="price" id="price" placeholder="Enter Price" required><br><br>
+            <tbody id="tripScheduleBody">
+                <!-- Trip schedule data will be inserted here dynamically -->
+            </tbody>
             
-                    <input type="submit" id="tripeditsubmitButton" value="Submit">
-                </form>
-            </div>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="tripDetailsModal" class="modal">
+        <div class="modal-content">
+            <!-- Detailed trip information will be displayed here -->
+            <span class="close">&times;</span> <!-- Close button for the modal -->
         </div>
-    </table>
+    </div>
+
+    <!-- Modal 2 -->
+    <div id="tripEditModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <!-- Detailed trip information will be displayed here -->
+            <span class="close-edit">&times;</span> <!-- Close button for the modal -->
+        </div>
+    </div>
+
+    <!-- Modal 3 -->
+    <div id="EditTripModal" class="edit-trip-modal">
+        <div class="edit-trip-modal-content">
+            <span class="close-edit">&times;</span> 
+            <form id="trip_create_form">
+                <select name="driver" id="driver-dropdown">
+                    <!-- Options will be populated dynamically by JavaScript -->
+                </select>
+
+                <label for="orign">Origin</label><br>
+                <input type="text" name="origin" id="origin" placeholder="Enter Origin" required><br><br>
+                
+                <label for="destination">Destination</label><br>
+                <input type="text" name="destination" id="destination" placeholder="Enter Destination" required><br><br>
+                
+                <label for="departure_date">Departure Date</label><br>
+                <input type="date" name="departure_date" id="departure_date" placeholder="Enter departure date" required><br><br>
+                
+                <label for="departure_time">Departure Time</label><br>
+                <input type="time" name="departure_time" id="departure_time" placeholder="Enter time of departure" required><br><br>
+                
+                <label for="price">Price</label><br>
+                <input type="number" name="price" id="price" placeholder="Enter Price" required><br><br>
+        
+                <input type="submit" style="cursor: pointer;" id="tripeditsubmitButton" value="Submit">
+            </form>
+        </div>
+    </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
@@ -320,13 +343,13 @@
         window.location.href = '/trip-create/';
     });
 
-    const accessToken = localStorage.getItem('access_token')
+    const access_token = localStorage.getItem('access_token')
     
     $.ajax({
         url: "/api/v1/trips-schedule/",
         type: "GET",
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken); 
+            xhr.setRequestHeader("Authorization", "JWT " + access_token); 
         },
         success: function(response) {
             console.log("Response:", response);
@@ -339,20 +362,52 @@
 
     function renderDriverDetails(response) {
     if (response.data.trip_schedule && Array.isArray(response.data.trip_schedule)) {
+        // Sort trip schedules by departure date in descending order
+        response.data.trip_schedule.sort(function(a, b) {
+            return new Date(b.departure_date) - new Date(a.departure_date);
+        });
+
         var tripScheduleTable = $('#tripScheduleBody');
         response.data.trip_schedule.forEach(function(trip) {
             tripScheduleTable.append('<tr data-trip=\'' + JSON.stringify(trip) + '\'>' +
-                '<td><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + trip.driver.driver_name + '</td>' +
+                '<td id="tripDriver"><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + trip.driver.driver_name + '</td>' +
                 '<td id="tripStatus">' + trip.trip_status + '</td>' +
-                '<td>' + trip.origin + '</td>' +
-                '<td>' + trip.destination + '</td>' +
-                '<td>' + trip.departure_time + '</td>' +
+                '<td id="tripOrigin">' + trip.origin + '</td>' +
+                '<td id="tripDestination">' + trip.destination + '</td>' +
+                '<td id="departureTime">' + trip.departure_time + '</td>' +
                 '</tr>');
         });
     } else {
         console.error("Trip schedule not found in response or not an array.");
     }
 }
+
+// Ajax Request to get features
+$.ajax({
+            url: "http://127.0.0.1:8000/api/v1/driver/",
+            type: "GET",
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("Authorization", "JWT " + access_token); // Include access token in the headers
+            },
+            success: function(response) {
+                console.log("Driver Response:", response);
+                // Check if response contains the data array
+                if (response.data && Array.isArray(response.data)) {
+                    // Populate the dropdown with the retrieved features
+                    response.data.forEach(function(driver) {
+                        // Access the ID and attributes object of each feature
+                        var driverId = driver.id;
+                        var attributes = driver.attributes;
+                        // Append the feature name and ID to the dropdown
+                        $('#driver-dropdown').append('<option value="' + attributes.driver_name + '">' + attributes.driver_name + '</option>');
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("Error fetching features:", error);
+            }
+        });
+
 
 // Add click event listener to table rows
 $('#tripScheduleBody').on('click', 'tr', function() {   
@@ -445,13 +500,20 @@ $(document).on('click', '#editTripButton', function(e) {
     var currentDepartureDate = tripInfo.departure_date;
     var currentDepartureTime = tripInfo.departure_time;
     var currentPrice = tripInfo.price;
+    var CurrentDriver = tripInfo.driver.driver_name;
 
+    console.log('CurrentDriver', CurrentDriver)
 
     $('#origin').val(currentOrigin);
     $('#destination').val(currentDestination);
     $('#departure_date').val(currentDepartureDate);
     $('#departure_time').val(currentDepartureTime);
     $('#price').val(currentPrice);
+
+    tripEditModal.on('show.bs.modal', function() {
+        // Set the default value of the dropdown when the modal is shown
+        $('#driver-dropdown').val(CurrentDriver);
+    });
 
     tripEditModal.show();
 });
@@ -569,7 +631,7 @@ tripEditModal.show();
             data: payloadString,
             contentType: 'application/json',
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+                xhr.setRequestHeader("Authorization", "JWT " + access_token);
             },
             success: function(response) {
                 console.log('Success:', response);
@@ -617,6 +679,7 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
     // Convert the payload object to a JSON string
     var payloadString = JSON.stringify(payload);
 
+    
     // Send AJAX request
     $.ajax({
         url: 'http://127.0.0.1:8000/api/v1/trips-schedule-update/',
@@ -624,12 +687,12 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
         data: payloadString,
         contentType: 'application/json',
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+            xhr.setRequestHeader("Authorization", "JWT " + access_token);
         },
         success: function(response) {
             console.log('Success:', response);
-            $('#notesContent').text(response.data.success.notes); 
-            $('#tripStatus').text(response.data.success.trip_status); 
+            
+            $('#tripScheduleBody').find('tr.trip-selected td#tripStatus').text(response.data.success.trip_status);
         },
         error: function(xhr, status, error) {
             console.error('Error:', error);
@@ -648,7 +711,7 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
 <script>
     $(document).ready(function() {
 
-    const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
+    const access_token = localStorage.getItem('access_token')
 
     $(document).on('click', '#tripeditsubmitButton', function(e) {
         e.preventDefault(); // Prevent default form submission
@@ -678,10 +741,16 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
             "destination": $("#destination").val(),
             "departure_date": $("#departure_date").val(),
             "departure_time": $("#departure_time").val(),
+            "price": $('#price').val(),
+            "driver": { "driver_name": $('#driver-dropdown').val() } // Provide driver ID in a nested dictionary
         };
+
+
 
         // Convert the payload object to a JSON string
         var payloadString = JSON.stringify(payload);
+
+        console.log('payloadString', payloadString)
 
         // Send AJAX request
         $.ajax({
@@ -690,11 +759,18 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
             data: payloadString,
             contentType: 'application/json',
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+                xhr.setRequestHeader("Authorization", "JWT " + access_token);
             },
             success: function(response) {
                 console.log('Success:', response);
+                $('#tripScheduleBody').find('tr.trip-selected td#tripOrigin').text(response.data.success.origin);
+
+                $('#tripScheduleBody').find('tr.trip-selected td#tripDestination').text(response.data.success.destination);
+
+                $('#tripScheduleBody').find('tr.trip-selected td#departureTime').text(response.data.success.departure_time);
                 
+                $('#tripScheduleBody').find('tr.trip-selected td#tripDriver').text(response.data.success.driver.driver_name);
+
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);
