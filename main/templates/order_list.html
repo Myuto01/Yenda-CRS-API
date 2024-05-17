@@ -480,8 +480,8 @@ $('#closeSearchResults').on('click', function() {
 
             var passengerNames = extractPassengerName(attributes.passenger_name);
             var phoneNumber = extractPassengerName(attributes.passenger_phonenumber);
-            var departureDate = stripDate(attributes.trip.departure_date)
-            var departureTime = stripSeconds(attributes.trip.departure_time)
+            var departureDate = stripDate(attributes.trip.departure_date);
+            var departureTime = stripSeconds(attributes.trip.departure_time);
 
             // Include ID in the data-bus attribute
             var ticketData = {

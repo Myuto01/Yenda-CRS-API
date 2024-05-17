@@ -324,37 +324,39 @@ class EditDriverDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # Retrieve the driver_id from the request data
-        driver_id = request.data.get('driver_id')
+        try:
 
-        # Check if driver_id is present
-        if not driver_id:
-            return JsonResponse({'error': 'Driver ID is missing from the data'}, status=400)
+            # Retrieve the driver_id from the request data
+            driver_id = request.data.get('driver_id')
+            print('driver:', driver_id)
+            # Check if driver_id is present
+            if not driver_id:
+                return JsonResponse({'error': 'Driver ID is missing from the data'}, status=400)
 
-        # Retrieve the driver object from the database
-        driver = get_object_or_404(DriverDetails, pk=driver_id)
-        driver_serializer = CreateDriverDetailsSerializer(driver)
-        # Update driver attributes if the corresponding data is provided
-        if 'driver_name' in request.data and request.data['driver_name']:
-            driver.driver_name = request.data.get('driver_name')
+            # Retrieve the driver object from the database
+            driver = get_object_or_404(DriverDetails, pk=driver_id)
+            
+            valid_data = {}
+            for field, value in request.data.items():
+                if value:
+                    valid_data[field] = value
 
-        if 'phone_number' in request.data and request.data['phone_number']:
-            driver.phone_number = request.data.get('phone_number')
+            driver_serializer = CreateDriverDetailsSerializer(driver, data=valid_data, partial=True)
+            print('driver_serializer:', driver_serializer)
 
-        if 'nrc_number' in request.data and request.data['nrc_number']:
-            driver.nrc_number = request.data.get('nrc_number')
+            driver_serializer.is_valid(raise_exception=True)
+            print('validated_data:', driver_serializer.validated_data)
 
-        if 'license_number' in request.data and request.data['license_number']:
-            driver.license_number = request.data.get('license_number')
+            driver_serializer.save()
 
-        if 'passport_number' in request.data and request.data['passport_number']:
-            driver.passport_number = request.data.get('passport_number')
+            # Return a success response
+            return Response({'success': driver_serializer.data}, status=status.HTTP_201_CREATED)
 
-        # Save the changes to the driver object
-        driver.save()
+        except ValidationError as e:
+            return Response({'error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Return a success response
-        return Response({'success': driver_serializer.data}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EditDriverPicsDetailsView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -492,8 +494,6 @@ class BusCreateView(APIView):
        # Include uploaded file data in the deserialized data dictionary if available
         if 'fileData' in request.FILES:
             deserialized_data['seat_picture'] = request.FILES['fileData']
-
-        print("PASS")
 
         # Pass the combined data to the serializer
         serializer = BusCreateSerializer(data=deserialized_data)

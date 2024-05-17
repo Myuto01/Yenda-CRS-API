@@ -252,6 +252,28 @@ body.dark {
 #sidebarOpen {
   display: none;
 }
+
+/* Target the scrollbar */
+::-webkit-scrollbar {
+    width: 5px; /* Width of the scrollbar */
+    border-radius: 20px;
+}
+
+/* Track (background) */
+::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Color of the track */
+}
+
+/* Handle (thumb) */
+::-webkit-scrollbar-thumb {
+    background: #FF7300; /* Color of the thumb */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #FF7300; /* Color of the thumb on hover */
+}
+
 @media screen and (max-width: 768px) {
   #sidebarOpen {
     font-size: 25px;
@@ -356,7 +378,7 @@ body.dark {
           <li class="item">
             <a href="{% url 'driver-list' %}" class="nav_link">
               <span class="navlink_icon">
-                <i class="fa fa-id-card-o" aria-hidden="true"></i>
+                <i class='bx bx-id-card'></i>              
               </span>
               <span class="navlink">Drivers</span>
             </a>

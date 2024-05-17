@@ -10,21 +10,60 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
    <style>
- table {
+        table {
             border-collapse: collapse;
             width: 55%;
             position: relative;
         }
-
-        th, td {
-            border: none; /* Remove borders */
-            text-align: left;
-            padding: 8px;
+    
+        .table-container {
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            position: relative;
+            top: 165px;
+            width: 85%;
+            left: 114px;
         }
 
-        th {
-            background-color: #f2f2f2;
-        }        .modal {
+        #tripScheduleTable {
+            width: 100%;
+            border-collapse: collapse; /* Ensures the table borders do not have space between them */
+        }
+
+        #tripScheduleTable th,
+        #tripScheduleTable td {
+            border: none;
+            padding: 8px;
+            text-align: left; /* Align text to the left for better readability */
+        }
+
+        #tripScheduleTable th {
+            background-color: #f2f2f2; /* Light grey background for table headers */
+        }
+        #tripScheduleTable {
+            width: 100%;
+            border: 1px solid transparent;
+            border-collapse: collapse;
+            position: relative;
+            right: 51px;
+            bottom: 12px;
+        }
+
+        #tripScheduleBody {
+            position: relative;
+            left: 60px;
+        }
+
+        #tripScheduleBody tr {
+            border-radius: 20px;
+            cursor: pointer;
+            position: relative;
+            border-bottom: 1px solid;
+        }
+        .modal {
             display: none;
             position: fixed;
             z-index: 1;
@@ -36,12 +75,12 @@
 
         .edit-modal {
             display: none;
-            position: fixed;
+            position: relative;
             z-index: 1;
-            left: 60%;
-            bottom: 28px;
-            width: 15%;
-            height: 100%;
+            left: 70%;
+            bottom: 338px;
+            width: 12%;
+            height: 227px;
         }
 
         .edit-trip-modal {
@@ -75,7 +114,6 @@
             border-radius: 20px;
             position: relative;
             top: 90px;
-            left: 45px;
         }
 
         .edit-trip-modal-content {
@@ -96,8 +134,13 @@
             color: white;
             padding: 5px;
             left: 45px;
-            border-color: orangered;
             cursor: pointer;
+            border: 1px solid black;
+        }
+
+        #tripeditsubmitButton:hover {
+            
+            border-color: #6284FF;
         }
 
    
@@ -139,30 +182,7 @@
         }
         
 
-        #tripScheduleTable {
-            width: 89%;
-            border: 1px solid transparent;
-            border-collapse: collapse;
-            position: relative;
-            top: 160px;
-            left: 49px;
-        }
-
-        td, th {
-            border: 0 solid transparent; /* Sets the border color of cells and headers to transparent */
-        }
-  
-        #tripScheduleBody {
-    position: relative;
-    left: 60px;
-}
-
-#tripScheduleBody tr {
-    border-radius: 20px;
-    cursor: pointer;
-    position: relative;
-    border-bottom: 1px solid;
-}
+        
 
         .modal-header{
             background-color: orangered;
@@ -245,8 +265,11 @@
             top: 156px;
             left: 80%;
             color: white;
-            border-color: orangered;
             cursor: pointer;
+        }
+
+        #addTripButton:hover {
+            border-color: #6284FF;
         }
 
         #tripScheduleBody tr {
@@ -271,11 +294,12 @@
     left: 56px;
 }
         
-.trips-header{
+.trips-header {
     position: relative;
     top: 182px;
     left: 9%;
-    width: 10%;
+    width: 14%;
+    font-size: 25px;
 }
     </style>
 </head>
@@ -283,63 +307,63 @@
     <h3 class="trips-header">Driver List</h3>
     <button id="addTripButton"> + Add </button>
 
-    <table id="tripScheduleTable">
-        <thead>
-            <tr class="head-table-row">
-                <th>Name</th>
-                <th>License</th>
-                <th>NRC</th>
-                <th>Passport</th>
-                <th>Phone</th>
-            </tr>
-        </thead>
-
-        <tbody id="tripScheduleBody">
-            <!-- Trip schedule data will be inserted here dynamically -->
-        </tbody>
-
-        <!-- Modal -->
-        <div id="tripDetailsModal" class="modal">
-            <div class="modal-content">
-                <!-- Detailed trip information will be displayed here -->
-                <span class="close">&times;</span> <!-- Close button for the modal -->
-            </div>
+    <div class="table-container">
+        <table id="tripScheduleTable">
+            <thead>
+                <tr class="head-table-row">
+                    <th>Name</th>
+                    <th>License</th>
+                    <th>NRC</th>
+                    <th>Passport</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody id="tripScheduleBody">
+                <!-- Trip schedule data will be inserted here dynamically -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Modal -->
+    <div id="tripDetailsModal" class="modal">
+        <div class="modal-content">
+            <!-- Detailed trip information will be displayed here -->
+            <span class="close">&times;</span> <!-- Close button for the modal -->
         </div>
+    </div>
 
-        <!-- Modal 2 -->
-        <div id="tripEditModal" class="edit-modal">
-            <div class="edit-modal-content">
-                <!-- Detailed trip information will be displayed here -->
-                <span class="close-edit">&times;</span> <!-- Close button for the modal -->
-            </div>
+    <!-- Modal 2 -->
+    <div id="tripEditModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <!-- Detailed trip information will be displayed here -->
+            <span class="close-edit">&times;</span> <!-- Close button for the modal -->
         </div>
+    </div>
 
-        <!-- Modal 3 -->
-        <div id="EditTripModal" class="edit-trip-modal">
-            <div class="edit-trip-modal-content">
-                <span class="close-edit">&times;</span> 
-                <form id="trip_create_form">
-                    <label for="driver_name">Driver Name</label><br>
-                    <input type="text" name="driver_name" id="driver_name" placeholder="Enter Driver Name" required><br><br>
-                    
-                    <label for="license_number">Licence Number</label><br>
-                    <input type="text" name="license_number" id="license_number" placeholder="Enter Licence Number" required><br><br>
-                    
-                    <label for="nrc_number">NRC Number</label><br>
-                    <input type="text" name="nrc_number" id="nrc_number" placeholder="Enter NRC Number" required><br><br>
-                    
-                    <label for="phone_number">Phone Number</label><br>
-                    <input type="tel" name="phone_number" id="phone_number" placeholder="Enter Phone Number" required><br><br>
-                    
-                    <label for="passport_number">Passport Number</label><br>
-                    <input type="text" name="passport_number" id="passport_number" placeholder="Enter Passport Number" required><br><br>
-                    <a href="#">...more</a><br><br>
-                    <input type="submit" id="tripeditsubmitButton" value="Submit">
-                </form>
-            </div>
+    <!-- Modal 3 -->
+    <div id="EditTripModal" class="edit-trip-modal">
+        <div class="edit-trip-modal-content">
+            <span class="close-edit">&times;</span> 
+            <form id="trip_create_form">
+                <label for="driver_name">Driver Name</label><br>
+                <input type="text" name="driver_name" id="driver_name" placeholder="Enter Driver Name" required><br><br>
+                
+                <label for="license_number">Licence Number</label><br>
+                <input type="text" name="license_number" id="license_number" placeholder="Enter Licence Number" required><br><br>
+                
+                <label for="nrc_number">NRC Number</label><br>
+                <input type="text" name="nrc_number" id="nrc_number" placeholder="Enter NRC Number" required><br><br>
+                
+                <label for="phone_number">Phone Number</label><br>
+                <input type="tel" name="phone_number" id="phone_number" placeholder="Enter Phone Number" required><br><br>
+                
+                <label for="passport_number">Passport Number</label><br>
+                <input type="text" name="passport_number" id="passport_number" placeholder="Enter Passport Number" required><br><br>
+                <a href="#">...more</a><br><br>
+                <input type="submit" id="tripeditsubmitButton" value="Save">
+            </form>
         </div>
-
-    </table>
+    </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
@@ -350,13 +374,13 @@
         window.location.href = '/create-driver/';
     });
 
-    const accessToken = localStorage.getItem('access_token')
+    const access_token = localStorage.getItem('access_token')
     
     $.ajax({
         url: 'http://127.0.0.1:8000/api/v1/driver/',
         type: "GET",
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken); 
+            xhr.setRequestHeader("Authorization", "JWT " + access_token); 
         },
         success: function(response) {
             console.log("Response:", response);
@@ -416,7 +440,6 @@ var modalContent = tripEditModal.find('.edit-modal-content');
 // Populate modal with detailed information
 modalContent.empty(); // Clear previous content
 modalContent.append('<p id="editTripButton">Edit</p>');
-modalContent.append('<p id="editTripButton">Deactivate</p>');
 modalContent.append('<p id="tripDelete">Delete</p>');
 
 // Show modal
@@ -425,7 +448,7 @@ tripEditModal.show();
 
 $(document).on('click', '#editTripButton', function(e) {
     e.preventDefault();
-
+    
     var DriverDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-driver');
         if (!DriverDataAttr) {
             console.error("Trip data attribute not found.");
@@ -483,6 +506,8 @@ $(document).on('click', '#editTripButton', function(e) {
 $(document).on('click', '#tripeditsubmitButton', function(e) {
         e.preventDefault(); // Prevent default form submission
 
+        $('#tripeditsubmitButton').val('Saving...');
+
         console.log("clicked")
         // Retrieve driverData associated with the clicked row
         var DriverDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-driver');
@@ -521,12 +546,16 @@ $(document).on('click', '#tripeditsubmitButton', function(e) {
             data: payloadString,
             contentType: 'application/json',
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+                xhr.setRequestHeader("Authorization", "JWT " + access_token);
             },
             success: function(response) {
                 console.log('Success:', response);
-                $('#tripScheduleBody').find('tr.trip-selected td#driverName').text(response.data.success.driver_name);
+                $('#tripeditsubmitButton').val('Save'); 
+
+                $('#tripScheduleBody').find('tr.trip-selected td#driverName').html('<i class="fas fa-check-circle check-mark" style="display: none;"></i>' + response.data.success.driver_name);                
                 
+                $('#tripScheduleBody').find('tr.trip-selected td#driverName .check-mark').show();
+
                 $('#tripScheduleBody').find('tr.trip-selected td#driverLicenseNumber').text(response.data.success.license_number);
 
                 $('#tripScheduleBody').find('tr.trip-selected td#driverNrcNumber').text(response.data.success.nrc_number);
@@ -539,6 +568,8 @@ $(document).on('click', '#tripeditsubmitButton', function(e) {
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);
+                $('#tripeditsubmitButton').val('Save'); 
+
             },
         });
 });
@@ -579,7 +610,7 @@ $(document).on('click', '#tripeditsubmitButton', function(e) {
             data: payloadString,
             contentType: 'application/json',
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+                xhr.setRequestHeader("Authorization", "JWT " + access_token);
             },
             success: function(response) {
                 console.log('Success:', response);

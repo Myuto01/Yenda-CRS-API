@@ -10,11 +10,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
    <style>
- table {
-            border-collapse: collapse;
-            width: 55%;
+         .trips-header {
             position: relative;
+            top: 185px;
+            left: 115px;
+            font-size: 30px;
+            width: 0;
         }
+
+        .trips-table-form   {
+            padding: 83px 50px;
+            background: white;
+            width: 68%;
+            position: relative;
+            top: 176px;
+            left: 105px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+
+        }
+
+        table {
+                    border-collapse: collapse;
+                    width: 55%;
+                    position: relative;
+                }
 
         th, td {
             border: none; /* Remove borders */
@@ -50,7 +69,7 @@
             z-index: 1;
             top: 135px;
             width: 80%;
-            height: 100%;
+            height: 113%;
             margin: 0px 400px;
         }
 
@@ -95,6 +114,10 @@
             margin: 0 68px;
             top: 15px;
             color: white;
+        }
+
+        #tripeditsubmitButton:hover {
+            color: #6284FF;
         }
 
 
@@ -173,6 +196,11 @@
             cursor: pointer;
         }
 
+        .trip-schedule-save:hover,
+        .trip-schedule-edit:hover{
+            border-color: #6284FF;
+        }
+
         .modal-phonenumber::after {
             content: ''; 
             display: block; 
@@ -244,27 +272,13 @@
             border-color: #6284FF;
         }
 
-        .trips-header {
-            position: relative;
-            top: 185px;
-            left: 115px;
-            font-size: 28px;
-            width: 0;
+        select#driver-dropdown {
+            width: 181px;
         }
-        
 
-    .trips-table-form   {
-        padding: 83px 50px;
-        background: white;
-        width: 68%;
-        position: relative;
-        top: 176px;
-        left: 105px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-
-    }
     </style>
 </head>
+
 <body>
     <h3 class="trips-header">Trips</h3>
     <button id="addTripButton"> + Add </button>
@@ -310,9 +324,11 @@
         <div class="edit-trip-modal-content">
             <span class="close-edit">&times;</span> 
             <form id="trip_create_form">
+
+                <label for="orign">Driver</label><br>
                 <select name="driver" id="driver-dropdown">
                     <!-- Options will be populated dynamically by JavaScript -->
-                </select>
+                </select><br><br>   
 
                 <label for="orign">Origin</label><br>
                 <input type="text" name="origin" id="origin" placeholder="Enter Origin" required><br><br>
@@ -329,7 +345,7 @@
                 <label for="price">Price</label><br>
                 <input type="number" name="price" id="price" placeholder="Enter Price" required><br><br>
         
-                <input type="submit" style="cursor: pointer;" id="tripeditsubmitButton" value="Submit">
+                <input type="submit" style="cursor: pointer;" id="tripeditsubmitButton" value="Save">
             </form>
         </div>
     </div>
@@ -338,10 +354,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <script src="{% static 'main/js/access_token.js' %}"></script>
     <script>
-       $(document).ready(function() {
-    $('#addTripButton').click(function() {
-        window.location.href = '/trip-create/';
-    });
+    $(document).ready(function() {
+        $('#addTripButton').click(function() {
+            window.location.href = '/trip-create/';
+        });
 
     const access_token = localStorage.getItem('access_token')
     
@@ -362,24 +378,33 @@
 
     function renderDriverDetails(response) {
     if (response.data.trip_schedule && Array.isArray(response.data.trip_schedule)) {
-        // Sort trip schedules by departure date in descending order
+        // Sort trip schedules by departure date and time in descending order
         response.data.trip_schedule.sort(function(a, b) {
-            return new Date(b.departure_date) - new Date(a.departure_date);
+            var dateA = new Date(a.departure_date + 'T' + a.departure_time);
+            var dateB = new Date(b.departure_date + 'T' + b.departure_time);
+            return dateB - dateA;
         });
 
         var tripScheduleTable = $('#tripScheduleBody');
+        tripScheduleTable.empty(); // Clear the table body before appending new rows
+
         response.data.trip_schedule.forEach(function(trip) {
+            var departureTime = stripSeconds(trip.departure_time);
             tripScheduleTable.append('<tr data-trip=\'' + JSON.stringify(trip) + '\'>' +
                 '<td id="tripDriver"><i class="fas fa-check-circle check-mark" style="display: none;"></i>' + trip.driver.driver_name + '</td>' +
                 '<td id="tripStatus">' + trip.trip_status + '</td>' +
                 '<td id="tripOrigin">' + trip.origin + '</td>' +
                 '<td id="tripDestination">' + trip.destination + '</td>' +
-                '<td id="departureTime">' + trip.departure_time + '</td>' +
+                '<td id="departureTime">' + departureTime + '</td>' +
                 '</tr>');
         });
     } else {
         console.error("Trip schedule not found in response or not an array.");
     }
+}
+
+function stripSeconds(timeString) {
+    return timeString.split(":").slice(0, 2).join(":");
 }
 
 // Ajax Request to get features
@@ -411,7 +436,6 @@ $.ajax({
 
 // Add click event listener to table rows
 $('#tripScheduleBody').on('click', 'tr', function() {   
-
     $('#tripScheduleBody').find('tr').removeClass('trip-selected');
     $('.check-mark').hide();
 
@@ -433,40 +457,51 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     $(this).addClass('trip-selected');
     $(this).find('.check-mark').show();
 
-    var departureDate =  tripData.departure_date
+    var departureDate = tripData.departure_date;
     var formattedDate = departureDate.substring(0, 10);
 
+    var formattedTime = stripSeconds(tripData.departure_time)
     // Populate modal with detailed information
     var modalContent = $('#tripDetailsModal .modal-content');
     modalContent.empty(); // Clear previous content
 
-    // Populate modal with detailed information
     modalContent.append('<h3 class="modal-header">' + tripData.origin + ' to ' + tripData.destination + '</h3>');
     modalContent.append('<p>' + tripData.driver.driver_name + '</p>');
-    modalContent.append('<small>    Driver <br> ' + '</small>');
-    modalContent.append('<small class="modal-phonenumber"> ' + tripData.driver.phone_number + '</small>');
-    modalContent.append('<small class="modal-departuretime" >Departure Time <br> ' + formattedDate + ' ' + tripData.departure_time + '</small>');
-    modalContent.append('<small class="modal-busnumber">Bus Number <br> ' + tripData.bus.number_plate + '</small>'
-    + '<small class="modal-seatssold">Seats Sold <br> ' + '</small>' + '<small class="modal-seats">' + tripData.bus.booked_seats_count + '/' +  tripData.bus.total_seats + '</small><br><br>');
+    modalContent.append('<small>Driver<br>' + '</small>');
+    modalContent.append('<small class="modal-phonenumber">' + tripData.driver.phone_number + '</small>');
+    modalContent.append('<small class="modal-departuretime">Departure Time<br>' + formattedDate + ' ' + formattedTime + '</small>');
+    modalContent.append('<small class="modal-busnumber">Bus Number<br>' + tripData.bus.number_plate + '</small>'
+        + '<small class="modal-seatssold">Seats Sold<br>' + '</small>' + '<small class="modal-seats">' + tripData.bus.booked_seats_count + '/' + tripData.bus.total_seats + '</small><br><br>');
+
+    // Change Status Dropdown
     modalContent.append(
-        '<label style="font-weight: bold;">Change Status</label>' + '<br>' +
+        '<label style="font-weight: bold;">Change Status</label><br>' +
         '<select name="trip_status" id="tripStatus">' +
-                    '<option value="Upcoming">Upcoming</option>' +
-                    '<option value="In Progress">In Progress</option>' +
-                '</select> <br><br>');
+            '<option value="Upcoming">Upcoming</option>' +
+            '<option value="In Progress">In Progress</option>' +
+            '<option value="Completed">Completed</option>' +  // Add more options if needed
+            '<option value="Cancelled">Cancelled</option>' +
+        '</select><br><br>'
+    );
+    console.log('trip_status:',tripData.trip_status)
+
+    setTimeout(function() {
+        $('#tripStatus').val(tripData.trip_status);
+    }, 0);
+
     // Display notes if available, otherwise show default text
     if (tripData.notes) {
         modalContent.append('<div>' +
-            '<label style="font-weight: bold;">Notes</label>' + '<br>' +
+            '<label style="font-weight: bold;">Notes</label><br>' +
             '<p id="notesContent">' + tripData.notes + '</p>' +
             '<button id="editNotesButton" class="trip-schedule-edit">Edit</button>' +
         '</div>');
     } else {
         modalContent.append('<div>' +
-                    '<label style="font-weight: bold;">Notes</label>' + '<br>' +
-                    '<textarea id="notesArea"></textarea>' +
-                '</div>' +
-                '<button type="button" class="trip-schedule-save">' + 'Save' + '</button>');
+            '<label style="font-weight: bold;">Notes</label><br>' +
+            '<textarea id="notesArea"></textarea>' +
+            '<button type="button" class="trip-schedule-save">Save</button>' +
+        '</div>');
     }
 
     $('#tripDetailsModal').show();
@@ -474,24 +509,25 @@ $('#tripScheduleBody').on('click', 'tr', function() {
 
 
 
+
     // Add click event listener to table rows for trip edit modal
-$(document).on('click', '#editTripButton', function(e) {
+    $(document).on('click', '#editTripButton', function(e) {
     e.preventDefault();
 
     var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
-        if (!tripDataAttr) {
-            console.error("Trip data attribute not found.");
-            return;
-        }
+    if (!tripDataAttr) {
+        console.error("Trip data attribute not found.");
+        return;
+    }
 
-        var tripInfo;
-        try {
-            tripInfo = JSON.parse(tripDataAttr);
-            console.error("tripInfo:", tripInfo);
-        } catch (error) {
-            console.error("Error parsing trip data:", error);
-            return;
-        }
+    var tripInfo;
+    try {
+        tripInfo = JSON.parse(tripDataAttr);
+        console.error("tripInfo:", tripInfo);
+    } catch (error) {
+        console.error("Error parsing trip data:", error);
+        return;
+    }
 
     var tripEditModal = $('#EditTripModal');
 
@@ -500,41 +536,39 @@ $(document).on('click', '#editTripButton', function(e) {
     var currentDepartureDate = tripInfo.departure_date;
     var currentDepartureTime = tripInfo.departure_time;
     var currentPrice = tripInfo.price;
-    var CurrentDriver = tripInfo.driver.driver_name;
+    var currentDriver = tripInfo.driver.driver_name;
 
-    console.log('CurrentDriver', CurrentDriver)
 
     $('#origin').val(currentOrigin);
     $('#destination').val(currentDestination);
     $('#departure_date').val(currentDepartureDate);
     $('#departure_time').val(currentDepartureTime);
     $('#price').val(currentPrice);
-
-    tripEditModal.on('show.bs.modal', function() {
-        // Set the default value of the dropdown when the modal is shown
-        $('#driver-dropdown').val(CurrentDriver);
-    });
+    $('#driver-dropdown').val(currentDriver);
 
     tripEditModal.show();
 });
+
+
+
  
-$('#tripScheduleTable').on('click', 'tr', function() {
+        $('#tripScheduleTable').on('click', 'tr', function() {
 
-// Select the parent modal
-var tripEditModal = $('#tripEditModal');
+            // Select the parent modal
+            var tripEditModal = $('#tripEditModal');
 
-// Populate modal with detailed information
-var modalContent = tripEditModal.find('.edit-modal-content');
+            // Populate modal with detailed information
+            var modalContent = tripEditModal.find('.edit-modal-content');
 
-// Populate modal with detailed information
-modalContent.empty(); // Clear previous content
-modalContent.append('<p id="editTripButton">Edit</p>');
-modalContent.append('<p id="tripDelete">Delete</p>');
-console.log("Modal content HTML:", modalContent.html()); 
+            // Populate modal with detailed information
+            modalContent.empty(); // Clear previous content
+            modalContent.append('<p id="editTripButton">Edit</p>');
+            modalContent.append('<p id="tripDelete">Delete</p>');
+            console.log("Modal content HTML:", modalContent.html()); 
 
-// Show modal
-tripEditModal.show();
-});
+            // Show modal
+            tripEditModal.show();
+        });
 
 
 
@@ -716,7 +750,8 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
     $(document).on('click', '#tripeditsubmitButton', function(e) {
         e.preventDefault(); // Prevent default form submission
 
-        console.log("clicked")
+        $('#tripeditsubmitButton').val('Saving...');
+
         // Retrieve tripData associated with the clicked row
         var tripDataAttr = $('#tripScheduleBody').find('tr.trip-selected').attr('data-trip');
         if (!tripDataAttr) {
@@ -770,10 +805,14 @@ $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
                 $('#tripScheduleBody').find('tr.trip-selected td#departureTime').text(response.data.success.departure_time);
                 
                 $('#tripScheduleBody').find('tr.trip-selected td#tripDriver').text(response.data.success.driver.driver_name);
+                
+                $('#tripeditsubmitButton').val('Save');
 
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);
+                $('#tripeditsubmitButton').val('Save');
+
             },
         });
 });

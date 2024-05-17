@@ -9,48 +9,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} New Order {% endblock %}</title>
     <style>
-        .new-order-header{
+        .new-order-header {
             position: relative;
-            top: 100px;
-            left: 145px;
-            width: 10%;
+            top: 111px;
+            left: 106px;
+            width: 35%;
+            font-size: 30px;
         }
 
         #newOrderForm {
-    display: flex;
-    flex-direction: column;
-    width: 20%;
-    margin-left: 7%;
-}
+            display: flex;
+            flex-direction: column;
+            width: 20%;
+            margin-left: 7%;
+        }
 
-.new_order_a {
-    position: relative;
-    top: 134px;
-    display: flex;
-    gap: 0px;
-    flex-direction: column;
-}
+        .new_order_a {
+            position: relative;
+            top: 134px;
+            display: flex;
+            gap: 0px;
+            flex-direction: column;
+        }
 
-.new_order_b {
-    margin-left: 174%;
-    width: 120%;
-    display: flex;
-    flex-direction: column;
-    gap: 0px;
-    position: relative;
-    bottom: 278px;
-    left: 115px;
-}
+        .new_order_b {
+            margin-left: 174%;
+            width: 120%;
+            display: flex;
+            flex-direction: column;
+            gap: 0px;
+            position: relative;
+            bottom: 278px;
+            left: 115px;
+        }
 
-#newOrderSubmitButton {
-    position: relative;
-    bottom: 195px;
-    left: 860px;
-    width: 50%;
-    cursor: pointer;
-    background: #FF7300;
-    color: white;
-}
+        #newOrderSubmitButton {
+            position: relative;
+            bottom: 195px;
+            left: 860px;
+            width: 50%;
+            cursor: pointer;
+            background: #FF7300;
+            color: white;
+        }
 
         #newOrderSubmitButton:hover{
             border: 2px solid #FF7300;
@@ -71,14 +72,67 @@
         }
 
         .neworder-form {
-    background: white;
-    width: 89%;
-    position: relative;
-    top: 140px;
-    left: 101px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    height: 20%;
-}
+            background: white;
+            width: 89%;
+            position: relative;
+            top: 140px;
+            left: 101px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            height: 20%;
+        }
+
+
+
+        /* Mobile Money Modal*/
+        
+        /* Modal Container */
+        .modal-container {
+        display: none;
+        position: fixed;
+        z-index: 999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent background */
+        }
+
+        /* Modal Content */
+        .modal {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        position: relative;
+        }
+
+        /* Close Button */
+        .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+        }
+
+        /* Modal Content (input and button) */
+        .modal-content {
+        margin-top: 20px;
+        }
+
+        #mobileMoneyNumberInput{
+            width: 63%;
+        }
+
     </style>
 </head>
 <body>
@@ -128,18 +182,54 @@
         
         </form>
     </div>
-    
+        <!-- Mobile Money Modal Container -->
+        <div class="modal-container" id="mobileMoneyModalContainer">
+            <!-- Mobile Money Modal -->
+            <div class="modal" id="mobileMoneyModal">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2>Enter Mobile Money Number</h2>
+            <div class="modal-content">
+                <label for="mobileMoneyNumberInput">Mobile Money Number:</label><br>
+                <input type="text" id="mobileMoneyNumberInput" placeholder="Enter mobile money number"><br>
+                <button id="mobileMoneySubmitButton">Submit</button>
+            </div>
+            </div>
+        </div>
+  
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-            
-            const accessToken = localStorage.getItem('access_token')
+
+            // Open the modal
+            function openModal() {
+                var modalContainer = $('#mobileMoneyModalContainer');
+                modalContainer.show()
+            }
+
+            function closeModal() {
+                var modalContainer = $('#mobileMoneyModalContainer');
+                modalContainer.hide()
+            }
+
+            // Close the modal
+            $('#closeModal').click(function(e) {
+                e.preventDefault();
+                console.log('clicked')
+                var modalContainer = $('#mobileMoneyModalContainer');
+                modalContainer.hide()
+            });
+
+            // Submit mobile money
+           
+
+
+            const access_token = localStorage.getItem('access_token')
 
             $.ajax({
                 url: "http://127.0.0.1:8000/api/v1/bus-list/",
                 type: "GET",
                 beforeSend: function(xhr) {
-                    xhr.setRequestHeader("Authorization", "JWT " + accessToken); 
+                    xhr.setRequestHeader("Authorization", "JWT " + access_token); 
                 },
                 success: function(response) {
                     console.log("Response:", response);
@@ -173,8 +263,10 @@
             }
 
             $('#newOrderSubmitButton').click(function(e) {
-            e.preventDefault();
-                var access_token = localStorage.getItem('access_token')
+                e.preventDefault();
+
+                console.log('passed')
+                var paymentMethod = $("#payment_method").val();
                 // Serialize form data
                 var formData = {
                     "passenger_name": $("#passenger_name").val(),
@@ -190,31 +282,71 @@
                         "bus_id": $("#busSelect").val()
                     }
                 }
-                    
-    
-                var formDataString = JSON.stringify(formData);
-                
-                console.log("Data:", formDataString)
-    
-                $.ajax({
-                    url: '/api/v1/new-order/',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: formDataString,
-                    beforeSend: function(xhr) {
-                        xhr.setRequestHeader("Authorization", "JWT " + access_token);
-                    },
-                    success: function(response) {
-                        console.log('Response:', response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error submitting form:', error);
-                        // Handle error response
+
+                if (paymentMethod === "Cash") {
+                    submitForm(formData);
+                } else if (paymentMethod === "Mobile Money") {
+                        // Open modal to enter mobile money number
+                        openModal();
+                        console.log('passed');
+                        // Add event listener for modal submit button
+                        $('#mobileMoneySubmitButton').click(function(e) {
+                            e.preventDefault();
+                            var mobileMoneyNumber = $("#mobileMoneyNumberInput").val();
+                            // Add mobile money number to form data
+                            formData["mobile_money_number"] = mobileMoneyNumber;
+                            // Submit form
+                            submitFormMoblileMoney(formData);
+                            // Close modal
+                            closeModal();
+                        });
                     }
                 });
-            });
+
+                function submitForm(formData) {
+                    var formDataString = JSON.stringify(formData);
+                    console.log("Data:", formDataString);
+                    $.ajax({
+                        url: '/api/v1/new-order/',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: formDataString,
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader("Authorization", "JWT " + access_token);
+                        },
+                        success: function(response) {
+                            console.log('Response:', response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error submitting form:', error);
+                            // Handle error response
+                        }
+                    });
+                }
+
+                function submitFormMoblileMoney(formData) {
+                    var formDataString = JSON.stringify(formData);
+                    console.log("Data:", formDataString);
+                    $.ajax({
+                        url: '/api/v1/new-order/',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: formDataString,
+                        beforeSend: function(xhr) {
+                            xhr.setRequestHeader("Authorization", "JWT " + access_token);
+                        },
+                        success: function(response) {
+                            console.log('Response:', response);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error submitting form:', error);
+                            // Handle error response
+                        }
+                    });
+                }
+
     });
-    </script>
-    </body>
-    </html>
+</script>
+</body>
+</html>
 {% endblock %}

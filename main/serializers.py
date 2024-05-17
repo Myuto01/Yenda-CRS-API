@@ -12,6 +12,7 @@ from django.contrib.auth.hashers import make_password
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 import datetime
+from decimal import Decimal
 
 #chamge extra keyword arguments and log in serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -129,6 +130,14 @@ class TripScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = TripSchedule
         fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if 'price' in representation:
+            original_price = Decimal(representation['price'])
+            adjusted_price = round(original_price * Decimal('1.03'), 2)  # Add 3% to the price and round to 2 decimal places
+            representation['price'] = str(adjusted_price)  # Convert back to string for JSON serialization
+        return representation
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)

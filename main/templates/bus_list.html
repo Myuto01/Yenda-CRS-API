@@ -242,11 +242,16 @@
             cursor: pointer;
         }
 
+        #addTripButton:hover {
+            border-color: #6284FF;
+        }
+
         .trips-header {
             position: relative;
             top: 185px;
             left: 183px;
-            width: 10%;
+            width: 11%;
+            font-size: 30px;
         }
         
         .select2-container {
@@ -272,12 +277,12 @@
             cursor: pointer;
         }
 
+      
     </style>
 </head>
 <body>
     <h3 class="trips-header">Bus List</h3>
     <button id="addTripButton"> + Add </button>
-
     <table id="tripScheduleTable">
         <thead>
             <tr>
@@ -293,6 +298,9 @@
             <!-- Trip schedule data will be inserted here dynamically -->
         </tbody>
 
+    </table>
+
+    
         <!-- Modal -->
         <div id="tripDetailsModal" class="modal">
             <div class="modal-content">
@@ -343,7 +351,6 @@
                 </form>
             </div>
         </div>
-    </table>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
@@ -351,7 +358,7 @@
     <script>
        $(document).ready(function() {
     $('#addTripButton').click(function() {
-        window.location.href = '/trip-create/';
+        window.location.href = '/test/';
     });
 
     const accessToken = localStorage.getItem('access_token')

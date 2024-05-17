@@ -37,11 +37,12 @@
     }
 
     .input-container {
-    width: 60%;
-    position: relative;
-    top: 110px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+        width: 60%;
+        background: #fff;
+        position: relative;
+        top: 110px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
     #create_bus_form {
         display: flex;
@@ -57,50 +58,44 @@
     }
 
     #addFeatureBtn {
-    position: relative;
-    bottom: 33px;
-    left: 400px;
-    border-radius: 5px;
-    padding: 5px;
-    width: 15%;
-    cursor: pointer;
-    background-color: orangered;
-    border-color: orangered;
-    color: white;
-}
+        position: relative;
+        bottom: 33px;
+        left: 400px;
+        border-radius: 5px;
+        padding: 5px;
+        width: 15%;
+        cursor: pointer;
+        background-color: orangered;
+        color: white;
+    }
 
-#submitButton{
-    border-radius: 5px;
-    cursor: pointer;
-    background-color: orangered;
-    border-color: orangered;
-    color: white;
-}
+    #submitButton{
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: orangered;
+        color: white;
+    }
 
-#customFeatureInput{
-    width: 50%;
-}
+    #addFeatureBtn:hover,
+    #submitButton:hover{
+        border-color: #6284FF;
+    }
 
-input,
-select{
-    border-radius: 10px;
-    height: 32px;
-    border: 1px solid black;
-}
+    #customFeatureInput{
+        width: 50%;
+    }
 
-input:hover,
-input:focus{
-    border: 1px solid orangered; 
-}
+    input,
+    select{
+        border-radius: 10px;
+        height: 32px;
+        border: 1px solid black;
+    }
 
-/* Apply border when input is focused or active */
-input:focus,
-input:active {
-    border: 1px solid orangered; /* Change border color as needed */
-}
-
-
-
+    input:hover,
+    input:focus{
+        border: 1px solid orangered; 
+    }
 
 </style>
 </head>
@@ -145,7 +140,7 @@ input:active {
 
     <script>
     $(document).ready(function() {
-        const accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1NDkxMzMxLCJpYXQiOjE3MTM3NjMzMzEsImp0aSI6IjgxM2E5MWI4MTFlODRkNTZhMWVjZTllNGJlMjk0MmY0IiwidXNlcl9pZCI6OX0.HHv0PIPifk1CupzjBVnlFKVoMWtxbLd1qie7hTa4WRw";
+        const access_token = localStorage.getItem('access_token')
 
     // Fetch features from the backend API after page load
     $('#features').select2({
@@ -156,7 +151,7 @@ input:active {
         url: "http://127.0.0.1:8000/api/v1/features/",
         type: "GET",
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
+            xhr.setRequestHeader("Authorization", "JWT " + access_token); // Include access token in the headers
         },
         success: function(response) {
             console.log("Response:", response);
@@ -201,7 +196,7 @@ input:active {
             } 
         }),
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+            xhr.setRequestHeader("Authorization", "JWT " + access_token);
         },
         success: function(response) {
         console.log("Custom Feature created:", response);
@@ -290,7 +285,7 @@ $("#create_bus_form").submit(function(e) {
         contentType: false,
         processData: false,
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+            xhr.setRequestHeader("Authorization", "JWT " + access_token);
         },
         success: function(response) {
             console.log('Success:', response);

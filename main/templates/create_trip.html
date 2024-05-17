@@ -12,72 +12,81 @@
       
 
         .new-trip {
+            font-size: 30px;
             position: relative;
-            top: 100px;
-            left: 47%;
+            top: 35px;
+            left: 40%;
+            width: 21%;
         }
 
  
-#tripcreatesubmitButton {
-    position: relative;
-    left: 290px;
-    width: 52%;
-    border-radius: 10px;
-    background: orangered;
-    color: white;
-    border-color: orangered;
-    cursor: pointer;
-    bottom: 220px;
-}
+        #tripcreatesubmitButton {
+            position: relative;
+            left: 290px;
+            width: 52%;
+            border-radius: 10px;
+            background: orangered;
+            color: white;
+            cursor: pointer;
+            bottom: 259px;
+        }
 
-label{
-    font-weight: 400;
-}
+        #tripcreatesubmitButton:hover {
+            border-color: #6284FF;
+        }
 
-.trip-bus-info-form {
-    left: 276px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 20%;
-    position: relative;
-    top: 129px;
-}
+        label{
+            font-weight: 400;
+        }
 
-.trip-details-entry-form {
-    width: 20%;
-    position: relative;
-    left: 730px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    bottom: 256px;
-}
+        .trip-bus-info-form {
+            left: 247px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 20%;
+            position: relative;
+            top: 79px;
+        }
+
+        .trip-details-entry-form {
+            width: 20%;
+            position: relative;
+            left: 692px;
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+            bottom: 315px;
+        }
+
+        h2{
+            font-weight: 400;
+            font-size: 16px;
+        }
+
+        input,
+        select {
+            border-radius: 10px;
+            height: 32px;
+        }
 
 
-
-h2{
-    font-weight: 400;
-    font-size: 16px;
-}
-
-input,
-select {
-    border-radius: 10px;
-    height: 32px;
-}
-
-#trip_create_form {
-    position: relative;
-    left: 73px;
-}
-
+        .trip-create {
+            top: 130px;
+            position: relative;
+            background: white;
+            left: 112px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            /* padding: 94px; */
+            width: 89%;
+        }
     </style>
 </head>
 <body>
-    <h3 class="new-trip">New Trip</h3>
-
+<div class="trip-create">
     <form id="trip_create_form">
+        <h3 class="new-trip">New Trip</h3>
+
         <div class="trip-bus-info-form">
             <h2 class="select-bus">Select a bus:</h2>
             <select id="bus-dropdown">
@@ -121,18 +130,18 @@ select {
         <input type="submit" id="tripcreatesubmitButton" value="Submit">
 
     </form>
-
+</div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     <script>
 
-        const accessToken = localStorage.getItem('access_token')
+        const access_token = localStorage.getItem('access_token')
 
         // Fetch data from the backend API
         fetch('http://127.0.0.1:8000/api/v1/bus-list/', {
             headers: {
-                'Authorization': "JWT " + accessToken 
+                'Authorization': "JWT " + access_token 
             }
         })
         .then(response => {
@@ -206,7 +215,7 @@ select {
             url: "http://127.0.0.1:8000/api/v1/features/",
             type: "GET",
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
+                xhr.setRequestHeader("Authorization", "JWT " + access_token); // Include access token in the headers
             },
             success: function(response) {
                 console.log("Response:", response);
@@ -232,7 +241,7 @@ select {
             url: "http://127.0.0.1:8000/api/v1/driver/",
             type: "GET",
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
+                xhr.setRequestHeader("Authorization", "JWT " + access_token); // Include access token in the headers
             },
             success: function(response) {
                 console.log("Driver Response:", response);
@@ -285,7 +294,7 @@ select {
                 data: payloadString ,
                 contentType: 'application/vnd.api+json',
                 beforeSend: function(xhr) {
-                    xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+                    xhr.setRequestHeader("Authorization", "JWT " + access_token);
                 },
                 success: function(response) {
                     console.log('Success:', response);
