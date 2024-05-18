@@ -148,7 +148,7 @@
     });
 
     $.ajax({
-        url: "http://127.0.0.1:8000/api/v1/features/",
+        url: "https://yenda-crs-api-2.onrender.com/api/v1/features/",
         type: "GET",
         beforeSend: function(xhr) {
             xhr.setRequestHeader("Authorization", "JWT " + access_token); // Include access token in the headers
@@ -184,7 +184,7 @@
 
     function addCustomFeature(customFeature) {
     $.ajax({
-        url: 'http://127.0.0.1:8000/api/v1/create-features/',
+        url: 'https://yenda-crs-api-2.onrender.com/api/v1/create-features/',
         method: 'POST',
         contentType: 'application/vnd.api+json',
         data: JSON.stringify({ 
@@ -279,7 +279,7 @@ $("#create_bus_form").submit(function(e) {
 
     // Send AJAX request
     $.ajax({
-        url: 'http://127.0.0.1:8000/api/v1/buses/',
+        url: 'https://yenda-crs-api-2.onrender.com/api/v1/buses/',
         type: 'POST',
         data: formDataToSend,
         contentType: false,

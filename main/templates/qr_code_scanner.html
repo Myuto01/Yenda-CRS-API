@@ -10,12 +10,83 @@
             color: red;
             font-weight: bold;
         }
+
+        #preloader {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 9999;
+            text-align: center;
+        }
+
+        #preloader img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .close-modal{
+            background: orangered;
+            color: white;
+        }
+
+        .close:hover{
+            color: orangered;
+        }
+
+        .modal-content {
+            width: 80% !important;
+        }
+
+        .container-one{
+            display: flex;
+            flex-direction: row;
+            gap: 100px;
+        }
+
+        .container-two{
+            display: flex;
+            flex-direction: row;
+            gap: 171px;
+        }
+
+        .container-three{
+            display: flex;
+            flex-direction: row;
+            gap: 100px;
+        }
+
+        .container-four{
+            display: flex;
+            flex-direction: row;
+            gap: 93px;
+        }
+
+        .close-modal-button{
+            right: 140px;
+            position: relative;
+            bottom: 20px;
+            width: 30%;
+            border-radius: 8px;
+            background: orangered;
+        }
+
     </style>
 </head>
 <body>
     <video id="video" width="100%" height="100%" autoplay></video>
     <canvas id="canvas" style="display: none;"></canvas>
     <div id="error-message"></div>
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <img src="https://i.gifer.com/ZNeT.gif" alt="Loading...">
+    </div>
 
     <!-- Modal Structure -->
     <div class="modal fade" id="qrModal" tabindex="-1" role="dialog" aria-labelledby="qrModalLabel" aria-hidden="true">
@@ -31,7 +102,7 @@
                     <!-- QR code data will be displayed here -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="close-modal-button" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -69,30 +140,78 @@
             if (code) {
                 qrCodeData = code.data;
                 console.log('QR Code Data:', qrCodeData);
-                // Call a function to handle the QR code data
                 handleQRCodeData(qrCodeData);
             }
         }
 
         function handleQRCodeData(data) {
-            // Here you can send the QR code data to the server via AJAX
-            // Example AJAX request using jQuery
+            $('#preloader').show();
             $.ajax({
                 url: 'http://127.0.0.1:8000/api/v1/verify_ticket/',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({ qr_data: data }),
                 success: function(response) {
+                    $('#preloader').hide();
                     console.log('Server Response:', response);
-                    // Populate and show the modal with the QR code data
-                    $('#qrData').text(JSON.stringify(response, null, 2));
-                    $('#qrModal').modal('show');
+                    if (response.data && response.data.status === 'success') {
+                        const details = response.data.ticket_details;
+                        const passengerName = extractDetails(details.passenger_name);
+                        const phoneNumber = extractDetails(details.passenger_phonenumber);
+                        const seatNumber = extractDetails(details.seat_number);
+                        const busDetails = details.bus.number_plate;
+                        const origin = details.trip.origin;
+                        const destination = details.trip.destination;
+                        const departureDate = stripDate(details.trip.departure_date);
+                        const departureTime = stripSeconds(details.trip.departure_time);
+                        const operatorName = details.trip.user.company_name
+                        const modalContent = `
+                            <div class="container-one">
+                                <p><strong>Operator Name:</strong><br> ${operatorName}</p>
+                                <p><strong>Bus Number Plate:</strong><br> ${busDetails}</p>
+                            </div>
+                            <div class="container-two">
+                                <p><strong>Origin:</strong><br> ${origin}</p>
+                                <p><strong>Destination:</strong><br> ${destination}</p>
+                            </div>
+                            <div class="container-three">
+                                <p><strong>Departure Date:</strong><br> ${departureDate}</p>
+                                <p><strong>Departure Time:</strong><br> ${departureTime}</p>
+                            </div>
+                            <div class="container-four">
+                                <p><strong>Passenger Name:</strong><br> ${passengerName}</p>
+                                <p><strong>Phone Number:</strong><br> ${phoneNumber}</p>
+                            </div>
+                            <p><strong>Seat Number:</strong><br> ${seatNumber}</p>
+                        `;
+                        $('#qrData').html(modalContent);
+                        $('#qrModal').modal('show');
+                    } else {
+                        $('#error-message').text('Error: Invalid response from server.');
+                    }
                 },
                 error: function(xhr, status, error) {
+                    $('#preloader').hide();
                     console.error('Error:', error);
                     $('#error-message').text('Error: ' + error);
                 }
             });
+        }
+
+        function extractDetails(detailsString) {
+            if (detailsString) {
+                detailsString = detailsString.replace(/[\[\]']+/g, '').trim();
+                return detailsString;
+            }
+            return 'Unknown';
+        }
+
+        function stripSeconds(timeString) {
+            return timeString.split(":").slice(0, 2).join(":");
+        }
+
+        function stripDate(dateString) {
+            return dateString.replace("T00:00:00Z", "");
         }
     </script>
 </body>

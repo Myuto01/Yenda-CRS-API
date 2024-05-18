@@ -927,7 +927,9 @@ class VerifyTicket(APIView):
     def post(self, request):
         # Extract QR code data from the request
         qr_data = request.data.get('qr_data')
-        print("qr_data:", qr_data)
+
+        if not qr_data:
+            return Response({"status": "error", "message": "QR data is missing"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Validate and verify ticket based on QR code data
         try:
@@ -938,21 +940,17 @@ class VerifyTicket(APIView):
                     key, value = item.split(': ', 1)  # Split only once
                     print("Extracted key:", key)
                     print("Extracted value:", value)
-                    
-                    # Extract passenger name and seat number
-                    if key == 'Passenger Name':
-                        # Leave square brackets intact
+
+                    # Keep square brackets for passenger name and seat number
+                    if key == 'Passenger Name' or key == 'Seat Number':
                         value = value.strip()
-                    elif key == 'Seat Number':
-                        # Leave square brackets intact
-                        value = value.strip()
+
                     ticket_details[key] = value
                 except ValueError:
-                    # Skip elements that cannot be split into key and value
                     print("Skipping element:", item)
                     continue
 
-            # Query the Ticket model based on extracted data
+            # Query the database for the ticket
             ticket = Ticket.objects.filter(
                 trip_id=ticket_details.get('Trip_id'),
                 bus_id=ticket_details.get('Bus_id'),
@@ -961,30 +959,13 @@ class VerifyTicket(APIView):
             ).first()
 
             if ticket:
-                # Ticket found, prepare response data
-                response_data = {
-                    "status": "success",
-                    "ticket_details": {
-                        "passenger_name": ticket.passenger_name,
-                        "passenger_phonenumber": ticket.passenger_phonenumber,
-                        "passenger_email": ticket.passenger_email,
-                        "seat_number": ticket.seat_number,
-                        "confirmed": ticket.confirmed,
-                        # Add bus details
-                        "bus_details": {
-                            "bus_id": ticket.bus.id,
-                            "Number Plate": ticket.bus.number_plate,
-                            # Add more bus details as needed
-                        }
-                    }
-                }
-                return Response(response_data)
+                ticket_serializer = TicketSerializer(ticket)
+                return Response({"status": "success", "ticket_details": ticket_serializer.data}, status=status.HTTP_200_OK)
             else:
-                # Ticket not found
-                return Response({"status": "error", "message": "Ticket not found"})
+                return Response({"status": "error", "message": "Ticket not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             print("Error occurred during QR code processing:", e)
-            return Response({"status": "error", "message": "Error processing QR code"})
+            return Response({"status": "error", "message": "Error processing QR code"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 """
 class TicketDetailsAPIView(APIView):
