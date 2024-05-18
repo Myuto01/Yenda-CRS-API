@@ -4,12 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #error-message {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <video id="video" width="100%" height="100%" autoplay></video>
     <canvas id="canvas" style="display: none;"></canvas>
+    <div id="error-message"></div>
+
+    <!-- Modal Structure -->
+    <div class="modal fade" id="qrModal" tabindex="-1" role="dialog" aria-labelledby="qrModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrModalLabel">QR Code Data</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="qrData">
+                    <!-- QR code data will be displayed here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
@@ -23,6 +53,7 @@
             })
             .catch(function(err) {
                 console.error('Error accessing camera:', err);
+                $('#error-message').text('Error accessing camera: ' + err.message);
             });
 
         video.addEventListener('canplay', function() {
@@ -53,11 +84,13 @@
                 data: JSON.stringify({ qr_data: data }),
                 success: function(response) {
                     console.log('Server Response:', response);
-                    // Handle the response from the server
+                    // Populate and show the modal with the QR code data
+                    $('#qrData').text(JSON.stringify(response, null, 2));
+                    $('#qrModal').modal('show');
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
-                    // Handle the error
+                    $('#error-message').text('Error: ' + error);
                 }
             });
         }

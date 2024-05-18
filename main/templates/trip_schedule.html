@@ -276,10 +276,20 @@
             width: 181px;
         }
 
+        #error-message {
+            color: red;
+            font-weight: bold;
+            position: relative;
+            top: 94px;
+            left: 111px;
+        }
+
     </style>
 </head>
 
 <body>
+    <div id="error-message"></div>
+
     <h3 class="trips-header">Trips</h3>
     <button id="addTripButton"> + Add </button>
     
@@ -461,6 +471,8 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     var formattedDate = departureDate.substring(0, 10);
 
     var formattedTime = stripSeconds(tripData.departure_time)
+
+    var tripStatus = tripData.trip_status
     // Populate modal with detailed information
     var modalContent = $('#tripDetailsModal .modal-content');
     modalContent.empty(); // Clear previous content
@@ -473,21 +485,21 @@ $('#tripScheduleBody').on('click', 'tr', function() {
     modalContent.append('<small class="modal-busnumber">Bus Number<br>' + tripData.bus.number_plate + '</small>'
         + '<small class="modal-seatssold">Seats Sold<br>' + '</small>' + '<small class="modal-seats">' + tripData.bus.booked_seats_count + '/' + tripData.bus.total_seats + '</small><br><br>');
 
+    console.log('trip_status:',tripStatus);
+
     // Change Status Dropdown
+
     modalContent.append(
         '<label style="font-weight: bold;">Change Status</label><br>' +
         '<select name="trip_status" id="tripStatus">' +
             '<option value="Upcoming">Upcoming</option>' +
             '<option value="In Progress">In Progress</option>' +
-            '<option value="Completed">Completed</option>' +  // Add more options if needed
+            '<option value="Completed">Completed</option>' +  
             '<option value="Cancelled">Cancelled</option>' +
         '</select><br><br>'
     );
-    console.log('trip_status:',tripData.trip_status)
 
-    setTimeout(function() {
-        $('#tripStatus').val(tripData.trip_status);
-    }, 0);
+    $('#tripStatus').val(tripStatus);
 
     // Display notes if available, otherwise show default text
     if (tripData.notes) {
@@ -673,10 +685,11 @@ $('#tripScheduleBody').on('click', 'tr', function() {
             },
             error: function(xhr, status, error) {
                 console.error('Error:', error);
+                $('#error-message').text('Error: ' + error.message);
             },
         });
 });
-    // Event listener for the save button
+
 $("#tripDetailsModal").on("click", ".trip-schedule-save", function(e) {
     e.preventDefault(); // Prevent default form submission
 
