@@ -13,6 +13,9 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.tokens import RefreshToken
 import datetime
 from decimal import Decimal
+import qrcode
+from io import BytesIO
+from django.core.files import File
 
 #chamge extra keyword arguments and log in serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -135,8 +138,8 @@ class TripScheduleSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         if 'price' in representation:
             original_price = Decimal(representation['price'])
-            adjusted_price = round(original_price * Decimal('1.03'), 2)  # Add 3% to the price and round to 2 decimal places
-            representation['price'] = str(adjusted_price)  # Convert back to string for JSON serialization
+            adjusted_price = round(original_price * Decimal('1.03'), 2)  
+            representation['price'] = str(adjusted_price)  
         return representation
 
     def update(self, instance, validated_data):
@@ -190,8 +193,7 @@ class BusCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bus
-        fields = ['bus_type', 'total_seats', 'number_plate', 'status', 'features', 'seat_picture']
-
+        fields = '__all__'
 
 
 
@@ -200,23 +202,26 @@ class TripSubmissionSerializer(serializers.ModelSerializer):
     passenger_phonenumber = serializers.ListField(child=serializers.CharField())
     passenger_email = serializers.ListField(child=serializers.EmailField())
     seat_number = serializers.ListField(child=serializers.IntegerField())
-
-    # Add custom fields for trip and bus IDs
-    trip_id = serializers.PrimaryKeyRelatedField(queryset=TripSchedule.objects.all(), source='trip', write_only=True)
-    bus_id = serializers.PrimaryKeyRelatedField(queryset=Bus.objects.all(), source='bus', write_only=True)
+    trip = serializers.PrimaryKeyRelatedField(queryset=TripSchedule.objects.all())
+    bus = serializers.PrimaryKeyRelatedField(queryset=Bus.objects.all())
+    trip_detail = TripScheduleSerializer(source='trip', read_only=True)
+    bus_detail = BusSerializer(source='bus', read_only=True)
 
     class Meta:
         model = Ticket
         fields = [
-            'trip_id',
-            'bus_id',
+            'trip',
+            'bus',
             'buyer_user_id',
             'passenger_name',
             'passenger_phonenumber',
             'passenger_email',
             'seat_number',
             'active',
+            'trip_detail',
+            'bus_detail',
         ]
+
 
     def create(self, validated_data):
         # Extract the bus instance from validated data
@@ -242,15 +247,19 @@ class TripSubmissionSerializer(serializers.ModelSerializer):
         # Call the supercla ss's create method to create the Ticket instance
         return super().create(validated_data)
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['trip_detail'] = TripScheduleSerializer(instance.trip).data
+        representation['bus_detail'] = BusSerializer(instance.bus).data
+        if instance.qr_code:
+            qr_code_url = instance.qr_code.url
+            print(f"QR code URL in representation: {qr_code_url}")
+            representation['qr_code_url'] = qr_code_url
+        return representation
+
 class TicketSerializer(serializers.ModelSerializer):
-
-    bus = BusSerializer(required=False)
-    trip = TripScheduleSerializer()
-
-    class Meta:
+    
+     class Meta:
         model = Ticket
         fields = '__all__'
-
-
-
 

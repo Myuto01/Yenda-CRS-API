@@ -34,7 +34,8 @@ urlpatterns = [
     path('api/v1/driver-delete/', views.DriverDeleteView.as_view(), name='delete-driver'),
     path('api/v1/ticket-list/', views.TicketListView.as_view(), name='ticket-list'),
     path('api/v1/new-order/', views.NewOrderView.as_view(), name='new-order'),
-
+    path('api/v1/get-qrcode/', views.GetQRcodeView.as_view(), name='get-qrcode'),
+    
     #Remove
 
 
@@ -60,5 +61,6 @@ urlpatterns = [
     path('trip-schedule/', views.trip_schedule_view, name='trip-schedule' ),
     path('order-list/', views.order_list_view, name='order-list'),
     path('new-order/', views.new_order_view, name='new-order-template'),
+    path('ticket-success/', views.success_ticket, name='ticket-success'),
 
 ]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

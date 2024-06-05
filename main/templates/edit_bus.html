@@ -82,7 +82,7 @@
 
     <script>
     $(document).ready(function() {
-        const accessToken = localStorage.getItem('access_token')
+        const access_token = localStorage.getItem('access_token')
 
     // Fetch features from the backend API after page load
     $('#features').select2({
@@ -93,7 +93,7 @@
         url: "http://127.0.0.1:8000/api/v1/features/",
         type: "GET",
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken); // Include access token in the headers
+            xhr.setRequestHeader("Authorization", "JWT " + access_token); // Include access token in the headers
         },
         success: function(response) {
             console.log("Response:", response);
@@ -138,7 +138,7 @@
             } 
         }),
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+            xhr.setRequestHeader("Authorization", "JWT " + access_token);
         },
         success: function(response) {
         console.log("Custom Feature created:", response);
@@ -227,7 +227,7 @@ $("#create_bus_form").submit(function(e) {
         contentType: false,
         processData: false,
         beforeSend: function(xhr) {
-            xhr.setRequestHeader("Authorization", "JWT " + accessToken);
+            xhr.setRequestHeader("Authorization", "JWT " + access_token);
         },
         success: function(response) {
             console.log('Success:', response);

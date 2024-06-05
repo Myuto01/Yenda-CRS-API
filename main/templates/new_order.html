@@ -26,7 +26,7 @@
 
         .new_order_a {
             position: relative;
-            top: 134px;
+            top: 31px;
             display: flex;
             gap: 0px;
             flex-direction: column;
@@ -37,15 +37,15 @@
             width: 120%;
             display: flex;
             flex-direction: column;
-            gap: 0px;
+            gap: 4px;
             position: relative;
-            bottom: 278px;
+            bottom: 272px;
             left: 115px;
         }
 
         #newOrderSubmitButton {
             position: relative;
-            bottom: 195px;
+            bottom: 260px;
             left: 860px;
             width: 50%;
             cursor: pointer;
@@ -79,6 +79,25 @@
             left: 101px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             height: 20%;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            background: rgb(0, 255, 0);
+            color: black; 
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 9999;
+            display: none;
         }
 
         /* Mobile Money Modal*/
@@ -130,60 +149,67 @@
         #mobileMoneyNumberInput{
             width: 63%;
         }
-
     </style>
 </head>
 <body>
-     <h3 class="new-order-header">New Order</h3>
-     <div class="neworder-form">
+    <div id="success-message" class="success-message"></div>
+    <h3 class="new-order-header">New Order</h3>
+    <div class="neworder-form">
         <form method="post" action="" id="newOrderForm">
             <div class="new_order_a">
                 <label for="trip_origin">Origin:</label>
-                <input type="text" name="trip_origin" id="trip_origin" placeholder="Enter trip origin" required><br>
-                
+                <input type="text" name="trip_origin" id="trip_origin" placeholder="Enter trip origin" required>
+                <div id="trip_origin_error" class="error-message"></div>
+
                 <label for="trip_destination">Destination:</label>
-                <input type="text" name="trip_destination" id="trip_destination" placeholder="Enter trip destination" required><br>
-                
+                <input type="text" name="trip_destination" id="trip_destination" placeholder="Enter trip destination" required>
+                <div id="trip_destination_error" class="error-message"></div>
+
                 <label for="trip_date">Date:</label>
-                <input type="date" name="trip_date" id="trip_date" required><br>
-                
+                <input type="date" name="trip_date" id="trip_date" required>
+                <div id="trip_date_error" class="error-message"></div>
+
                 <label for="trip_time">Time:</label>
-                <input type="time" name="trip_time" id="trip_time" placeholder="Enter trip destination" required><br>
-                
+                <input type="time" name="trip_time" id="trip_time" placeholder="Enter trip destination" required>
+                <div id="trip_time_error" class="error-message"></div>
+
                 <label for="busSelect">Select Bus:</label>
                 <select name="busSelect" id="busSelect" required>
                     <option value="" disabled selected hidden>Select bus</option>
-                    
-                </select><br>
-
+                </select>
+                <div id="busSelect_error" class="error-message"></div>
             </div>
 
             <div class="new_order_b">
                 <label for="passenger_name">Passenger Name:</label>
-                <input type="text" name="passenger_name" id="passenger_name" placeholder="Enter passenger name" required><br>
-            
+                <input type="text" name="passenger_name" id="passenger_name" placeholder="Enter passenger name" required>
+                <div id="passenger_name_error" class="error-message"></div>
+
                 <label for="passenger_phonenumber">Passenger Phone Number:</label>
-                <input type="tel" name="passenger_phonenumber" id="passenger_phonenumber" placeholder="Enter phone number" required><br>
-                
+                <input type="tel" name="passenger_phonenumber" id="passenger_phonenumber" placeholder="Enter phone number" required>
+                <div id="passenger_phonenumber_error" class="error-message"></div>
+
                 <label for="passenger_seatnumber">Seat Number:</label>
-                <input type="number" name="passenger_seatnumber" id="passenger_seatnumber" placeholder="Enter seat number" required><br>
-            
+                <input type="number" name="passenger_seatnumber" id="passenger_seatnumber" placeholder="Enter seat number" required>
+                <div id="passenger_seatnumber_error" class="error-message"></div>
+
                 <label for="payment_method">Payment Method:</label>
                 <select name="payment_method" id="payment_method" required>
                     <option value="" disabled selected hidden>Choose payment method</option>
                     <option value="Cash">Cash</option>
                     <option value="Mobile Money">Mobile Money</option>
-                </select><br>
-        </div>
+                </select>
+                <div id="payment_method_error" class="error-message"></div>
+            </div>
 
             <input type="submit" value="Proceed" id="newOrderSubmitButton">
-        
         </form>
     </div>
-        <!-- Mobile Money Modal Container -->
-        <div class="modal-container" id="mobileMoneyModalContainer">
-            <!-- Mobile Money Modal -->
-            <div class="modal" id="mobileMoneyModal">
+
+    <!-- Mobile Money Modal Container -->
+    <div class="modal-container" id="mobileMoneyModalContainer">
+        <!-- Mobile Money Modal -->
+        <div class="modal" id="mobileMoneyModal">
             <span class="close-btn" id="closeModal">&times;</span>
             <h2>Enter Mobile Money Number</h2>
             <div class="modal-content">
@@ -191,13 +217,12 @@
                 <input type="text" id="mobileMoneyNumberInput" placeholder="Enter mobile money number"><br>
                 <button id="mobileMoneySubmitButton">Submit</button>
             </div>
-            </div>
         </div>
-  
+    </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-
             // Open the modal
             function openModal() {
                 var modalContainer = $('#mobileMoneyModalContainer');
@@ -217,11 +242,7 @@
                 modalContainer.hide()
             });
 
-            // Submit mobile money
-           
-
-
-            const access_token = localStorage.getItem('access_token')
+            const access_token = localStorage.getItem('access_token');
 
             $.ajax({
                 url: "http://127.0.0.1:8000/api/v1/bus-list/",
@@ -284,67 +305,87 @@
                 if (paymentMethod === "Cash") {
                     submitForm(formData);
                 } else if (paymentMethod === "Mobile Money") {
-                        // Open modal to enter mobile money number
-                        openModal();
-                        console.log('passed');
-                        // Add event listener for modal submit button
-                        $('#mobileMoneySubmitButton').click(function(e) {
-                            e.preventDefault();
-                            var mobileMoneyNumber = $("#mobileMoneyNumberInput").val();
-                            // Add mobile money number to form data
-                            formData["mobile_money_number"] = mobileMoneyNumber;
-                            // Submit form
-                            submitFormMoblileMoney(formData);
-                            // Close modal
-                            closeModal();
-                        });
+                    // Open modal to enter mobile money number
+                    openModal();
+                    console.log('passed');
+                    // Add event listener for modal submit button
+                    $('#mobileMoneySubmitButton').click(function(e) {
+                        e.preventDefault();
+                        var mobileMoneyNumber = $("#mobileMoneyNumberInput").val();
+                        // Add mobile money number to form data
+                        formData["mobile_money_number"] = mobileMoneyNumber;
+                        // Submit form
+                        submitFormMoblileMoney(formData);
+                        // Close modal
+                        closeModal();
+                    });
+                }
+            });
+
+            function submitForm(formData) {
+                var formDataString = JSON.stringify(formData);
+                console.log("Data:", formDataString);
+                $.ajax({
+                    url: '/api/v1/new-order/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: formDataString,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("Authorization", "JWT " + access_token);
+                    },
+                    success: function(response) {
+                        console.log('Response:', response);
+                        displaySuccessMessage('New order successfully created.');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error submitting form:', error);
+                        displayErrorMessages(xhr);
                     }
                 });
+            }
 
-                function submitForm(formData) {
-                    var formDataString = JSON.stringify(formData);
-                    console.log("Data:", formDataString);
-                    $.ajax({
-                        url: '/api/v1/new-order/',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: formDataString,
-                        beforeSend: function(xhr) {
-                            xhr.setRequestHeader("Authorization", "JWT " + access_token);
-                        },
-                        success: function(response) {
-                            console.log('Response:', response);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error submitting form:', error);
-                            // Handle error response
-                        }
-                    });
+            function submitFormMoblileMoney(formData) {
+                var formDataString = JSON.stringify(formData);
+                console.log("Data:", formDataString);
+                $.ajax({
+                    url: '/api/v1/new-order/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: formDataString,
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("Authorization", "JWT " + access_token);
+                    },
+                    success: function(response) {
+                        console.log('Response:', response);
+                        displaySuccessMessage('New order successfully created.');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error submitting form:', error);
+                        displayErrorMessages(xhr);
+                    }
+                });
+            }
+
+            function displaySuccessMessage(message) {
+                var successMessageDiv = $('#success-message');
+                successMessageDiv.text(message);
+                successMessageDiv.show();
+
+                setTimeout(function() {
+                    successMessageDiv.hide();
+                }, 5000);
+            }
+
+            function displayErrorMessages(xhr) {
+                var errors = xhr.responseJSON.errors;
+                for (var field in errors) {
+                    if (errors.hasOwnProperty(field)) {
+                        $('#' + field + '_error').text(errors[field]);
+                    }
                 }
-
-                function submitFormMoblileMoney(formData) {
-                    var formDataString = JSON.stringify(formData);
-                    console.log("Data:", formDataString);
-                    $.ajax({
-                        url: '/api/v1/new-order/',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: formDataString,
-                        beforeSend: function(xhr) {
-                            xhr.setRequestHeader("Authorization", "JWT " + access_token);
-                        },
-                        success: function(response) {
-                            console.log('Response:', response);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error submitting form:', error);
-                            // Handle error response
-                        }
-                    });
-                }
-
-    });
-</script>
+            }
+        });
+    </script>
 </body>
 </html>
 {% endblock %}

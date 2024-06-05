@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Success</title>
+    <script src="https://kit.fontawesome.com/02677053c5.js" crossorigin="anonymous"></script>
+</head>
+<style>
+    .driver-info {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        width: 332px;
+        position: relative;
+        left: 15px;
+        height: auto;
+    }
+
+    .driver-info .company-name{
+        background: #FF7300;
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .driver-info .depature-time {
+        position: relative;
+        bottom: 65px;
+        left: 275px;
+        width: fit-content;
+    }
+
+    .origin-container {
+        position: relative;
+        left: 10px;
+        bottom: 47px;
+    }
+
+            .origin {
+            width: fit-content;
+            display: flex;
+            position: relative;
+            left: 16px;
+        }
+
+
+        .bus-icon {
+            margin: 0 90px;
+            position: relative;
+            width: fit-content;
+            font-size: 24px;
+            left: 52px;
+            bottom: 20px;
+        }
+
+        .destination {
+            margin-left: 10px;
+            width: fit-content;
+            display: flex;
+            position: relative;
+            left: 220px;
+            bottom: 43px;
+        }
+
+        .plate-number{
+            position: relative;
+            margin: 20px;
+            bottom: 68px;
+        }
+
+        .departure-date {
+            position: relative;
+            left: 240px;
+            bottom: 125px;
+            width: fit-content;
+        }
+
+        .date-text{
+            position: relative;
+            left: 40px;
+        }
+
+        .passenger-name {
+            position: relative;
+            margin: 20px;
+            width: fit-content;
+        }
+
+        .passenger-seatnumber{
+            position: relative;
+            bottom: 130px;
+            display: flex;
+            flex-direction: row;
+            gap: 80px;
+            height: fit-content;
+        }
+
+        .seat-number {
+            position: relative;
+            bottom: -23px;
+            left: 24px;
+            width: fit-content;
+            color: white;
+        }
+
+        .seat-numbers {
+            background: #6248FF;
+            padding: 5px;
+            border-radius: 20px;
+        }
+
+        .line {
+            border-top: 1px solid black;
+            position: relative;
+            bottom: 100px;
+            width: 297px;
+            left: 18px;
+        }
+
+
+
+        .dashed-line {
+            border: 1px dashed black;
+            position: relative;
+            bottom: 18px;
+            width: 293px;
+            left: 33px;
+        }
+
+        .trip-price {
+            text-align: center;
+            position: relative;
+            left: 133px;
+            bottom: 10px;
+        }
+
+        .qrcode-container {
+            position: relative;
+            left: 17px;
+            background: white;
+            width: 86%;
+            border-radius: 20px;
+            bottom: 18px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #qrCodeContainer{
+            position: relative;
+            left: 22px;
+        }
+
+
+
+</style>
+<body>
+    <h3 style="text-align: center;"> Ticket Success</h3>
+    <p style="text-align: center;">You have purchased your ticket successfully</p>
+    
+    
+    <div id="ticketResults"></div>
+
+    <div class="qrcode-container">
+        <div id="qrCodeContainer">
+            <!-- This container will hold the QR Code image -->
+        </div>     
+    </div>
+
+   
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+         $(document).ready(function() {
+
+                
+
+                var ticketData = JSON.parse(localStorage.getItem('ticketResults'));
+                var attributes = ticketData.data.attributes
+                companyName = attributes.trip_detail.user.company_name;
+                departureTime = stripSeconds(attributes.trip_detail.departure_time);
+                origin =  attributes.trip_detail.origin;
+                destination = attributes.trip_detail.destination;
+                plateNumber =  attributes.trip_detail.bus.number_plate;
+                tripDate = stripDate(attributes.trip_detail.departure_date);
+                passengerName = attributes.passenger_name;
+                seatNumber = attributes.seat_number;
+                tripPrice = attributes.trip_detail.price;
+
+                
+                function PassengerNames(item, className) {
+                    if (Array.isArray(item)) {
+                        return item.map(function(value, index) {
+                            return '<span class="' + className + '-' + (index + 1) + ' detail-item">' + value + '</span><br><br><br>';
+                        }).join('');
+                    }
+                    return '<span class="' + className + '-1 detail-item">' + item + '</span><br><br>';
+                }
+
+                function SeatNumber(item, className) {
+                    if (Array.isArray(item)) {
+                        return item.map(function(value, index) {
+                            return '<span class="' + className + '-' + (index + 1) + ' seat-numbers">Seat ' + value + '</span><br><br><br>';
+                        }).join('');
+                    }
+                    return '<span class="' + className + '-1 seat-numbers"> Seat ' + item + '</span><br><br><br>';
+                }
+
+
+                var passengerNames = PassengerNames(passengerName, 'passenger-name');
+                var seatNumbers = SeatNumber(seatNumber, 'seat-number');
+
+                var numberOfSeats = Array.isArray(seatNumber) ? seatNumber.length : 1;
+                var totalPricePaid = tripPrice * numberOfSeats;
+
+
+                var detailsHtml = '<div></div>';
+                detailsHtml += '<div class="driver-info">';
+                detailsHtml += '<p class="company-name"><strong> ' + companyName + '</strong></p>';
+                detailsHtml += '<p class="depature-time">Time:<br><strong> ' + departureTime + '</strong></p>';
+                detailsHtml += '<p class="origin-container"><strong> ' + 
+               '<span class="origin">' + origin + '</span>' + 
+               '<i class="fa-solid fa-bus bus-icon"></i>' + 
+               '<span class="destination">' + destination + '</span>' + 
+               '</strong></p>';
+                detailsHtml += '<p class="plate-number">Plate number:<br><strong> ' + plateNumber + '</strong></p>';
+                detailsHtml += '<p class="departure-date"><span class="date-text">Date:</span><br><strong> ' + tripDate + '</strong></p>';
+                detailsHtml += '<div class="passenger-seatnumber">'
+                detailsHtml += '<p class="passenger-name">Passenger(s):<br><strong> ' + passengerNames + '</strong></p>';
+                detailsHtml += '<p class="seat-number"><strong>' + seatNumbers + '</strong></p>';
+                detailsHtml += '</div>'
+                detailsHtml += '<div class="line">' + '<p style="text-align:center;"> Total Price: </p> <strong class="trip-price">' + totalPricePaid +  '</strong></div>' 
+                detailsHtml += '</div><br>';    
+                detailsHtml += '<div class="dashed-line"></div>'
+
+
+                $('#ticketResults').html(detailsHtml);
+
+                
+
+                function stripDate(dateString) {
+                    return dateString.replace("T00:00:00Z", "");
+                }
+
+                function stripSeconds(timeString) {
+                    return timeString.split(":").slice(0, 2).join(":");
+                }
+
+
+                const access_token = localStorage.getItem('access_token');
+            
+                // Initializing the buyer user Id
+                var buyer_user_id;
+
+                // First AJAX request to get the user ID
+                $.ajax({
+                    url: 'https://yenda-app-api.onrender.com/api/v1/user_id',
+                    type: 'GET',
+                    contentType: "application/json",
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+                    },
+                    success: function(response) {
+                        console.log('User ID:', response.data.user_id);
+                        buyer_user_id = response.data.user_id;
+
+                        // Second AJAX request to send the user ID
+                        $.ajax({
+                            type: 'POST',
+                            url: '/api/v1/get-qrcode/',
+                            data: JSON.stringify({ user_id: buyer_user_id }),  
+                            contentType: 'application/json',
+                            success: function(response) {
+                                console.log('Success:', response.data.attributes.qr_code);
+                                const qrCodeUrl = response.data.attributes.qr_code;
+                                if (qrCodeUrl) {
+                                    // Clear any previous QR Code image
+                                    $('#qrCodeContainer').empty();
+                                    console.log('Appending')
+                                    $('#qrCodeContainer').append(`<img src="${qrCodeUrl}" alt="QR Code" width="85%" height="20%">`);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error:', error);
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+        });
+    </script>
+</body>
+</html>

@@ -8,7 +8,7 @@ from .models import User, TripSchedule, Bus, Feature, DriverDetails, Seat, Ticke
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer, CreateDriverDetailsSerializer, TripSubmissionSerializer, TicketSerializer
-from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number
+from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number, mtn_mobile_money_pay, mtn_mobile_money_disbursment
 from .permissions import AllowAnyPermission
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
@@ -20,6 +20,8 @@ import json
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import  permission_classes
 from django.db import IntegrityError
+import uuid
+from decimal import Decimal
 
 #Remove
 
@@ -89,6 +91,11 @@ def order_list_view(request):
 def new_order_view(request):
     return render(request, 'new_order.html')
 
+def success_ticket(request):
+    return render(request, 'ticket_success.html')
+
+
+
 class NewOrderView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -148,8 +155,8 @@ class TicketListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Assuming YourModel has a ForeignKey to the User model
-        queryset = Ticket.objects.filter(user=request.user)  # Filter objects for the current user
+
+        queryset = Ticket.objects.filter(user=request.user)  
         serializer = TicketSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -240,14 +247,12 @@ class TripScheduleEditView(APIView):
     def post(self, request):
         try:
             trip_id = request.data.get('trip_id')
-            print('Trip:', trip_id)
             # Retrieve the trip schedule object
             trip_schedule = get_object_or_404(TripSchedule, pk=trip_id)
-            print('trip_schedule', trip_schedule)
             # Extract non-empty fields from the request data
             valid_data = {}
             for field, value in request.data.items():
-                if value:
+                if value: 
                     valid_data[field] = value
 
             # Update the trip schedule object with the valid data
@@ -315,7 +320,6 @@ class TripScheduleListView(APIView):
         # Assuming YourModel has a ForeignKey to the User model
         queryset = TripSchedule.objects.filter(user=request.user)  
         trip_schedule_serializer = TripScheduleSerializer(queryset, many=True)
-        print("DOne")
         return Response({'trip_schedule': trip_schedule_serializer.data}, status=status.HTTP_201_CREATED)
 
 
@@ -848,36 +852,53 @@ class DriverListView(APIView):
         return Response(serializer.data)
 
 class TripSubmissionAPIView(APIView):
+    
     authentication_classes = []
     permission_classes = []
-    
+
     def post(self, request):
         data = request.data
-        
-        # Print original data
-        print("Original data:", data)
-        
-        # Remove brackets and quotation marks from the data
-        cleaned_data = {}
-        for key, value in data.items():
-            print(f"Processing {key}: {value}")
-            if isinstance(value, list) and len(value) > 0 and isinstance(value[0], str):
-                # Strip off brackets and quotation marks
-                cleaned_value = [v.replace("[", "").replace("]", "").replace("'", "").replace('"', '') for v in value]
-                print(f"Stripped {key}: {value} -> {cleaned_value}")
-                cleaned_data[key] = cleaned_value
-            else:
-                cleaned_data[key] = value
-        
-        serializer = TripSubmissionSerializer(data=cleaned_data)
-        
+        payment_phone_number = request.data.get('payment_phone_number')
+        total_price = Decimal(request.data.get('total_price'))
+        operator_phone_number = request.data.get('operator_phone_number')
+        payment_method = request.data.get('payment_method')
+
+        serializer = TripSubmissionSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            validated_data = serializer.validated_data
+            print('validated data:', validated_data)
 
+            try:
+                payment_response = None
 
+                # Process payment based on the selected payment method
+                if payment_method == 'mtn-money':
+                    payment_response = mtn_mobile_money_pay(payment_phone_number, str(total_price), str(uuid.uuid4()))
+                elif payment_method == 'airtel-money':
+                    payment_response = airtel_mobile_money_pay(payment_phone_number, str(total_price), str(uuid.uuid4()))
 
+                if not payment_response:
+                    return Response({"error": "Invalid payment method"}, status=status.HTTP_400_BAD_REQUEST)
+
+                print('payment_response:', payment_response)
+
+                if 'verification_response' in payment_response and payment_response['verification_response'].get('status') == 'SUCCESSFUL':
+                    serializer.save()
+
+                    # Calculate the original price by removing the 3% increase
+                    original_price = round(total_price / Decimal('1.03'), 2)
+
+                    # Process the operator payment with the original price
+                    operator_payment = mtn_mobile_money_disbursment(operator_phone_number, str(original_price), str(uuid.uuid4()))
+
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({"error": "Payment failed", "details": payment_response}, status=status.HTTP_400_BAD_REQUEST)
+
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TicketDetailsAPIView(APIView):
 
@@ -967,6 +988,26 @@ class VerifyTicket(APIView):
             print("Error occurred during QR code processing:", e)
             return Response({"status": "error", "message": "Error processing QR code"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+class GetQRcodeView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        user_id = request.data.get('user_id')
+
+        try:
+            # Get the most recently saved ticket for the given user
+            ticket = Ticket.objects.filter(buyer_user_id=user_id).order_by('-timestamp').first()
+             
+            if ticket:
+                ticket_serializer = TicketSerializer(ticket)
+                return Response(ticket_serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"status": "error", "message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"status": "error", "message": f"Error processing: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 """
 class TicketDetailsAPIView(APIView):
     

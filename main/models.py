@@ -126,6 +126,7 @@ class Ticket(models.Model):
     buyer_user_id = models.IntegerField(default=0)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True)
 
+
     def save(self, *args, **kwargs):
         # Construct QR code data
         qr_data = f"Trip_id: {self.trip.id} , Bus_id: {self.bus.id},  Origin: {self.trip.origin}, Departure Time: {self.trip.departure_time}, Passenger Name: {self.passenger_name}, Seat Number: {self.seat_number}"
@@ -146,4 +147,3 @@ class Ticket(models.Model):
         self.qr_code.save(f'qr_code_{self.pk}.jpg', File(img_io), save=False)
 
         super().save(*args, **kwargs)
-
