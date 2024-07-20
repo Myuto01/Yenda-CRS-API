@@ -97,7 +97,7 @@ DATABASES = {
 DATABASES = {
     'default': dj_database_url.config(
         # Replace this value with your local database's connection string.
-        default='postgres://yenda_api_db_user:XmFKpryvZdmPwkLuFhEpxcaNr7zlZlbM@dpg-cobb0jn79t8c73brbsg0-a.oregon-postgres.render.com/yenda_api_db',
+        default='postgresql://yenda_crs_api_db_user:zop8UyzLAvY6jHKEXKkSudL1hEpbEb9W@dpg-cqd821uehbks73brjla0-a/yenda_crs_api_db',
         conn_max_age=600
     )
 }

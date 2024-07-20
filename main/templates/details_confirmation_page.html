@@ -121,7 +121,7 @@
             var buyer_user_id;
 
             $.ajax({
-                url: 'https://yenda-app-api.onrender.com/api/v1/user_id',
+                d: 'https://yenda-app-api.onrender.com/api/v1/user_id',
                 type: 'GET',
                 contentType: "application/json",
                 beforeSend: function(xhr) {
@@ -137,8 +137,6 @@
                     console.error('Error:', error);
                 }
             });
-
-           
 
 
             // Retrieve selected seats from localStorage
@@ -202,7 +200,6 @@
                 trip.attributes.bus.features.forEach(function(feature) {
                     featuresList.append($("<li></li>").text(feature.name));
                 });
-
 
                 var operator_phone_number = trip.attributes.user.phone_number;
             
@@ -268,7 +265,7 @@
             console.log("Data:", formDataString);
 
             $.ajax({
-                url: '/api/v1/trip-submission/',
+                d: 'https://yenda-crs-api-2.onrender.com/api/v1/trip-submission/',
                 type: 'POST',
                 contentType: 'application/json',
                 data: formDataString,
@@ -286,7 +283,7 @@
 
                     $('#phoneNumberModal').hide();
 
-                    window.location.href = '{% url "ticket-success" %}';
+                    window.location.href = '{% "ticket-success" %}';
                 },
                 error: function(xhr, status, error) {
                     $('#modalSubmitButton').val('Submit');
