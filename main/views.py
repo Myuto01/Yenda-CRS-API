@@ -24,7 +24,7 @@ import uuid
 from decimal import Decimal
 
 #Remove
-
+"""
 def login_view(request):
     return render(request, 'login.html')
 
@@ -76,8 +76,7 @@ def edit_bus_view(request):
 def driver_list_view(request):
     return render(request, 'driver_list.html')
 
-def driver_details_view(request):
-    return render(request, 'driver_details.html')
+
 
 def trip_schedule_view(request):
     return render(request, 'trip_schedule.html')
@@ -94,8 +93,10 @@ def new_order_view(request):
 def success_ticket(request):
     return render(request, 'ticket_success.html')
 
-
-
+"""
+def driver_details_view(request):
+    return render(request, 'driver_details.html')
+    
 class NewOrderView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
