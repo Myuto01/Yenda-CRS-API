@@ -6,8 +6,8 @@ from django.conf import settings
 
 urlpatterns = [
     
-    path("api/v1/auth/bus_operator_registeration", views.RegistrationAPIView.as_view(), name="user_registeration" ),
-    path("api/v1/auth/login", views.UserLoginView.as_view(), name="user_login" ),
+    path("api/v1/auth/bus_operator_registeration/", views.RegistrationAPIView.as_view(), name="user_registeration" ),
+    path("api/v1/auth/login/", views.UserLoginView.as_view(), name="user_login" ),
     path('api/v1/buses/',  views.BusCreateView.as_view(), name='bus-create'),
     path('api/v1/trip-schedules/',  views.TripScheduleCreateView.as_view(), name='trip-schedule-create'),
     path('api/v1/trip-search/', views.TripSearchView.as_view(), name='trip_search'),
@@ -37,11 +37,7 @@ urlpatterns = [
     path('api/v1/new-order/', views.NewOrderView.as_view(), name='new-order'),
     path('api/v1/get-qrcode/', views.GetQRcodeView.as_view(), name='get-qrcode'),
     
-   
-]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
- #Remove
-"""
     path('base/', views.base_view),
     path('login/', views.login_view, name='login'),
     path('home/', views.home_view, name='home'),
@@ -65,4 +61,10 @@ urlpatterns = [
     path('order-list/', views.order_list_view, name='order-list'),
     path('new-order/', views.new_order_view, name='new-order-template'),
     path('ticket-success/', views.success_ticket, name='ticket-success'),
+   
+]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+ #Remove
+"""
+   
 """

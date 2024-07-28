@@ -25,6 +25,9 @@ from decimal import Decimal
 
 #Remove
 """
+
+"""
+
 def login_view(request):
     return render(request, 'login.html')
 
@@ -93,10 +96,11 @@ def new_order_view(request):
 def success_ticket(request):
     return render(request, 'ticket_success.html')
 
-"""
+#End
+
 def driver_details_view(request):
     return render(request, 'driver_details.html')
-    
+
 class NewOrderView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -468,7 +472,9 @@ class UserLoginView(APIView):
 
     def post(self, request):
         data = request.data
+        print("data:", data)
         serializer = UserLoginSerializer(data=data)
+        print("serializer:", serializer)
         if serializer.is_valid(raise_exception=True):
             validated_data = serializer.validated_data
             print("Validated Data:", validated_data)

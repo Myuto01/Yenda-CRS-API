@@ -8,7 +8,7 @@
 <body>
     <form id="user-login_form">
 
-        <input type="tel" name="phone_number" id="phone_number" placeholder="Enter Phone Number">
+        <input type="email" name="email" id="email" placeholder="Enter Phone Number">
 
         <input type="password" name="password" id="password" placeholder="Enter Password">
 
@@ -27,7 +27,7 @@
 
             // Serialize form data
             var formData = {
-                "phone_number": $("#phone_number").val(),
+                "email": $("#email").val(),
                 "password": $("#password").val(),
                 }
 
@@ -36,7 +36,7 @@
             
             console.log("Data:", formDataString)
 
-            // Send AJAX request to submit the form data
+            // Send AJAX request to submit the form data 
             $.ajax({
                 url: 'https://yenda-app-api.onrender.com/api/v1/auth/login/',
                 type: 'POST',
