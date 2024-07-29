@@ -2,7 +2,7 @@
 from .models import User
 import random
 import string
-from .pay import PayClass
+# from .pay import PayClass
 
 def generate_otp_for_user_from_session(request):
     # Retrieve user data from the session
