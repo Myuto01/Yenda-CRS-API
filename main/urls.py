@@ -16,7 +16,9 @@ urlpatterns = [
     path('api/v1/create-features/', views.FeatureCreateAPIView.as_view(), name='feature-create'),
     path('api/v1/bus-list/', views.BusListView.as_view(), name='bus-list'),
     path('api/v1/create-driver-details/', views.CreateDriverDetailsAPIView.as_view(), name='create-driver-details'),
-    path('api/v1/trip-submission/', views.TripSubmissionAPIView.as_view(), name='trip-submission'),
+    # Uncomment When adding payment
+
+    #path('api/v1/trip-submission/', views.TripSubmissionAPIView.as_view(), name='trip-submission'),
     path('api/v1/ticket-details/', views.TicketDetailsAPIView.as_view(), name='ticket-details'),
     path('api/v1/inactive-ticket-details/', views.InactiveTicketDetailsAPIView.as_view(), name='inactive-ticket-details'),
     path('api/v1/verify_ticket/', views.VerifyTicket.as_view(), name='verify_ticket'),

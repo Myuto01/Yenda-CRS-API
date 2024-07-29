@@ -197,7 +197,7 @@ PHONENUMBER_DEFAULT_REGION = 'ZM'
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "https://yenda.onrender.com",
-    "https://yenda-crs.onrender.com/"
+    "https://yenda-crs.onrender.com"
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  

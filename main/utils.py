@@ -39,6 +39,9 @@ def generate_otp_for_new_number(request):
 
     return otp_value
 
+
+#Uncomment on mobile money payments
+"""
 def mtn_mobile_money_pay(phone_number, total_price, reference):
 
     amount = total_price
@@ -96,5 +99,4 @@ def mtn_mobile_money_disbursment(operator_phone_number, operator_amount, referen
         }
     else:
         print("Error in payment response:", withdrawmoney)
-
-
+"""
