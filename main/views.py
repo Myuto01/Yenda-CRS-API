@@ -8,7 +8,8 @@ from .models import User, TripSchedule, Bus, Feature, DriverDetails, Seat, Ticke
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, BusSerializer, TripScheduleSerializer, BusCreateSerializer, FeatureSerializer, CreateDriverDetailsSerializer, TripSubmissionSerializer, TicketSerializer
-from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number, mtn_mobile_money_pay, mtn_mobile_money_disbursment
+from .utils import generate_otp_for_user_from_session, generate_otp_for_new_number
+#, mtn_mobile_money_pay, mtn_mobile_money_disbursment
 from .permissions import AllowAnyPermission
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioException
@@ -858,6 +859,8 @@ class DriverListView(APIView):
         serializer = CreateDriverDetailsSerializer(queryset, many=True)
         return Response(serializer.data)
 
+# Uncomment When adding payment
+"""
 class TripSubmissionAPIView(APIView):
     
     authentication_classes = []
@@ -906,7 +909,7 @@ class TripSubmissionAPIView(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+"""
 class TicketDetailsAPIView(APIView):
 
     authentication_classes = []
