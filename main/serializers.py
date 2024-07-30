@@ -16,6 +16,8 @@ from decimal import Decimal
 import qrcode
 from io import BytesIO
 from django.core.files import File
+from rest_framework import status
+
 
 #chamge extra keyword arguments and log in serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -50,20 +52,24 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField( required=True)  
-    password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})  
+    access_token = serializers.CharField(read_only=True)  
+    refresh_token = serializers.CharField(read_only=True)  
+
+    class Meta:
+        model = User
+        fields = ['email', 'password']
 
     def validate(self, attrs):
+        print("Attrs:", attrs) 
         email = attrs.get('email')
         password = attrs.get('password')
-
-        if not email or not password:
-            raise serializers.ValidationError("Email and password are required.")
-
-        user = authenticate(email=email, password=password)
+        request = self.context.get('request')
+        user = authenticate(request, email=email, password=password)
         if not user:
-            raise serializers.ValidationError("Invalid credentials. Please try again.")
-
+            raise AuthenticationFailed("Invalid credential try again")
+    
         user_tokens = user.tokens()
         access_token = user_tokens.get('access')
         refresh_token = user_tokens.get('refresh')
@@ -71,7 +77,8 @@ class UserLoginSerializer(serializers.Serializer):
         validated_data = {
             'email': email,
             'access_token': access_token,
-            'refresh_token': refresh_token
+            'refresh_token': refresh_token,
+            'status': status.HTTP_200_OK 
         }
 
         return validated_data

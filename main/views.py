@@ -475,7 +475,6 @@ class UserLoginView(APIView):
         data = request.data
         print("data:", data)
         serializer = UserLoginSerializer(data=data)
-        print("serializer:", serializer)
         if serializer.is_valid(raise_exception=True):
             validated_data = serializer.validated_data
             print("Validated Data:", validated_data)
