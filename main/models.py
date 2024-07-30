@@ -75,7 +75,7 @@ class Seat(models.Model):
         return f"Seat {self.seat_number} of Bus {self.bus.number_plate}"
 
 class Feature(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
     features = models.ManyToManyField('self', blank=True)
 
@@ -85,7 +85,7 @@ class Feature(models.Model):
        return self.name
 
 class DriverDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     driver_name = models.CharField(max_length=30, blank=True, null=True, default="")
     license_number = models.CharField(max_length=30, blank=True, null=True, default="")
     nrc_number = models.CharField(max_length=30, blank=True, null=True, default="")
@@ -96,7 +96,7 @@ class DriverDetails(models.Model):
     passport_image = models.ImageField(upload_to='media/passport_image/', null=True, blank=True)
 
 class TripSchedule(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=10)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE)  
     driver = models.ForeignKey(DriverDetails, on_delete=models.CASCADE, default=1)
     origin = models.CharField(max_length=30, blank=True, default="")
@@ -110,9 +110,8 @@ class TripSchedule(models.Model):
     def __str__(self):
         return f"User: {self.user}, Bus: {self.bus}, Origin: {self.origin}, Destination: {self.destination}, Departure Date: {self.departure_date}, Departure Time: {self.departure_time}"
 
-
 class Ticket(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=9)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     trip = models.ForeignKey(TripSchedule, on_delete=models.CASCADE)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default="")
     passenger_name = models.CharField(max_length=255, default="", null=True)
