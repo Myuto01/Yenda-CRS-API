@@ -55,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         }
 
 class Bus(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     bus_type = models.CharField(max_length=30, blank=True, null=True, default="")
     total_seats = models.IntegerField(blank=True, null=True, default=0)
     number_plate = models.CharField(max_length=10, blank=True, null=True, default="")
