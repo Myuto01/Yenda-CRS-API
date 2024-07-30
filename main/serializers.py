@@ -65,6 +65,10 @@ class UserLoginSerializer(serializers.Serializer):
         print("Attrs:", attrs) 
         email = attrs.get('email')
         password = attrs.get('password')
+
+        print("Extracted Email:", email) 
+        print("Extracted password:", password) 
+
         request = self.context.get('request')
         user = authenticate(request, email=email, password=password)
         if not user:
